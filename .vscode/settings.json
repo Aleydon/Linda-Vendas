@@ -1,0 +1,12 @@
+{
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript, javascriptreact, typescript, typescriptreact, css, sass, scss, less, postcss, sss, stylus, xml, svg]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

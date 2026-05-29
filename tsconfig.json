@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "esnext",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "typeRoots": ["./node_modules/@types", "./src/@types"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts",
+    "jest.config.js",
+    "tailwind.config.js",
+    "metro.config.js",
+    "babel.config.js",
+    "src/assets/images/icon.png"
+  ],
+  "extends": "expo/tsconfig.base"
+}
