@@ -1,7 +1,7 @@
 declare module '*.png';
+declare module '*.svg';
 declare module '*.jpg';
-declare module '*.jpeg';
-declare module 'expo-react-native-toastify';
+
 declare module '*.svg' {
   import React from 'react';
   import { SvgProps } from 'react-native-svg';

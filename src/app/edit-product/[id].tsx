@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { ProductForm } from '@/components/ProductForm';
@@ -7,7 +7,11 @@ import { useAppContext } from '@/context/AppContext';
 export function EditProduct() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { products, updateProduct } = useAppContext();
+  const { products, updateProduct, isAdmin } = useAppContext();
+
+  if (!isAdmin) {
+    return <Redirect href="/(tabs)/stock" />;
+  }
 
   const product = products.find(item => item.id === id);
 

@@ -1,17 +1,28 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Toast as toast } from 'expo-react-native-toastify';
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+  ZoomIn,
+  ZoomOut
+} from 'react-native-reanimated';
 
 import { Header } from '@/components/Header';
 import { Loading } from '@/components/Loading';
@@ -24,13 +35,15 @@ export function Stock(): React.JSX.Element {
     loading,
     deleteProduct,
     addCategory,
-    deleteCategory
+    deleteCategory,
+    isAdmin
   } = useAppContext();
   const [showOptions, setShowOptions] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
   const handleDeleteProduct = (id: string, name: string): void => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Deletar Produto',
       `Tem certeza que deseja deletar o produto "${name}"?`,
@@ -42,12 +55,11 @@ export function Stock(): React.JSX.Element {
           onPress: async () => {
             try {
               await deleteProduct(id);
-              toast.success('Produto excluído com sucesso!');
-            } catch (error) {
-              toast.error(
-                'Erro ao excluir produto.',
-                error instanceof Error ? error.message : undefined
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
               );
+            } catch (error) {
+              console.error('Erro ao excluir produto:', error);
             }
           }
         }
@@ -57,22 +69,19 @@ export function Stock(): React.JSX.Element {
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
-      toast.error('O nome da categoria não pode estar vazio.');
       return;
     }
     try {
       await addCategory(newCategoryName.trim());
       setNewCategoryName('');
-      toast.success('Categoria adicionada com sucesso!');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      toast.error(
-        'Erro ao adicionar categoria.',
-        error instanceof Error ? error.message : undefined
-      );
+      console.error('Erro ao adicionar categoria:', error);
     }
   };
 
   const handleDeleteCategory = (id: string, name: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Deletar Categoria',
       `Tem certeza que deseja deletar a categoria "${name}"?`,
@@ -84,12 +93,11 @@ export function Stock(): React.JSX.Element {
           onPress: async () => {
             try {
               await deleteCategory(id);
-              toast.success('Categoria excluída com sucesso!');
-            } catch (error) {
-              toast.error(
-                'Erro ao excluir categoria.',
-                error instanceof Error ? error.message : undefined
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
               );
+            } catch (error) {
+              console.error('Erro ao excluir categoria:', error);
             }
           }
         }
@@ -165,31 +173,36 @@ export function Stock(): React.JSX.Element {
                   </Text>
                 </View>
 
-                <View className="ml-4 flex-row">
-                  <TouchableOpacity
-                    className="mr-2 rounded-full bg-gray-100 p-2"
-                    onPress={() => router.push(`/edit-product/${product.id}`)}
-                  >
-                    <MaterialCommunityIcons
-                      name="pencil"
-                      size={20}
-                      color="#4B5563"
-                    />
-                  </TouchableOpacity>
+                {isAdmin && (
+                  <View className="ml-4 flex-row">
+                    <TouchableOpacity
+                      className="mr-2 rounded-full bg-gray-100 p-2"
+                      onPress={() => {
+                        Haptics.selectionAsync();
+                        router.push(`/edit-product/${product.id}`);
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="pencil"
+                        size={20}
+                        color="#4B5563"
+                      />
+                    </TouchableOpacity>
 
-                  <TouchableOpacity
-                    className="rounded-full bg-red-50 p-2"
-                    onPress={() =>
-                      handleDeleteProduct(product.id, product.name)
-                    }
-                  >
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={20}
-                      color="#EF4444"
-                    />
-                  </TouchableOpacity>
-                </View>
+                    <TouchableOpacity
+                      className="rounded-full bg-red-50 p-2"
+                      onPress={() =>
+                        handleDeleteProduct(product.id, product.name)
+                      }
+                    >
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={20}
+                        color="#EF4444"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -214,15 +227,26 @@ export function Stock(): React.JSX.Element {
       <Modal
         visible={showOptions}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setShowOptions(false)}
       >
-        <TouchableOpacity
-          className="flex-1 bg-black/50 items-center justify-center px-6"
-          activeOpacity={1}
-          onPress={() => setShowOptions(false)}
-        >
-          <View className="bg-white w-full rounded-3xl p-6 overflow-hidden">
+        <View className="flex-1 items-center justify-center px-6">
+          <Animated.View
+            entering={FadeIn}
+            exiting={FadeOut}
+            className="absolute inset-0 bg-black/50"
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => setShowOptions(false)}
+            />
+          </Animated.View>
+
+          <Animated.View
+            entering={ZoomIn.springify().damping(15)}
+            exiting={ZoomOut}
+            className="bg-white w-full rounded-3xl p-6 overflow-hidden shadow-2xl"
+          >
             <Text className="text-text-primary font-bold text-xl mb-6 text-center">
               O que deseja fazer?
             </Text>
@@ -230,6 +254,7 @@ export function Stock(): React.JSX.Element {
             <TouchableOpacity
               className="bg-primary flex-row items-center justify-center py-4 rounded-2xl mb-4"
               onPress={() => {
+                Haptics.selectionAsync();
                 setShowOptions(false);
                 router.push('/new-product');
               }}
@@ -243,6 +268,7 @@ export function Stock(): React.JSX.Element {
             <TouchableOpacity
               className="bg-secondary flex-row items-center justify-center py-4 rounded-2xl"
               onPress={() => {
+                Haptics.selectionAsync();
                 setShowOptions(false);
                 setShowCategoryManager(true);
               }}
@@ -256,88 +282,118 @@ export function Stock(): React.JSX.Element {
                 Gerenciar Categorias
               </Text>
             </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
+          </Animated.View>
+        </View>
       </Modal>
 
       {/* Category Manager Modal */}
       <Modal
         visible={showCategoryManager}
         transparent
-        animationType="slide"
+        animationType="none"
         onRequestClose={() => setShowCategoryManager(false)}
       >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white h-[70%] rounded-t-3xl p-6">
-            <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-text-primary font-bold text-xl">
-                Gerenciar Categorias
-              </Text>
-              <TouchableOpacity onPress={() => setShowCategoryManager(false)}>
-                <MaterialCommunityIcons
-                  name="close"
-                  size={28}
-                  color="#3C2F2F"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View className="flex-row mb-6">
-              <TextInput
-                className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-text-primary mr-2"
-                placeholder="Nova categoria..."
-                value={newCategoryName}
-                onChangeText={setNewCategoryName}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View className="flex-1 justify-end">
+            <Animated.View
+              entering={FadeIn}
+              exiting={FadeOut}
+              className="absolute inset-0 bg-black/50"
+            >
+              <Pressable
+                className="flex-1"
+                onPress={() => setShowCategoryManager(false)}
               />
-              <TouchableOpacity
-                className="bg-primary p-3 rounded-xl items-center justify-center"
-                onPress={handleAddCategory}
-              >
-                <MaterialCommunityIcons name="plus" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
+            </Animated.View>
 
-            <FlatList
-              data={categories}
-              keyExtractor={item => item.id}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
-                  <Text className="text-text-primary text-lg">{item.name}</Text>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteCategory(item.id, item.name)}
-                    className="p-2"
-                  >
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={22}
-                      color="#EF4444"
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-              ListEmptyComponent={() => (
-                <Text className="text-text-secondary text-center mt-10">
-                  Nenhuma categoria cadastrada.
+            <Animated.View
+              entering={SlideInDown.springify().damping(15)}
+              exiting={SlideOutDown}
+              className="bg-white h-[70%] rounded-t-3xl p-6 shadow-2xl"
+            >
+              <View className="flex-row justify-between items-center mb-6">
+                <Text className="text-text-primary font-bold text-xl">
+                  Gerenciar Categorias
                 </Text>
-              )}
-            />
+                <TouchableOpacity
+                  onPress={() => setShowCategoryManager(false)}
+                  className="p-1"
+                >
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={28}
+                    color="#3C2F2F"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View className="flex-row mb-6">
+                <TextInput
+                  className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-text-primary mr-2"
+                  placeholder="Nova categoria..."
+                  value={newCategoryName}
+                  onChangeText={setNewCategoryName}
+                />
+                <TouchableOpacity
+                  className="bg-primary p-3 rounded-xl items-center justify-center"
+                  onPress={handleAddCategory}
+                >
+                  <MaterialCommunityIcons name="plus" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              <FlatList
+                data={categories}
+                keyExtractor={item => item.id}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
+                    <Text className="text-text-primary text-lg">
+                      {item.name}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteCategory(item.id, item.name)}
+                      className="p-2"
+                    >
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={22}
+                        color="#EF4444"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                ListEmptyComponent={() => (
+                  <Text className="text-text-secondary text-center mt-10">
+                    Nenhuma categoria cadastrada.
+                  </Text>
+                )}
+              />
+            </Animated.View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Floating Action Button */}
-      <TouchableOpacity
-        className="bg-primary shadow-primary/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
-        activeOpacity={0.8}
-        onPress={() => setShowOptions(true)}
-      >
-        <MaterialCommunityIcons
-          name="plus-box-outline"
-          size={32}
-          color="white"
-        />
-      </TouchableOpacity>
+      {isAdmin && (
+        <TouchableOpacity
+          className="bg-primary shadow-primary/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
+          activeOpacity={0.8}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowOptions(true);
+          }}
+        >
+          <MaterialCommunityIcons
+            name="plus-box-outline"
+            size={32}
+            color="white"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

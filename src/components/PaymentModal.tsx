@@ -3,11 +3,18 @@ import React from 'react';
 import {
   ActivityIndicator,
   Modal,
+  Pressable,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  ZoomIn,
+  ZoomOut
+} from 'react-native-reanimated';
 
 import { formatCurrency } from '@/utils/formatters';
 
@@ -32,11 +39,23 @@ export function PaymentModal({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="none"
       onRequestClose={onClose}
     >
-      <View className="flex-1 items-center justify-center bg-black/50 px-6">
-        <View className="w-full rounded-3xl bg-white p-6 shadow-xl">
+      <View className="flex-1 items-center justify-center px-6">
+        <Animated.View
+          entering={FadeIn}
+          leaving={FadeOut}
+          className="absolute inset-0 bg-black/50"
+        >
+          <Pressable className="flex-1" onPress={onClose} />
+        </Animated.View>
+
+        <Animated.View
+          entering={ZoomIn.springify().damping(15)}
+          leaving={ZoomOut}
+          className="w-full rounded-3xl bg-white p-6 shadow-2xl"
+        >
           <View className="mb-6 items-center">
             <Text className="text-text-primary mb-2 text-xl font-bold">
               Confirmar Pagamento
@@ -107,7 +126,7 @@ export function PaymentModal({
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

@@ -1,8 +1,26 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Image, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
-import Logo from '../assets/icon.png';
+import { useAppContext } from '@/context/AppContext';
+
 export function Header() {
+  const { user, signOut } = useAppContext();
+
+  const handleSignOut = () => {
+    Alert.alert('Sair', 'Tem certeza que deseja sair da sua conta?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+          router.replace('/login');
+        }
+      }
+    ]);
+  };
+
   return (
     <View className="border-secondary bg-background flex-row items-center justify-between border-b px-6 pb-4 pt-12">
       <View className="flex-row items-center">
@@ -15,11 +33,20 @@ export function Header() {
           Linda Vendas
         </Text>
       </View>
-      <View className="border-secondary bg-secondary h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
-        {/* Placeholder for profile image */}
-        {/* <MaterialCommunityIcons name="account" size={24} color="#A34211" /> */}
-        <Image source={Logo} className="h-full w-full" />
-      </View>
+
+      <TouchableOpacity
+        onPress={handleSignOut}
+        className="border-secondary bg-secondary h-10 w-10 items-center justify-center overflow-hidden rounded-full border"
+      >
+        {user?.user_metadata?.avatar_url ? (
+          <Image
+            source={{ uri: user.user_metadata.avatar_url }}
+            className="h-full w-full"
+          />
+        ) : (
+          <MaterialCommunityIcons name="account" size={24} color="#A34211" />
+        )}
+      </TouchableOpacity>
     </View>
   );
 }

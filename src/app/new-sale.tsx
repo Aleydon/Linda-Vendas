@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Toast as toast } from 'expo-react-native-toastify';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -71,7 +70,6 @@ export function NewSale() {
           return prev.filter(item => item.productId !== productId);
         }
         if (newQuantity > product.stock) {
-          toast.error(`Apenas ${product.stock} unidades disponíveis.`);
           return prev;
         }
         return prev.map(item =>
@@ -88,7 +86,6 @@ export function NewSale() {
 
   const handleFinalize = () => {
     if (cart.length === 0) {
-      toast.error('Adicione pelo menos um produto para realizar a venda.');
       return;
     }
     setShowConfirmation(true);
@@ -107,11 +104,9 @@ export function NewSale() {
 
       await addSale(items, total);
       setShowConfirmation(false);
-      toast.success('Venda realizada com sucesso!');
       router.back();
     } catch (error) {
       console.error('Error finalizing sale:', error);
-      toast.error('Ocorreu um erro ao realizar a venda.');
     }
   };
 

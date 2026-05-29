@@ -54,7 +54,7 @@ export function SaleProductItem({
           onPress={() => onUpdateQuantity(item.id, -1)}
           className="p-1"
         >
-          <MaterialCommunityIcons name="minus" size={20} color="#A34211" />
+          <MaterialCommunityIcons name="minus" size={24} color="#A34211" />
         </TouchableOpacity>
         <Text className="text-text-primary mx-3 font-bold text-base">
           {quantity}
@@ -63,7 +63,7 @@ export function SaleProductItem({
           onPress={() => onUpdateQuantity(item.id, 1)}
           className="p-1"
         >
-          <MaterialCommunityIcons name="plus" size={20} color="#A34211" />
+          <MaterialCommunityIcons name="plus" size={24} color="#A34211" />
         </TouchableOpacity>
       </View>
     </View>

@@ -18,7 +18,7 @@ export function ProductCard({
   outOfStock
 }: ProductCardProps) {
   return (
-    <View className="border-secondary bg-surface flex-row items-center rounded-2xl border p-4 mb-4">
+    <View className="border-secondary bg-surface flex-row items-center rounded-2xl border p-4 mb-2">
       <View className="bg-secondary h-20 w-20 items-center justify-center overflow-hidden rounded-xl">
         {imageUrl ? (
           <Image

@@ -12,13 +12,37 @@ import {
   Inter_900Black
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
-import ToastManager from 'expo-react-native-toastify';
-import { Slot } from 'expo-router';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { Loading } from '@/components/Loading';
-import { AppProvider } from '@/context/AppContext';
+import { AppProvider, useAppContext } from '@/context/AppContext';
+
+function InitialLayout() {
+  const { user, loading } = useAppContext();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === 'login';
+
+    if (!user && !inAuthGroup) {
+      router.replace('/login');
+    } else if (user && inAuthGroup) {
+      router.replace('/(tabs)/dashboard');
+    }
+  }, [user, segments, loading]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  return <Slot />;
+}
 
 export function RootLayout() {
   const [fontsIsLoaded] = useFonts({
@@ -40,14 +64,13 @@ export function RootLayout() {
   return (
     <AppProvider>
       <StatusBar
-        barStyle="light-content"
+        barStyle="dark-content"
         backgroundColor="transparent"
         translucent
       />
       <SafeAreaProvider>
         <SafeAreaView edges={[]} style={{ flex: 1 }}>
-          <Slot />
-          <ToastManager />
+          <InitialLayout />
         </SafeAreaView>
       </SafeAreaProvider>
     </AppProvider>

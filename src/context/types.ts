@@ -1,6 +1,16 @@
+import { User } from '@supabase/supabase-js';
+
 export interface Category {
   id: string;
   name: string;
+}
+
+export type UserRole = 'admin' | 'user';
+
+export interface Profile {
+  id: string;
+  email: string;
+  role: UserRole;
 }
 
 export interface Product {
@@ -39,6 +49,11 @@ export interface AppContextType {
   sales: Sale[];
   loading: boolean;
   categories: Category[];
+  user: User | null;
+  profile: Profile | null;
+  isAdmin: boolean;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
   addProduct: (
     product: Omit<Product, 'id' | 'outOfStock' | 'category'>
   ) => Promise<void>;
