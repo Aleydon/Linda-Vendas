@@ -36,24 +36,37 @@ The United Nations Sustainable Development Goal 8 aims to "promote sustained, in
 
 ---
 
-## 📱 Screenshots
+## 📱 Screenshots & Features
 
-Discover how **Linda Vendas** empowers entrepreneurs through its intuitive interface:
+Discover how **Linda Vendas** empowers entrepreneurs through its intuitive and secure interface:
 
-|                                                  **Dashboard**                                                   |                                            **Stock Management**                                             |
-| :--------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------: |
-|                   <img src="./assets/read-images/dashboard.jpg" width="300" alt="Dashboard"/>                    |               <img src="./assets/read-images/stock.jpg" width="300" alt="Stock Management"/>                |
-| _Central control panel providing at-a-glance metrics on sales and stock levels, enabling data-driven decisions._ | _Real-time monitoring of inventory to prevent stockouts and manage resources effectively (**Target 8.2**)._ |
+### 🔐 Auth & Dashboard
 
-|                                             **Add New Product**                                              |                                     **Product Price List**                                     |
-| :----------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: |
-|       <img src="./assets/read-images/add-new-product-in-stock.jpg" width="300" alt="Add New Product"/>       | <img src="./assets/read-images/products-price-list.jpg" width="300" alt="Product Price List"/> |
-| _Simplified interface for digitizing inventory, lowering the barrier to formal management (**Target 8.3**)._ | _Consolidated view of the product catalog, facilitating quick reference and inventory audits._ |
+|                                          **Secure Google Sign-In**                                           |                                          **Business Dashboard**                                          |
+| :----------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
+|             <img src="./assets/read-images/google-signin.jpg" width="350" alt="Google Sign-In"/>             |               <img src="./assets/read-images/dashboard.jpg" width="350" alt="Dashboard"/>                |
+| _Seamless login via Google Authentication, ensuring business data protection and role-based access control._ | _Real-time metrics on revenue and inventory status, providing the insights needed for strategic growth._ |
 
-|                                  **Dynamic Sales & Pricing**                                   |                                              **Sales History**                                              |
-| :--------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------: |
-|   <img src="./assets/read-images/sales-dinamyc-price.jpg" width="300" alt="Dynamic Sales"/>    |             <img src="./assets/read-images/sales-history.jpg" width="300" alt="Sales History"/>             |
-| _Flexible sales recording process that accommodates the fluid nature of small-scale commerce._ | _Historical record of transactions, allowing business owners to track progress and identify growth trends._ |
+### 📊 Inventory & Control
+
+|                                                     **Stock Management**                                                     |                                             **Admin Stock Entry**                                             |
+| :--------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+|                        <img src="./assets/read-images/stock.jpg" width="350" alt="Stock Management"/>                        |       <img src="./assets/read-images/add-new-product-in-stock.jpg" width="350" alt="Add New Product"/>        |
+| _Monitor every item in your catalog. **Note:** Only administrators can modify stock levels to maintain financial integrity._ | _Streamlined process for adding new inventory, categories, and descriptions to keep your business organized._ |
+
+### 💸 Pricing & Sales
+
+|                                          **Product Price List**                                          |                                     **Dynamic Sales & Pricing**                                     |
+| :------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: |
+|      <img src="./assets/read-images/products-price-list.jpg" width="350" alt="Product Price List"/>      |      <img src="./assets/read-images/sales-dynamic-price.jpg" width="350" alt="Dynamic Sales"/>      |
+| _Quick access to the full product catalog and current pricing, facilitating fast customer interactions._ | _Agile sales recording with the flexibility to apply manual discounts or adjust prices on the fly._ |
+
+### 📜 Payments & History
+
+|                                       **Instant Pix QR Code**                                        |                                        **Sales History & Analytics**                                        |
+| :--------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------: |
+|     <img src="./assets/read-images/sale-dynamic-qrcode.jpg" width="350" alt="QR Code Payment"/>      |             <img src="./assets/read-images/sales-history.jpg" width="350" alt="Sales History"/>             |
+| _Secure and fast payments via dynamic QR codes, generating a unique Pix code for every transaction._ | _Detailed audit trail of all transactions, allowing you to analyze peak periods and manage accountability._ |
 
 ---
 
