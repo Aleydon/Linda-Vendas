@@ -4,9 +4,9 @@ import React, { useMemo } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { Header } from '@/components/Header';
+import { HistoryItem } from '@/components/HistoryItem';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/utils/formatters';
-import { getCategoryIcon } from '@/utils/icons';
 
 export function Dashboard() {
   const router = useRouter();
@@ -34,18 +34,7 @@ export function Dashboard() {
       pChange = 100;
     }
 
-    const rSales = sales.slice(0, 5).map(s => {
-      const firstItem = s.sale_items?.[0];
-      const categoryName = firstItem?.product?.categories?.name || '';
-
-      return {
-        id: s.id,
-        title: firstItem?.product?.name || 'Venda',
-        time: formatRelativeTime(new Date(s.created_at)),
-        value: s.total.toFixed(2).replace('.', ','),
-        icon: getCategoryIcon(categoryName)
-      };
-    });
+    const rSales = sales.slice(0, 5);
 
     return {
       todaySales: tTotalSales,
@@ -111,16 +100,10 @@ export function Dashboard() {
               </TouchableOpacity>
             </View>
 
-            <View className="gap-y-3">
+            <View className="gap-y-4">
               {recentSales.length > 0 ? (
                 recentSales.map(sale => (
-                  <RecentSaleItem
-                    key={sale.id}
-                    icon={sale.icon}
-                    title={sale.title}
-                    time={sale.time}
-                    value={sale.value}
-                  />
+                  <HistoryItem key={sale.id} sale={sale} showRelativeTime />
                 ))
               ) : (
                 <View className="items-center py-8">
@@ -133,49 +116,6 @@ export function Dashboard() {
           </View>
         </View>
       </ScrollView>
-    </View>
-  );
-}
-
-function formatRelativeTime(date: Date) {
-  const diff = Date.now() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-
-  if (minutes < 1) return 'Agora mesmo';
-  if (minutes < 60) return `Há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Há ${hours} h`;
-  return date.toLocaleDateString('pt-BR');
-}
-
-interface RecentSaleItemProps {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  title: string;
-  time: string;
-  value: string;
-}
-
-function RecentSaleItem({ icon, title, time, value }: RecentSaleItemProps) {
-  return (
-    <View className="border-secondary flex-row items-center rounded-2xl border bg-white p-4">
-      <View className="bg-secondary h-12 w-12 items-center justify-center rounded-lg">
-        <MaterialCommunityIcons name={icon} size={24} color="#A34211" />
-      </View>
-
-      <View className="ml-4 flex-1">
-        <Text
-          className="text-text-primary font-bold text-base"
-          numberOfLines={1}
-        >
-          {title}
-        </Text>
-        <Text className="text-text-secondary text-sm">{time}</Text>
-      </View>
-
-      <View className="flex-row items-baseline">
-        <Text className="text-primary font-bold text-sm">R$ </Text>
-        <Text className="text-primary font-bold text-xl">{value}</Text>
-      </View>
     </View>
   );
 }

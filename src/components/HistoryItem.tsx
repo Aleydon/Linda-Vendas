@@ -3,15 +3,22 @@ import React from 'react';
 import { Text, View } from 'react-native';
 
 import { Sale } from '@/context/AppContext';
-import { formatCurrency, formatDateTime } from '@/utils/formatters';
+import {
+  formatCurrency,
+  formatDateTime,
+  formatRelativeTime
+} from '@/utils/formatters';
 import { getCategoryIcon } from '@/utils/icons';
 
 interface HistoryItemProps {
   sale: Sale;
+  showRelativeTime?: boolean;
 }
 
-export function HistoryItem({ sale }: HistoryItemProps) {
-  const timeStr = formatDateTime(sale.created_at);
+export function HistoryItem({ sale, showRelativeTime }: HistoryItemProps) {
+  const timeStr = showRelativeTime
+    ? formatRelativeTime(sale.created_at)
+    : formatDateTime(sale.created_at);
 
   return (
     <View className="border-secondary overflow-hidden rounded-3xl border bg-white shadow-sm">
