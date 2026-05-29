@@ -15,7 +15,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#7e000c"
+        "backgroundColor": "#ffffff"
       },
       "icon": "./assets/images/icon.png",
       "permissions": ["INTERNET"],
@@ -52,7 +52,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#7e000c"
+          "backgroundColor": "#ffffff"
         }
       ],
       [
