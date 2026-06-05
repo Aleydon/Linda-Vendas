@@ -1,85 +1,131 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 import { Sale } from '@/context/AppContext';
-import {
-  formatCurrency,
-  formatDateTime,
-  formatRelativeTime
-} from '@/utils/formatters';
-import { getCategoryIcon } from '@/utils/icons';
+import { formatCurrency, formatDateTime } from '@/utils/formatters';
 
 interface HistoryItemProps {
   sale: Sale;
-  showRelativeTime?: boolean;
+  isInitiallyExpanded?: boolean;
 }
 
-export function HistoryItem({ sale, showRelativeTime }: HistoryItemProps) {
-  const timeStr = showRelativeTime
-    ? formatRelativeTime(sale.created_at)
-    : formatDateTime(sale.created_at);
+export function HistoryItem({
+  sale,
+  isInitiallyExpanded = false
+}: HistoryItemProps) {
+  const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+
+  // Format date and time for the header
+  const dateObj = new Date(sale.created_at);
+  const timeStr = formatDateTime(sale.created_at);
+  const dateStr = dateObj
+    .toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short'
+    })
+    .replace('.', '');
 
   return (
-    <View className="border-secondary overflow-hidden rounded-3xl border bg-white shadow-sm">
-      <View className="border-secondary flex-row items-center justify-between border-b bg-gray-50/50 px-5 py-3">
-        <View className="flex-row items-center">
-          <MaterialCommunityIcons
-            name="clock-outline"
-            size={16}
-            color="#8C7E7E"
-          />
-          <Text className="text-text-secondary ml-2 font-bold text-xs uppercase tracking-widest">
-            {timeStr}
-          </Text>
-        </View>
-        <View className="flex-row items-baseline">
-          <Text className="text-primary font-bold text-base">
-            {formatCurrency(sale.total)}
-          </Text>
-        </View>
-      </View>
-
-      <View className="p-5">
-        {sale.sale_items?.map((item, index) => {
-          const categoryName = item.product?.categories?.name || '';
-          const icon = getCategoryIcon(categoryName);
-
-          return (
-            <View
-              key={item.id}
-              className={`flex-row items-center ${
-                index !== (sale.sale_items?.length || 0) - 1 ? 'mb-4' : ''
-              }`}
-            >
-              <View className="bg-secondary h-10 w-10 items-center justify-center rounded-xl">
-                <MaterialCommunityIcons name={icon} size={20} color="#A34211" />
-              </View>
-              <View className="ml-4 flex-1">
-                <Text className="text-text-primary font-semibold text-base">
-                  {item.product?.name || 'Produto'}
+    <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-secondary/20">
+      <Pressable onPress={() => setIsExpanded(!isExpanded)} className="p-4">
+        {/* Header: Status, Total, and Date/Icon */}
+        <View className="flex-row items-center justify-between">
+          <View className="rounded-2xl flex-row items-center">
+            <MaterialCommunityIcons
+              name="cart-outline"
+              size={25}
+              color="#A34211"
+            />
+            <View className="flex-row items-center pl-2">
+              <View className="items-start">
+                <Text className="text-text-secondary font-bold text-[10px] uppercase tracking-wider">
+                  {timeStr}
                 </Text>
-                <View className="flex-row items-center">
-                  {categoryName ? (
-                    <>
+                <Text className="text-text-muted text-[10px] uppercase font-medium">
+                  {dateStr}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="items-end">
+            <Text className="text-green-500 font-bold text-[10px] uppercase mb-0.5">
+              Concluída
+            </Text>
+            <Text className="text-primary font-bold text-2xl">
+              {formatCurrency(sale.total)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Expansion indicator (Optional, keeping it subtle) */}
+        <View className="absolute bottom-1 left-1/2 -ml-3">
+          <MaterialCommunityIcons
+            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+            size={16}
+            color="#BDB2B2"
+          />
+        </View>
+      </Pressable>
+
+      {/* Expandable Content */}
+      {isExpanded && (
+        <View className="px-6 pb-4">
+          <View className="h-[1px] bg-secondary/10 w-full mb-2" />
+
+          {/* Sale Items */}
+          <View className="gap-y-3">
+            {sale.sale_items?.map(item => {
+              const variationName = item.variation?.name;
+              const displayName = variationName
+                ? `• ${variationName}`
+                : item.product?.name || 'Produto';
+
+              return (
+                <View
+                  key={item.id}
+                  className="flex-row items-center justify-between"
+                >
+                  <View className="flex-1 mr-4">
+                    <Text
+                      className="text-text-primary font-bold text-base"
+                      numberOfLines={1}
+                    >
+                      {displayName}
+                    </Text>
+
+                    <View className="flex-row items-center mt-0.5">
                       <Text className="text-text-secondary text-xs">
-                        {categoryName}
+                        {item.quantity} un x {formatCurrency(item.unit_price)}
                       </Text>
-                      <View className="bg-text-secondary/20 mx-1.5 h-1 w-1 rounded-full" />
-                    </>
-                  ) : null}
-                  <Text className="text-text-secondary text-xs">
-                    {item.quantity} un × {formatCurrency(item.unit_price)}
+                    </View>
+                  </View>
+
+                  <Text className="text-text-primary font-bold text-base">
+                    {formatCurrency(item.quantity * Number(item.unit_price))}
                   </Text>
                 </View>
-              </View>
-              <Text className="text-text-primary font-bold text-base">
-                {formatCurrency(item.quantity * Number(item.unit_price))}
+              );
+            })}
+          </View>
+
+          <View className="h-[1px] bg-secondary/10 w-full my-4" />
+
+          {/* Detailed Footer */}
+          <View className="flex-row justify-between items-center">
+            <Text className="text-[9px] text-text-muted font-mono uppercase">
+              ID: {sale.id.slice(0, 8)}
+            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-[9px] text-text-muted ml-1 pb-2">
+                Registrado em{' '}
+                {new Date(sale.created_at).toLocaleDateString('pt-BR')}
               </Text>
             </View>
-          );
-        })}
-      </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

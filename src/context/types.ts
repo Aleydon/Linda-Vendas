@@ -45,6 +45,9 @@ export interface SaleItem {
       name: string;
     } | null;
   } | null;
+  variation?: {
+    name: string;
+  } | null;
 }
 
 export interface Sale {

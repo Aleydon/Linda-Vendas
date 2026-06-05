@@ -7,7 +7,11 @@ import { HistoryItem } from '@/components/HistoryItem';
 import { Loading } from '@/components/Loading';
 import { SearchBar } from '@/components/SearchBar';
 import { Sale, useAppContext } from '@/context/AppContext';
-import { formatDateLong, formatDateTime } from '@/utils/formatters';
+import {
+  formatCurrency,
+  formatDateLong,
+  formatDateTime
+} from '@/utils/formatters';
 
 export function History() {
   const { sales, loading } = useAppContext();
@@ -18,9 +22,11 @@ export function History() {
 
     const lowerSearch = search.toLowerCase();
     return sales.filter(sale => {
-      // Search by product name
-      const hasProduct = sale.sale_items?.some(item =>
-        item.product?.name.toLowerCase().includes(lowerSearch)
+      // Search by product name or variation name
+      const hasProduct = sale.sale_items?.some(
+        item =>
+          item.product?.name.toLowerCase().includes(lowerSearch) ||
+          item.variation?.name.toLowerCase().includes(lowerSearch)
       );
 
       // Search by time/date
@@ -36,12 +42,15 @@ export function History() {
   }, [sales, search]);
 
   const groupedSales = useMemo(() => {
-    const groups: { [key: string]: Sale[] } = {};
+    const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
 
     filteredSales.forEach(sale => {
       const label = formatDateLong(sale.created_at);
-      if (!groups[label]) groups[label] = [];
-      groups[label].push(sale);
+      if (!groups[label]) {
+        groups[label] = { sales: [], total: 0 };
+      }
+      groups[label].sales.push(sale);
+      groups[label].total += Number(sale.total);
     });
 
     return Object.entries(groups);
@@ -63,7 +72,7 @@ export function History() {
         value={search}
         onChangeText={setSearch}
         onClear={() => setSearch('')}
-        placeholder="Buscar por produto, data ou hora..."
+        placeholder="Buscar por produto, variação, data ou hora..."
       />
 
       <ScrollView
@@ -72,14 +81,25 @@ export function History() {
       >
         <View className="px-6">
           {groupedSales.length > 0 ? (
-            groupedSales.map(([date, dateSales]) => (
+            groupedSales.map(([date, data]) => (
               <View key={date} className="mb-8">
-                <Text className="text-text-secondary mb-4 font-bold text-xs uppercase tracking-widest">
-                  {date}
-                </Text>
+                <View className="mb-4 flex-row items-center justify-between">
+                  <Text className="text-text-secondary font-bold text-xs uppercase tracking-widest">
+                    {date}
+                  </Text>
+                  <View className="bg-primary/10 rounded-full px-3 py-1">
+                    <Text className="text-primary font-bold text-xs">
+                      Total: {formatCurrency(data.total)}
+                    </Text>
+                  </View>
+                </View>
                 <View className="gap-y-4">
-                  {dateSales.map(sale => (
-                    <HistoryItem key={sale.id} sale={sale} />
+                  {data.sales.map((sale, index) => (
+                    <HistoryItem
+                      key={sale.id}
+                      sale={sale}
+                      isInitiallyExpanded={index < 3}
+                    />
                   ))}
                 </View>
               </View>

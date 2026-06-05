@@ -44,7 +44,9 @@ export const api = {
   async fetchSales(): Promise<Sale[]> {
     const { data, error } = await supabase
       .from('sales')
-      .select('*, sale_items(*, product:products(name, categories(name)))')
+      .select(
+        '*, sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
+      )
       .order('created_at', { ascending: false });
 
     if (error) throw error;
