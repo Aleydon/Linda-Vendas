@@ -31,21 +31,24 @@ export function VariationSection({
 }: VariationSectionProps) {
   return (
     <View className="mt-4">
-      <View className="flex-row items-center justify-between border-t border-secondary pt-6 pb-2">
-        <View className="flex-1 pr-4">
-          <Text className="text-text-primary font-bold text-base">
-            Variações
-          </Text>
-          <Text className="text-text-secondary text-xs mt-0.5">
-            Este produto possui variações de cor ou tamanho.
+      <View className="flex flex-col border-t border-secondary pt-6 pb-2">
+        <Text className="text-text-primary font-semibold text-base">
+          VARIAÇÕES (OPCIONAL)
+        </Text>
+        <View className="flex flex-col">
+          <View className="flex-row items-center justify-between mt-2">
+            <Text>Este produto possui variações</Text>
+            <Switch
+              value={hasVariations}
+              onValueChange={onToggleVariations}
+              trackColor={{ false: '#E5E7EB', true: '#A34211' }}
+              thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+            />
+          </View>
+          <Text className=" text-xs mt-0.5 text-text-muted">
+            Ex.: sabores, marcas, tamanhos, tipos, etc...
           </Text>
         </View>
-        <Switch
-          value={hasVariations}
-          onValueChange={onToggleVariations}
-          trackColor={{ false: '#E5E7EB', true: '#A34211' }}
-          thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
-        />
       </View>
 
       {hasVariations && (
