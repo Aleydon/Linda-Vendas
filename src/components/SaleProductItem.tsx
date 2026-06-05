@@ -126,20 +126,25 @@ export function SaleProductItem({
               className="flex-row items-center justify-between py-3 border-b border-secondary/10 last:border-b-0"
             >
               <View className="flex-1 mr-4">
-                <Text className="text-text-primary font-medium text-sm">
+                <Text className="text-text-primary font-medium text-base">
                   {v.name}
                 </Text>
-                <Text className="text-primary font-bold text-xs">
+                <Text className="text-primary font-bold text-base">
                   {formatCurrency(v.price)}
                 </Text>
-                <Text className="text-text-muted text-[10px]">
+                <Text className="text-text-muted text-sm">
                   Estoque: {v.stock} un
                 </Text>
               </View>
 
-              <View className="flex-row items-center rounded-xl bg-white border border-secondary/30 px-2 py-1">
+              <View
+                className={`flex-row items-center rounded-xl bg-white border border-secondary/30 px-2 py-1 ${
+                  v.stock <= 0 ? 'opacity-50' : ''
+                }`}
+              >
                 <TouchableOpacity
                   onPress={() => onUpdateQuantity(item.id, -1, v.id)}
+                  disabled={v.stock <= 0}
                   className="p-1"
                 >
                   <MaterialCommunityIcons
@@ -153,12 +158,17 @@ export function SaleProductItem({
                 </Text>
                 <TouchableOpacity
                   onPress={() => onUpdateQuantity(item.id, 1, v.id)}
+                  disabled={v.stock <= 0 || getQuantity(v.id) >= v.stock}
                   className="p-1"
                 >
                   <MaterialCommunityIcons
                     name="plus"
                     size={18}
-                    color="#A34211"
+                    color={
+                      v.stock <= 0 || getQuantity(v.id) >= v.stock
+                        ? '#BDB2B2'
+                        : '#A34211'
+                    }
                   />
                 </TouchableOpacity>
               </View>

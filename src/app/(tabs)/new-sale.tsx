@@ -2,12 +2,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
+  ScrollView,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
 
+import { CategoryItem } from '@/components/CategoryItem';
 import { Header } from '@/components/Header';
 import { PaymentModal } from '@/components/PaymentModal';
 import { SaleProductItem } from '@/components/SaleProductItem';
@@ -23,22 +24,37 @@ interface CartItem {
 }
 
 export function NewSale() {
-  const { products, addSale, loading } = useAppContext();
+  const { products, addSale, loading, categories } = useAppContext();
   const [search, setSearch] = useState('');
+  const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const filteredProducts = useMemo(() => {
     const lowerQuery = search.toLowerCase();
     return products.filter(p => {
-      if (p.stock <= 0) return false;
+      if (p.stock <= 0 && !p.has_variations) return false;
+
+      const matchesCategory =
+        activeCategoryId === 'Todos' || p.category_id === activeCategoryId;
+
       const matchesName = p.name.toLowerCase().includes(lowerQuery);
       const matchesVariations = p.variations?.some(v =>
         v.name.toLowerCase().includes(lowerQuery)
       );
-      return matchesName || matchesVariations;
+
+      return matchesCategory && (matchesName || matchesVariations);
     });
-  }, [products, search]);
+  }, [products, search, activeCategoryId]);
+
+  const displayedSections = useMemo(() => {
+    if (activeCategoryId === 'Todos') {
+      return categories.filter(cat =>
+        filteredProducts.some(p => p.category_id === cat.id)
+      );
+    }
+    return categories.filter(cat => cat.id === activeCategoryId);
+  }, [categories, filteredProducts, activeCategoryId]);
 
   const total = useMemo(() => {
     return cart.reduce((acc, item) => {
@@ -154,53 +170,95 @@ export function NewSale() {
   };
 
   return (
-    <View className="bg-background flex-1">
+    <View className="bg-surface flex-1">
       <Header />
 
-      <View className="px-6 py-2">
-        <Text className="text-text-primary font-bold text-2xl">Nova Venda</Text>
-        <Text className="text-text-secondary text-base">
-          Selecione os produtos para gerar o QR Code.
-        </Text>
-      </View>
-
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        onClear={() => setSearch('')}
-      />
-
-      <FlatList
-        data={filteredProducts}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 180 }}
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <SaleProductItem
-            item={item}
-            cart={cart}
-            onUpdateQuantity={updateQuantity}
-            searchQuery={search}
+        contentContainerStyle={{ paddingBottom: 180 }}
+      >
+        <View className="px-6 pt-2">
+          <Text className="text-text-primary font-bold text-2xl">
+            Nova Venda
+          </Text>
+          <Text className="text-text-secondary text-base">
+            Selecione os produtos para gerar o QR Code.
+          </Text>
+        </View>
+
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          onClear={() => setSearch('')}
+        />
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-6 px-6"
+          contentContainerStyle={{ paddingRight: 40 }}
+        >
+          <CategoryItem
+            label="Todos"
+            isActive={activeCategoryId === 'Todos'}
+            onPress={() => setActiveCategoryId('Todos')}
           />
-        )}
-        ListEmptyComponent={() => (
-          <View className="py-20 items-center justify-center">
-            <MaterialCommunityIcons
-              name="package-variant"
-              size={48}
-              color="#D1D5DB"
+          {categories.map(category => (
+            <CategoryItem
+              key={category.id}
+              label={category.name}
+              isActive={activeCategoryId === category.id}
+              onPress={() => setActiveCategoryId(category.id)}
             />
-            <Text className="text-text-secondary mt-2 text-base text-center px-10">
-              {search
-                ? 'Nenhum produto disponível com este nome.'
-                : 'Nenhum produto em estoque no momento.'}
-            </Text>
-          </View>
-        )}
-      />
+          ))}
+        </ScrollView>
+
+        <View className="px-6">
+          {displayedSections.map(section => {
+            const sectionProducts = filteredProducts.filter(
+              p => p.category_id === section.id
+            );
+
+            if (sectionProducts.length === 0) return null;
+
+            return (
+              <View key={section.id} className="mb-6">
+                <Text className="text-text-secondary mb-4 font-bold text-xs uppercase tracking-widest">
+                  {section.name}
+                </Text>
+
+                {sectionProducts.map(product => (
+                  <SaleProductItem
+                    key={product.id}
+                    item={product}
+                    cart={cart}
+                    onUpdateQuantity={updateQuantity}
+                    searchQuery={search}
+                  />
+                ))}
+              </View>
+            );
+          })}
+
+          {filteredProducts.length === 0 && (
+            <View className="py-20 items-center justify-center">
+              <MaterialCommunityIcons
+                name="package-variant"
+                size={48}
+                color="#D1D5DB"
+              />
+              <Text className="text-text-secondary mt-2 text-base text-center px-10">
+                {search || activeCategoryId !== 'Todos'
+                  ? 'Nenhum produto encontrado com estes filtros.'
+                  : 'Nenhum produto em estoque no momento.'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
 
       {/* Bottom Summary */}
-      <View className="border-secondary absolute bottom-0 left-0 right-0 border-t bg-white px-6 pb-24 pt-4 shadow-lg">
+      <View className="border-secondary absolute bottom-0 left-0 right-0 border-t bg-white px-6 pb-2 pt-2 shadow-lg">
         <View className="mb-4 flex-row items-center justify-between">
           <View>
             <Text className="text-text-secondary text-sm">Total da Venda</Text>
@@ -229,7 +287,11 @@ export function NewSale() {
             <ActivityIndicator color="white" />
           ) : (
             <>
-              <MaterialCommunityIcons name="check" size={24} color="white" />
+              <MaterialCommunityIcons
+                name="qrcode-scan"
+                size={20}
+                color="white"
+              />
               <Text className="ml-2 font-bold text-white text-lg">
                 Gerar QR Code
               </Text>

@@ -47,11 +47,7 @@ export function Layout() {
         options={{
           title: 'Vender',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="cart-plus"
-              size={size}
-              color={color}
-            />
+            <MaterialCommunityIcons name="cart" size={size} color={color} />
           )
         }}
       />
