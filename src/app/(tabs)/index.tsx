@@ -8,6 +8,7 @@ import { Loading } from '@/components/Loading';
 import { ProductCard } from '@/components/ProductCard';
 import { SearchBar } from '@/components/SearchBar';
 import { useAppContext } from '@/context/AppContext';
+import { formatCurrencyValue } from '@/utils/formatters';
 
 export function Home(): React.JSX.Element {
   const { products, loading, categories } = useAppContext();
@@ -95,9 +96,7 @@ export function Home(): React.JSX.Element {
                   <ProductCard
                     key={product.id}
                     name={product.name}
-                    price={product.price.toLocaleString('pt-BR', {
-                      minimumFractionDigits: 2
-                    })}
+                    price={formatCurrencyValue(product.price)}
                     stock={product.stock}
                     imageUrl={product.imageUrl}
                     outOfStock={product.outOfStock}

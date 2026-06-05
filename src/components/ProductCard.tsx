@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { Variation } from '@/context/types';
+import { formatCurrency } from '@/utils/formatters';
 
 interface ProductCardProps {
   name: string;
@@ -32,10 +33,8 @@ export function ProductCard({
 
   const displayPrice =
     has_variations && variations && variations.length > 0
-      ? variations[0].price.toLocaleString('pt-BR', {
-          minimumFractionDigits: 2
-        })
-      : price;
+      ? formatCurrency(variations[0].price)
+      : `R$ ${price}`;
 
   return (
     <View className="mb-2">
@@ -76,7 +75,8 @@ export function ProductCard({
           </Text>
           <View className="mt-1 flex-row items-center">
             <Text className="text-primary font-bold text-lg">
-              {has_variations ? 'A partir de ' : ''}R$ {displayPrice}
+              {has_variations ? 'A partir de ' : ''}
+              {displayPrice}
             </Text>
             <View
               className={`ml-3 rounded-full px-2 py-0.5 ${
@@ -111,10 +111,7 @@ export function ProductCard({
               </Text>
               <View className="flex-row items-center">
                 <Text className="text-primary font-bold mr-4">
-                  R${' '}
-                  {v.price.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2
-                  })}
+                  {formatCurrency(v.price)}
                 </Text>
                 <View className="bg-white rounded-full px-2 py-0.5 border border-secondary">
                   <Text className="text-text-secondary text-[10px]">
