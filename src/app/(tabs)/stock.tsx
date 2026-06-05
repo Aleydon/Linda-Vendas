@@ -151,7 +151,11 @@ export function Stock(): React.JSX.Element {
             </Text>
           </View>
 
-          <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            customClass="mb-6"
+          />
 
           <View className="gap-y-4">
             {filteredProducts.map(product => {

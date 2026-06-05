@@ -4,8 +4,9 @@ import { TextInput, TouchableOpacity, View } from 'react-native';
 
 interface SearchBarProps {
   value: string;
-  onChangeText: (text: string) => void;
+  customClass?: string;
   placeholder?: string;
+  onChangeText: (text: string) => void;
   onClear?: () => void;
 }
 
@@ -13,10 +14,11 @@ export function SearchBar({
   value,
   onChangeText,
   placeholder = 'Buscar produtos...',
+  customClass,
   onClear
 }: SearchBarProps) {
   return (
-    <View className="px-6 py-6">
+    <View className={customClass || 'px-6 py-6'}>
       <View className="border-secondary flex-row items-center rounded-2xl border bg-white px-4 py-3 shadow-sm">
         <MaterialCommunityIcons name="magnify" size={24} color="#8C7E7E" />
         <TextInput
