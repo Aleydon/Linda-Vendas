@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Sale } from '@/context/AppContext';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
@@ -71,7 +72,11 @@ export function HistoryItem({
 
       {/* Expandable Content */}
       {isExpanded && (
-        <View className="px-6 pb-4">
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(200)}
+          className="px-6 pb-4"
+        >
           <View className="h-[1px] bg-secondary/10 w-full mb-2" />
 
           {/* Sale Items */}
@@ -124,7 +129,7 @@ export function HistoryItem({
               </Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
       )}
     </View>
   );

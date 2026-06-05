@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Variation } from '@/context/types';
 import { formatCurrency } from '@/utils/formatters';
@@ -98,7 +99,11 @@ export function ProductCard({
       </TouchableOpacity>
 
       {has_variations && isExpanded && variations && (
-        <View className="bg-secondary/30 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary">
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(200)}
+          className="bg-secondary/30 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary"
+        >
           {variations.map((v, index) => (
             <View
               key={v.id || index}
@@ -119,7 +124,7 @@ export function ProductCard({
               </View>
             </View>
           ))}
-        </View>
+        </Animated.View>
       )}
     </View>
   );

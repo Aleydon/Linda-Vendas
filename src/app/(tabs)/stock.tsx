@@ -258,7 +258,11 @@ export function Stock(): React.JSX.Element {
                     isExpanded &&
                     product.variations &&
                     product.variations.length > 0 && (
-                      <View className="bg-secondary/10 px-5 pb-4 border-t border-secondary/20">
+                      <Animated.View
+                        entering={FadeIn.duration(300)}
+                        exiting={FadeOut.duration(200)}
+                        className="bg-secondary/10 px-5 pb-4 border-t border-secondary/20"
+                      >
                         {product.variations.map(v => (
                           <View
                             key={v.id}
@@ -279,7 +283,7 @@ export function Stock(): React.JSX.Element {
                             </View>
                           </View>
                         ))}
-                      </View>
+                      </Animated.View>
                     )}
                 </View>
               );
