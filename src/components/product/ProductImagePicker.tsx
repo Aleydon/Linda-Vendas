@@ -26,7 +26,7 @@ export function ProductImagePicker({
       onPress={onPickImage}
       disabled={isUploading}
       activeOpacity={0.7}
-      className="border-secondary overflow-hidden rounded-3xl border bg-white shadow-sm"
+      className="border-primary overflow-hidden rounded-3xl border bg-white shadow-sm border-dotted "
     >
       <View className="relative h-40 w-full">
         {imageUrl ? (
@@ -46,14 +46,16 @@ export function ProductImagePicker({
                   size={40}
                   color="#A34211"
                 />
-                <Text className="text-primary mt-4 text-center text-lg">
+                <Text className="text-primary mt-2 text-center text-lg">
                   Adicionar imagem
                 </Text>
               </View>
             )}
             {!isUploading && (
               <View>
-                <Text className="text-text-secondary mt-2">Opcional</Text>
+                <Text className="text-text-secondary  text-center text-sm py-2">
+                  Opcional
+                </Text>
               </View>
             )}
           </View>
