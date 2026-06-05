@@ -73,9 +73,8 @@ export function ProductCard({
           >
             {name}
           </Text>
-          <View className="mt-1 flex-row items-center">
+          <View className="mt-1 flex-row items-center justify-between">
             <Text className="text-primary font-bold text-lg">
-              {has_variations ? 'A partir de ' : ''}
               {displayPrice}
             </Text>
             <View
@@ -87,20 +86,19 @@ export function ProductCard({
                 Estoque: {totalStock.toString().padStart(2, '0')} un
               </Text>
             </View>
+            {has_variations && (
+              <MaterialCommunityIcons
+                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                size={24}
+                color="#A34211"
+              />
+            )}
           </View>
         </View>
-
-        {has_variations && (
-          <MaterialCommunityIcons
-            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-            size={24}
-            color="#A34211"
-          />
-        )}
       </TouchableOpacity>
 
       {has_variations && isExpanded && variations && (
-        <View className="bg-secondary/30 mx-2 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary">
+        <View className="bg-secondary/30 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary">
           {variations.map((v, index) => (
             <View
               key={v.id || index}
