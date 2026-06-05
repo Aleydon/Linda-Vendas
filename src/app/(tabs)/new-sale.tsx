@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,6 +8,7 @@ import {
   View
 } from 'react-native';
 
+import { Header } from '@/components/Header';
 import { PaymentModal } from '@/components/PaymentModal';
 import { SaleProductItem } from '@/components/SaleProductItem';
 import { SearchBar } from '@/components/SearchBar';
@@ -18,26 +18,41 @@ import { generatePixPayload } from '@/utils/pix';
 
 interface CartItem {
   productId: string;
+  variationId?: string;
   quantity: number;
 }
 
 export function NewSale() {
-  const router = useRouter();
   const { products, addSale, loading } = useAppContext();
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      p => p.name.toLowerCase().includes(search.toLowerCase()) && p.stock > 0
-    );
+    const lowerQuery = search.toLowerCase();
+    return products.filter(p => {
+      if (p.stock <= 0) return false;
+      const matchesName = p.name.toLowerCase().includes(lowerQuery);
+      const matchesVariations = p.variations?.some(v =>
+        v.name.toLowerCase().includes(lowerQuery)
+      );
+      return matchesName || matchesVariations;
+    });
   }, [products, search]);
 
   const total = useMemo(() => {
     return cart.reduce((acc, item) => {
       const product = products.find(p => p.id === item.productId);
-      return acc + (product?.price || 0) * item.quantity;
+      if (!product) return acc;
+
+      if (item.variationId && product.variations) {
+        const variation = product.variations.find(
+          v => v.id === item.variationId
+        );
+        return acc + (variation?.price || 0) * item.quantity;
+      }
+
+      return acc + (product.price || 0) * item.quantity;
     }, 0);
   }, [cart, products]);
 
@@ -57,28 +72,45 @@ export function NewSale() {
     });
   }, [total]);
 
-  const updateQuantity = (productId: string, delta: number) => {
+  const updateQuantity = (
+    productId: string,
+    delta: number,
+    variationId?: string
+  ) => {
     setCart(prev => {
-      const existing = prev.find(item => item.productId === productId);
+      const existingIndex = prev.findIndex(
+        item => item.productId === productId && item.variationId === variationId
+      );
       const product = products.find(p => p.id === productId);
 
       if (!product) return prev;
 
-      if (existing) {
+      let maxStock = product.stock;
+      if (variationId && product.variations) {
+        const v = product.variations.find(
+          varItem => varItem.id === variationId
+        );
+        if (v) maxStock = v.stock;
+      }
+
+      if (existingIndex > -1) {
+        const existing = prev[existingIndex];
         const newQuantity = existing.quantity + delta;
+
         if (newQuantity <= 0) {
-          return prev.filter(item => item.productId !== productId);
+          return prev.filter((_, i) => i !== existingIndex);
         }
-        if (newQuantity > product.stock) {
+
+        if (newQuantity > maxStock) {
           return prev;
         }
-        return prev.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: newQuantity }
-            : item
-        );
+
+        const newCart = [...prev];
+        newCart[existingIndex] = { ...existing, quantity: newQuantity };
+        return newCart;
       } else if (delta > 0) {
-        return [...prev, { productId, quantity: 1 }];
+        if (maxStock <= 0) return prev;
+        return [...prev, { productId, variationId, quantity: 1 }];
       }
       return prev;
     });
@@ -95,16 +127,27 @@ export function NewSale() {
     try {
       const items = cart.map(item => {
         const product = products.find(p => p.id === item.productId)!;
+        let price = product.price;
+
+        if (item.variationId && product.variations) {
+          const v = product.variations.find(
+            varItem => varItem.id === item.variationId
+          );
+          if (v) price = v.price;
+        }
+
         return {
           product_id: item.productId,
+          variation_id: item.variationId,
           quantity: item.quantity,
-          unit_price: product.price
+          unit_price: price
         };
       });
 
       await addSale(items, total);
       setShowConfirmation(false);
-      router.back();
+      setCart([]);
+      setSearch('');
     } catch (error) {
       console.error('Error finalizing sale:', error);
     }
@@ -112,40 +155,52 @@ export function NewSale() {
 
   return (
     <View className="bg-background flex-1">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pb-4 pt-12">
-        <TouchableOpacity onPress={() => router.back()} className="p-1">
-          <MaterialCommunityIcons name="arrow-left" size={28} color="#3C2F2F" />
-        </TouchableOpacity>
-        <Text className="text-text-primary font-bold text-xl">Nova Venda</Text>
-        <View className="border-secondary bg-secondary h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
-          <MaterialCommunityIcons name="cart-plus" size={22} color="#A34211" />
-        </View>
+      <Header />
+
+      <View className="px-6 py-2">
+        <Text className="text-text-primary font-bold text-2xl">Nova Venda</Text>
+        <Text className="text-text-secondary text-base">
+          Selecione os produtos para gerar o QR Code.
+        </Text>
       </View>
 
-      {/* Search Bar */}
       <SearchBar
         value={search}
         onChangeText={setSearch}
         onClear={() => setSearch('')}
       />
 
-      {/* Product List */}
       <FlatList
         data={filteredProducts}
         keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 160 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 180 }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <SaleProductItem
             item={item}
-            quantity={cart.find(ci => ci.productId === item.id)?.quantity || 0}
+            cart={cart}
             onUpdateQuantity={updateQuantity}
+            searchQuery={search}
           />
+        )}
+        ListEmptyComponent={() => (
+          <View className="py-20 items-center justify-center">
+            <MaterialCommunityIcons
+              name="package-variant"
+              size={48}
+              color="#D1D5DB"
+            />
+            <Text className="text-text-secondary mt-2 text-base text-center px-10">
+              {search
+                ? 'Nenhum produto disponível com este nome.'
+                : 'Nenhum produto em estoque no momento.'}
+            </Text>
+          </View>
         )}
       />
 
       {/* Bottom Summary */}
-      <View className="border-secondary absolute bottom-0 left-0 right-0 border-t bg-white px-6 pb-10 pt-4 shadow-lg">
+      <View className="border-secondary absolute bottom-0 left-0 right-0 border-t bg-white px-6 pb-24 pt-4 shadow-lg">
         <View className="mb-4 flex-row items-center justify-between">
           <View>
             <Text className="text-text-secondary text-sm">Total da Venda</Text>

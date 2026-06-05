@@ -43,6 +43,19 @@ export function Layout() {
         }}
       />
       <Tabs.Screen
+        name="new-sale"
+        options={{
+          title: 'Vender',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="cart-plus"
+              size={size}
+              color={color}
+            />
+          )
+        }}
+      />
+      <Tabs.Screen
         name="stock"
         options={{
           title: 'Estoque',

@@ -13,6 +13,13 @@ export interface Profile {
   role: UserRole;
 }
 
+export interface Variation {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
 export interface Product {
   id: string;
   category_id?: string;
@@ -22,11 +29,14 @@ export interface Product {
   stock: number;
   imageUrl: string;
   outOfStock?: boolean;
+  has_variations: boolean;
+  variations?: Variation[];
 }
 
 export interface SaleItem {
   id: string;
   product_id: string;
+  variation_id?: string;
   quantity: number;
   unit_price: number;
   product?: {
@@ -66,7 +76,12 @@ export interface AppContextType {
   ) => Promise<void>;
   deleteProduct: (productId: string) => Promise<void>;
   addSale: (
-    items: { product_id: string; quantity: number; unit_price: number }[],
+    items: {
+      product_id: string;
+      variation_id?: string;
+      quantity: number;
+      unit_price: number;
+    }[],
     total: number
   ) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
@@ -75,6 +90,14 @@ export interface AppContextType {
 }
 
 // Types for Supabase DB
+export interface DBVariation {
+  id: string;
+  product_id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
 export interface DBProduct {
   id: string;
   name: string;
@@ -83,4 +106,5 @@ export interface DBProduct {
   image_url: string;
   category_id: string | null;
   categories?: { name: string } | null;
+  product_variations?: DBVariation[];
 }

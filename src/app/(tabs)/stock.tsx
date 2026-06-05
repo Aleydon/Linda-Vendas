@@ -26,6 +26,7 @@ import Animated, {
 
 import { Header } from '@/components/Header';
 import { Loading } from '@/components/Loading';
+import { SearchBar } from '@/components/SearchBar';
 import { useAppContext } from '@/context/AppContext';
 
 export function Stock(): React.JSX.Element {
@@ -41,6 +42,25 @@ export function Stock(): React.JSX.Element {
   const [showOptions, setShowOptions] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
+
+  const toggleExpand = (productId: string) => {
+    setExpandedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const filteredProducts = products.filter(product => {
+    const lowerQuery = searchQuery.toLowerCase();
+    const matchesName = product.name.toLowerCase().includes(lowerQuery);
+    const matchesVariations = product.variations?.some(v =>
+      v.name.toLowerCase().includes(lowerQuery)
+    );
+    return matchesName || matchesVariations;
+  });
 
   const handleDeleteProduct = (id: string, name: string): void => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -131,84 +151,142 @@ export function Stock(): React.JSX.Element {
             </Text>
           </View>
 
+          <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+
           <View className="gap-y-4">
-            {products.map(product => (
-              <View
-                key={product.id}
-                className="border-secondary flex-row items-center justify-between rounded-2xl border bg-white p-5 shadow-sm"
-              >
-                <View className="flex-1">
-                  <Text className="text-text-primary font-bold text-lg">
-                    {product.name}
-                  </Text>
-                  <Text className="text-text-secondary text-sm">
-                    {product.category || 'Sem Categoria'}
-                  </Text>
-                </View>
+            {filteredProducts.map(product => {
+              const isExpanded = expandedProducts.includes(product.id);
+              const totalStock = product.stock;
 
-                <View className="items-end">
-                  <View
-                    className={`rounded-full px-3 py-1 ${
-                      product.stock > 10
-                        ? 'bg-teal-50'
-                        : product.stock > 0
-                          ? 'bg-orange-50'
-                          : 'bg-red-50'
-                    }`}
+              return (
+                <View
+                  key={product.id}
+                  className="border-secondary rounded-2xl border bg-white shadow-sm overflow-hidden"
+                >
+                  <TouchableOpacity
+                    activeOpacity={product.has_variations ? 0.7 : 1}
+                    onPress={() =>
+                      product.has_variations && toggleExpand(product.id)
+                    }
+                    className="flex-row items-center justify-between p-5"
                   >
-                    <Text
-                      className={`font-bold text-sm ${
-                        product.stock > 10
-                          ? 'text-teal-700'
-                          : product.stock > 0
-                            ? 'text-orange-700'
-                            : 'text-red-700'
-                      }`}
-                    >
-                      {product.stock} un
-                    </Text>
-                  </View>
-                  <Text className="text-text-muted mt-1 text-[10px] uppercase">
-                    {product.stock === 0 ? 'Esgotado' : 'Disponível'}
-                  </Text>
+                    <View className="flex-1">
+                      <Text className="text-text-primary font-bold text-lg">
+                        {product.name}
+                      </Text>
+                      <Text className="text-text-secondary text-sm">
+                        {product.category || 'Sem Categoria'}
+                      </Text>
+                      {product.has_variations && (
+                        <View className="flex-row items-center mt-1">
+                          <Text className="text-primary text-[10px] font-bold uppercase mr-1">
+                            {product.variations?.length || 0} Variações
+                          </Text>
+                          <MaterialCommunityIcons
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={14}
+                            color="#A34211"
+                          />
+                        </View>
+                      )}
+                    </View>
+
+                    <View className="items-end">
+                      <View
+                        className={`rounded-full px-3 py-1 ${
+                          totalStock > 10
+                            ? 'bg-teal-50'
+                            : totalStock > 0
+                              ? 'bg-orange-50'
+                              : 'bg-red-50'
+                        }`}
+                      >
+                        <Text
+                          className={`font-bold text-sm ${
+                            totalStock > 10
+                              ? 'text-teal-700'
+                              : totalStock > 0
+                                ? 'text-orange-700'
+                                : 'text-red-700'
+                          }`}
+                        >
+                          {totalStock} un
+                        </Text>
+                      </View>
+                      <Text className="text-text-muted mt-1 text-[10px] uppercase">
+                        {totalStock === 0 ? 'Esgotado' : 'Disponível'}
+                      </Text>
+                    </View>
+
+                    {isAdmin && (
+                      <View className="ml-4 flex-row">
+                        <TouchableOpacity
+                          className="mr-2 rounded-full bg-gray-100 p-2"
+                          onPress={() => {
+                            Haptics.selectionAsync();
+                            router.push(`/edit-product/${product.id}`);
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="pencil"
+                            size={20}
+                            color="#4B5563"
+                          />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          className="rounded-full bg-red-50 p-2"
+                          onPress={() =>
+                            handleDeleteProduct(product.id, product.name)
+                          }
+                        >
+                          <MaterialCommunityIcons
+                            name="trash-can-outline"
+                            size={20}
+                            color="#EF4444"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  {product.has_variations &&
+                    isExpanded &&
+                    product.variations &&
+                    product.variations.length > 0 && (
+                      <View className="bg-secondary/10 px-5 pb-4 border-t border-secondary/20">
+                        {product.variations.map(v => (
+                          <View
+                            key={v.id}
+                            className="flex-row justify-between py-3 border-b border-secondary/10 last:border-b-0"
+                          >
+                            <Text className="text-text-secondary text-sm">
+                              {v.name}
+                            </Text>
+                            <View className="flex-row items-center">
+                              <Text className="text-text-primary font-bold text-sm mr-2">
+                                {v.stock} un
+                              </Text>
+                              <View
+                                className={`w-2 h-2 rounded-full ${
+                                  v.stock > 0 ? 'bg-teal-500' : 'bg-red-500'
+                                }`}
+                              />
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
                 </View>
-
-                {isAdmin && (
-                  <View className="ml-4 flex-row">
-                    <TouchableOpacity
-                      className="mr-2 rounded-full bg-gray-100 p-2"
-                      onPress={() => {
-                        Haptics.selectionAsync();
-                        router.push(`/edit-product/${product.id}`);
-                      }}
-                    >
-                      <MaterialCommunityIcons
-                        name="pencil"
-                        size={20}
-                        color="#4B5563"
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      className="rounded-full bg-red-50 p-2"
-                      onPress={() =>
-                        handleDeleteProduct(product.id, product.name)
-                      }
-                    >
-                      <MaterialCommunityIcons
-                        name="trash-can-outline"
-                        size={20}
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            ))}
+              );
+            })}
           </View>
 
           {/* Low Stock Warning */}
-          {products.some(p => p.stock <= 5 && p.stock > 0) && (
+          {products.some(p => {
+            const totalStock = p.stock;
+            return totalStock <= 5 && totalStock > 0;
+          }) && (
             <View className="mt-10 flex-row items-center rounded-2xl bg-orange-50 p-4 border border-orange-100">
               <MaterialCommunityIcons
                 name="alert-circle-outline"

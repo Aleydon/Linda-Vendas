@@ -75,18 +75,6 @@ export function Dashboard() {
             </View>
           </View>
 
-          {/* Action Button */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/new-sale')}
-            className="bg-teal-600 flex-row items-center justify-center rounded-2xl py-5 shadow-sm mb-10"
-          >
-            <MaterialCommunityIcons name="cart-plus" size={24} color="white" />
-            <Text className="ml-2 font-bold text-white text-lg">
-              Nova Venda
-            </Text>
-          </TouchableOpacity>
-
           {/* Recent Sales Section */}
           <View>
             <View className="mb-4 flex-row items-center justify-between">

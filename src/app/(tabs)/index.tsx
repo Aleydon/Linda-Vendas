@@ -1,11 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { CategoryItem } from '@/components/CategoryItem';
 import { Header } from '@/components/Header';
 import { Loading } from '@/components/Loading';
 import { ProductCard } from '@/components/ProductCard';
+import { SearchBar } from '@/components/SearchBar';
 import { useAppContext } from '@/context/AppContext';
 
 export function Home(): React.JSX.Element {
@@ -24,10 +25,15 @@ export function Home(): React.JSX.Element {
   const filteredProducts = products.filter(product => {
     const matchesCategory =
       activeCategoryId === 'Todos' || product.category_id === activeCategoryId;
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+
+    const lowerQuery = searchQuery.toLowerCase();
+    const matchesName = product.name.toLowerCase().includes(lowerQuery);
+
+    const matchesVariations = product.variations?.some(v =>
+      v.name.toLowerCase().includes(lowerQuery)
+    );
+
+    return matchesCategory && (matchesName || matchesVariations);
   });
 
   // Decide which categories to show as section headers
@@ -45,18 +51,7 @@ export function Home(): React.JSX.Element {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Search Bar */}
-        <View className="px-6 py-6">
-          <View className="border-secondary flex-row items-center rounded-2xl border bg-white px-4 py-3 shadow-sm">
-            <MaterialCommunityIcons name="magnify" size={24} color="#8C7E7E" />
-            <TextInput
-              placeholder="Buscar produtos..."
-              placeholderTextColor="#8C7E7E"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              className="ml-2 flex-1 font-medium text-base"
-            />
-          </View>
-        </View>
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
 
         <ScrollView
           horizontal
@@ -106,6 +101,8 @@ export function Home(): React.JSX.Element {
                     stock={product.stock}
                     imageUrl={product.imageUrl}
                     outOfStock={product.outOfStock}
+                    has_variations={product.has_variations}
+                    variations={product.variations}
                   />
                 ))}
               </View>

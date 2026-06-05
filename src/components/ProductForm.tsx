@@ -7,17 +7,21 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
+  Switch,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
 
 import { FormField } from '@/components/FormField';
-import { Product, useAppContext } from '@/context/AppContext';
+import { Product, useAppContext, Variation } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 
 interface ProductFormProps {
@@ -27,6 +31,17 @@ interface ProductFormProps {
   ) => Promise<void> | void;
   title: string;
 }
+
+const formatCurrency = (value: string): string => {
+  const cleanValue = value.replace(/\D/g, '');
+  if (!cleanValue) return '';
+
+  const amount = parseInt(cleanValue, 10) / 100;
+  return amount.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
 
 export function ProductForm({
   initialData,
@@ -38,13 +53,20 @@ export function ProductForm({
 
   const [name, setName] = useState(initialData?.name ?? '');
   const [categoryId, setCategoryId] = useState(initialData?.category_id ?? '');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [price, setPrice] = useState(
-    initialData ? initialData.price.toFixed(2) : ''
+    initialData ? formatCurrency((initialData.price * 100).toFixed(0)) : ''
   );
   const [stock, setStock] = useState(
     initialData ? String(initialData.stock) : ''
   );
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl ?? '');
+  const [hasVariations, setHasVariations] = useState(
+    initialData?.has_variations ?? false
+  );
+  const [variations, setVariations] = useState<Variation[]>(
+    initialData?.variations ?? []
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -95,23 +117,82 @@ export function ProductForm({
     }
   };
 
+  const addVariation = (): void => {
+    setVariations([
+      ...variations,
+      {
+        id: Math.random().toString(36).substring(2, 9),
+        name: '',
+        price: 0,
+        stock: 0
+      }
+    ]);
+  };
+
+  const removeVariation = (id: string): void => {
+    setVariations(variations.filter(v => v.id !== id));
+  };
+
+  const updateVariation = (
+    id: string,
+    field: keyof Variation,
+    value: string | number
+  ): void => {
+    setVariations(
+      variations.map(v => (v.id === id ? { ...v, [field]: value } : v))
+    );
+  };
+
+  const handlePriceChange = (text: string): void => {
+    setPrice(formatCurrency(text));
+  };
+
+  const handleVariationPriceChange = (id: string, text: string): void => {
+    const formatted = formatCurrency(text);
+    const numericValue =
+      parseFloat(formatted.replace('.', '').replace(',', '.')) || 0;
+    updateVariation(id, 'price', numericValue);
+  };
+
   const handleSave = async (): Promise<void> => {
-    if (!name || !categoryId || !price || !stock) {
-      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+    if (!name || !categoryId) {
+      Alert.alert('Erro', 'Preencha o nome e a categoria.');
       return;
+    }
+
+    if (!hasVariations && (!price || !stock)) {
+      Alert.alert('Erro', 'Preencha o preço e o estoque.');
+      return;
+    }
+
+    if (hasVariations && variations.length === 0) {
+      Alert.alert('Erro', 'Adicione pelo menos uma variação.');
+      return;
+    }
+
+    if (hasVariations) {
+      const invalidVariation = variations.find(v => !v.name || v.price <= 0);
+      if (invalidVariation) {
+        Alert.alert('Erro', 'Preencha corretamente todas as variações.');
+        return;
+      }
     }
 
     try {
       setIsSaving(true);
-      const numericPrice = parseFloat(price.replace(',', '.')) || 0;
-      const numericStock = parseInt(stock, 10) || 0;
+      const numericPrice = hasVariations
+        ? 0
+        : parseFloat(price.replace('.', '').replace(',', '.')) || 0;
+      const numericStock = hasVariations ? 0 : parseInt(stock, 10) || 0;
 
       await onSubmit({
         name,
         category_id: categoryId || undefined,
         price: numericPrice,
         stock: numericStock,
-        imageUrl
+        imageUrl,
+        has_variations: hasVariations,
+        variations: hasVariations ? variations : []
       });
 
       router.back();
@@ -213,43 +294,218 @@ export function ProductForm({
                 <Text className="mb-2 text-text-secondary font-medium text-sm uppercase tracking-wider">
                   Categoria
                 </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {categories.map(cat => (
-                    <TouchableOpacity
-                      key={cat.id}
-                      onPress={() => setCategoryId(cat.id)}
-                      className={`rounded-xl border px-4 py-2 ${
-                        categoryId === cat.id
-                          ? 'bg-primary border-primary'
-                          : 'bg-white border-secondary'
-                      }`}
-                    >
-                      <Text
-                        className={`font-medium ${
-                          categoryId === cat.id
-                            ? 'text-white'
-                            : 'text-text-primary'
-                        }`}
-                      >
-                        {cat.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <TouchableOpacity
+                  onPress={() => setShowCategoryDropdown(true)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-between rounded-2xl border border-secondary bg-white px-4 py-4"
+                >
+                  <Text
+                    className={
+                      categoryId
+                        ? 'text-text-primary font-medium'
+                        : 'text-text-muted'
+                    }
+                  >
+                    {categoryId
+                      ? categories.find(c => c.id === categoryId)?.name
+                      : 'Selecione uma categoria'}
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="chevron-down"
+                    size={24}
+                    color="#8C7E7E"
+                  />
+                </TouchableOpacity>
+
+                <Modal
+                  visible={showCategoryDropdown}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setShowCategoryDropdown(false)}
+                >
+                  <Pressable
+                    className="flex-1 bg-black/40 justify-center px-6"
+                    onPress={() => setShowCategoryDropdown(false)}
+                  >
+                    <View className="bg-white rounded-3xl overflow-hidden max-h-[60%] shadow-2xl">
+                      <View className="p-4 border-b border-secondary flex-row justify-between items-center bg-gray-50">
+                        <Text className="text-text-primary font-bold text-lg">
+                          Escolher Categoria
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setShowCategoryDropdown(false)}
+                        >
+                          <MaterialCommunityIcons
+                            name="close"
+                            size={24}
+                            color="#3C2F2F"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <FlatList
+                        data={categories}
+                        keyExtractor={item => item.id}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setCategoryId(item.id);
+                              setShowCategoryDropdown(false);
+                            }}
+                            className={`px-6 py-4 border-b border-gray-50 flex-row items-center justify-between ${
+                              categoryId === item.id ? 'bg-primary/5' : ''
+                            }`}
+                          >
+                            <Text
+                              className={`text-base ${
+                                categoryId === item.id
+                                  ? 'text-primary font-bold'
+                                  : 'text-text-primary'
+                              }`}
+                            >
+                              {item.name}
+                            </Text>
+                            {categoryId === item.id && (
+                              <MaterialCommunityIcons
+                                name="check"
+                                size={20}
+                                color="#A34211"
+                              />
+                            )}
+                          </TouchableOpacity>
+                        )}
+                        ListEmptyComponent={() => (
+                          <View className="p-10 items-center">
+                            <Text className="text-text-secondary text-center">
+                              Nenhuma categoria encontrada.
+                            </Text>
+                          </View>
+                        )}
+                      />
+                    </View>
+                  </Pressable>
+                </Modal>
               </View>
 
-              <FormField
-                label="Preço de Venda (R$)"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="decimal-pad"
-              />
-              <FormField
-                label="Estoque Inicial"
-                value={stock}
-                onChangeText={setStock}
-                keyboardType="numeric"
-              />
+              <View className="flex-row items-center justify-between py-2">
+                <View>
+                  <Text className="text-text-primary font-bold text-base">
+                    Variações
+                  </Text>
+                  <Text className="text-text-secondary text-xs">
+                    O produto possui tamanhos ou cores diferentes
+                  </Text>
+                </View>
+                <Switch
+                  value={hasVariations}
+                  onValueChange={setHasVariations}
+                  trackColor={{ false: '#E5E7EB', true: '#A34211' }}
+                  thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+                />
+              </View>
+
+              {!hasVariations ? (
+                <>
+                  <FormField
+                    label="Preço de Venda (R$)"
+                    value={price}
+                    onChangeText={handlePriceChange}
+                    keyboardType="numeric"
+                    placeholder="0,00"
+                  />
+                  <FormField
+                    label="Estoque Inicial"
+                    value={stock}
+                    onChangeText={setStock}
+                    keyboardType="numeric"
+                  />
+                </>
+              ) : (
+                <View className="mt-4">
+                  <Text className="mb-4 text-text-secondary font-medium text-sm uppercase tracking-wider">
+                    Lista de Variações
+                  </Text>
+                  {variations.map((variation, index) => (
+                    <View
+                      key={variation.id}
+                      className="border-secondary mb-4 rounded-2xl border bg-white p-4 shadow-sm"
+                    >
+                      <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-text-primary font-bold">
+                          Variação #{index + 1}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => removeVariation(variation.id)}
+                        >
+                          <MaterialCommunityIcons
+                            name="delete-outline"
+                            size={20}
+                            color="#EF4444"
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <FormField
+                        label="Nome da Variação"
+                        value={variation.name}
+                        onChangeText={text =>
+                          updateVariation(variation.id, 'name', text)
+                        }
+                        placeholder="Ex: P, M, G ou Azul, Preto"
+                      />
+
+                      <View className="flex-row gap-4">
+                        <View className="flex-1">
+                          <FormField
+                            label="Preço"
+                            value={
+                              variation.price
+                                ? variation.price.toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 2
+                                  })
+                                : ''
+                            }
+                            onChangeText={text =>
+                              handleVariationPriceChange(variation.id, text)
+                            }
+                            keyboardType="numeric"
+                            placeholder="0,00"
+                          />
+                        </View>
+                        <View className="flex-1">
+                          <FormField
+                            label="Estoque"
+                            value={
+                              variation.stock ? variation.stock.toString() : ''
+                            }
+                            onChangeText={text =>
+                              updateVariation(
+                                variation.id,
+                                'stock',
+                                parseInt(text, 10) || 0
+                              )
+                            }
+                            keyboardType="numeric"
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+
+                  <TouchableOpacity
+                    onPress={addVariation}
+                    className="border-primary flex-row items-center justify-center rounded-2xl border border-dashed py-4"
+                  >
+                    <MaterialCommunityIcons
+                      name="plus"
+                      size={24}
+                      color="#A34211"
+                    />
+                    <Text className="text-primary ml-2 font-bold">
+                      Adicionar nova variação
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>

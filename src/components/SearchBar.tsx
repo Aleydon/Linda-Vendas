@@ -16,19 +16,22 @@ export function SearchBar({
   onClear
 }: SearchBarProps) {
   return (
-    <View className="px-6 py-4">
-      <View className="border-secondary bg-surface flex-row items-center rounded-xl border px-4 py-2">
+    <View className="px-6 py-6">
+      <View className="border-secondary flex-row items-center rounded-2xl border bg-white px-4 py-3 shadow-sm">
         <MaterialCommunityIcons name="magnify" size={24} color="#8C7E7E" />
         <TextInput
           placeholder={placeholder}
-          placeholderTextColor="#BDB2B2"
+          placeholderTextColor="#8C7E7E"
           value={value}
           onChangeText={onChangeText}
-          className="text-text-primary ml-2 flex-1 text-base"
+          className="ml-2 flex-1 font-medium text-base text-text-primary"
           autoCapitalize="none"
         />
-        {value.length > 0 && onClear && (
-          <TouchableOpacity onPress={onClear} className="p-1">
+        {value.length > 0 && (
+          <TouchableOpacity
+            onPress={() => (onClear ? onClear() : onChangeText(''))}
+            className="p-1"
+          >
             <MaterialCommunityIcons
               name="close-circle"
               size={20}
