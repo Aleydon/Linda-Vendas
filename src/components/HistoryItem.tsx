@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -16,6 +16,17 @@ export function HistoryItem({
   isInitiallyExpanded = false
 }: HistoryItemProps) {
   const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+
+  // Calculate total from items if sale.total is missing or 0
+  const calculatedTotal = useMemo(() => {
+    if (sale.total && sale.total > 0) return Number(sale.total);
+
+    return (
+      sale.sale_items?.reduce((acc, item) => {
+        return acc + item.quantity * Number(item.unit_price);
+      }, 0) || 0
+    );
+  }, [sale.total, sale.sale_items]);
 
   // Format date and time for the header
   const dateObj = new Date(sale.created_at);
@@ -55,7 +66,7 @@ export function HistoryItem({
               Concluída
             </Text>
             <Text className="text-primary font-bold text-2xl">
-              {formatCurrency(sale.total)}
+              {formatCurrency(calculatedTotal)}
             </Text>
           </View>
         </View>
@@ -87,6 +98,8 @@ export function HistoryItem({
                 ? `• ${variationName}`
                 : item.product?.name || 'Produto';
 
+              const itemTotal = item.quantity * Number(item.unit_price);
+
               return (
                 <View
                   key={item.id}
@@ -108,7 +121,7 @@ export function HistoryItem({
                   </View>
 
                   <Text className="text-text-primary font-bold text-base">
-                    {formatCurrency(item.quantity * Number(item.unit_price))}
+                    {formatCurrency(itemTotal)}
                   </Text>
                 </View>
               );

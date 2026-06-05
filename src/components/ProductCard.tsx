@@ -34,7 +34,7 @@ export function ProductCard({
 
   const displayPrice =
     has_variations && variations && variations.length > 0
-      ? formatCurrency(variations[0].price)
+      ? formatCurrency(Math.min(...variations.map(v => v.price)))
       : `R$ ${price}`;
 
   return (
@@ -42,7 +42,7 @@ export function ProductCard({
       <TouchableOpacity
         activeOpacity={has_variations ? 0.7 : 1}
         onPress={() => has_variations && setIsExpanded(!isExpanded)}
-        className="border-secondary bg-surface flex-row items-center rounded-2xl border p-4"
+        className="border-secondary bg-surface flex-row items-center rounded-2xl border p-2"
       >
         <View className="bg-secondary h-20 w-20 items-center justify-center overflow-hidden rounded-xl">
           {imageUrl ? (
@@ -68,31 +68,45 @@ export function ProductCard({
         </View>
 
         <View className="ml-4 flex-1">
-          <Text
-            className="text-text-primary font-semibold text-base"
-            numberOfLines={1}
-          >
+          <Text className="text-text-primary font-semibold text-base">
             {name}
           </Text>
+
           <View className="mt-1 flex-row items-center justify-between">
-            <Text className="text-primary font-bold text-lg">
-              {displayPrice}
-            </Text>
-            <View
-              className={`ml-3 rounded-full px-2 py-0.5 ${
-                outOfStock ? 'bg-secondary' : 'bg-badge-success'
-              }`}
-            >
-              <Text className="text-text-secondary font-medium text-[10px]">
-                Estoque: {totalStock.toString().padStart(2, '0')} un
+            <View>
+              {has_variations && (
+                <Text className="text-text-secondary text-[10px] font-medium uppercase">
+                  A partir de
+                </Text>
+              )}
+              <Text className="text-primary font-bold text-lg">
+                {displayPrice}
               </Text>
             </View>
-            {has_variations && (
-              <MaterialCommunityIcons
-                name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                size={24}
-                color="#A34211"
-              />
+
+            {has_variations ? (
+              <View className="items-center">
+                <View className="bg-secondary rounded-full px-2 py-0.5 mb-1">
+                  <Text className="text-text-secondary font-medium text-[10px]">
+                    Estoque: {totalStock.toString().padStart(2, '0')} un
+                  </Text>
+                </View>
+                <MaterialCommunityIcons
+                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color="#A34211"
+                />
+              </View>
+            ) : (
+              <View
+                className={`rounded-full px-2 py-0.5 ${
+                  outOfStock ? 'bg-secondary' : 'bg-badge-success'
+                }`}
+              >
+                <Text className="text-text-secondary font-medium text-[10px]">
+                  Estoque: {totalStock.toString().padStart(2, '0')} un
+                </Text>
+              </View>
             )}
           </View>
         </View>
@@ -102,7 +116,7 @@ export function ProductCard({
         <Animated.View
           entering={FadeIn.duration(300)}
           exiting={FadeOut.duration(200)}
-          className="bg-secondary/30 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary"
+          className="bg-secondary/30 -mt-[1.5px] rounded-b-2xl rounded-t-xl px-4 pb-4 pt-4 border-x border-b border-secondary"
         >
           {variations.map((v, index) => (
             <View

@@ -41,6 +41,19 @@ export function History() {
     });
   }, [sales, search]);
 
+  const grandTotal = useMemo(() => {
+    return filteredSales.reduce((acc, sale) => {
+      const saleTotal =
+        sale.total ||
+        sale.sale_items?.reduce(
+          (sAcc, item) => sAcc + item.quantity * Number(item.unit_price),
+          0
+        ) ||
+        0;
+      return acc + Number(saleTotal);
+    }, 0);
+  }, [filteredSales]);
+
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
 
@@ -50,7 +63,15 @@ export function History() {
         groups[label] = { sales: [], total: 0 };
       }
       groups[label].sales.push(sale);
-      groups[label].total += Number(sale.total);
+
+      const saleTotal =
+        sale.total ||
+        sale.sale_items?.reduce(
+          (sAcc, item) => sAcc + item.quantity * Number(item.unit_price),
+          0
+        ) ||
+        0;
+      groups[label].total += Number(saleTotal);
     });
 
     return Object.entries(groups);
@@ -80,6 +101,27 @@ export function History() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View className="px-6">
+          {/* Grand Total Summary */}
+          {filteredSales.length > 0 && (
+            <View className="bg-white rounded-[32px] p-6 mb-8 border border-secondary/20 shadow-sm flex-row items-center justify-between">
+              <View>
+                <Text className="text-primary text-xs uppercase font-bold tracking-widest mb-1">
+                  Total do Período
+                </Text>
+                <Text className="text-[#22c55e] font-bold text-3xl">
+                  {formatCurrency(grandTotal)}
+                </Text>
+              </View>
+              <View className="bg-primary/10 p-3 rounded-2xl">
+                <MaterialCommunityIcons
+                  name="finance"
+                  size={32}
+                  color="#A34211"
+                />
+              </View>
+            </View>
+          )}
+
           {groupedSales.length > 0 ? (
             groupedSales.map(([date, data]) => (
               <View key={date} className="mb-8">
@@ -87,11 +129,6 @@ export function History() {
                   <Text className="text-text-secondary font-bold text-xs uppercase tracking-widest">
                     {date}
                   </Text>
-                  <View className="bg-primary/10 rounded-full px-3 py-1">
-                    <Text className="text-primary font-bold text-xs">
-                      Total: {formatCurrency(data.total)}
-                    </Text>
-                  </View>
                 </View>
                 <View className="gap-y-4">
                   {data.sales.map((sale, index) => (
