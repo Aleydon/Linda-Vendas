@@ -52,7 +52,7 @@ export function VariationSection({
       </View>
 
       {hasVariations && (
-        <View className="mt-4">
+        <View className="mt-6 border-t border-secondary pt-6">
           <Text className="mb-4 text-text-secondary font-medium text-sm uppercase tracking-wider">
             Lista de Variações
           </Text>
@@ -61,67 +61,64 @@ export function VariationSection({
               key={variation.id}
               className="border-secondary mb-4 rounded-2xl border bg-white p-4 shadow-sm"
             >
-              <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-text-primary font-bold">
-                  Variação #{index + 1}
-                </Text>
+              <View className="flex-col items-center mb-4">
+                <FormField
+                  label="Nome da Variação"
+                  value={variation.name}
+                  onChangeText={text =>
+                    onUpdateVariation(variation.id, 'name', text)
+                  }
+                  placeholder="Ex: sabores, marcas, tamanhos, tipos..."
+                />
+
+                <View className="flex-row gap-4">
+                  <View className="flex-1">
+                    <FormField
+                      label="Preço"
+                      value={
+                        variation.price
+                          ? formatCurrencyValue(variation.price)
+                          : ''
+                      }
+                      onChangeText={text =>
+                        onVariationPriceChange(variation.id, text)
+                      }
+                      keyboardType="numeric"
+                      placeholder="0,00"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <FormField
+                      label="Estoque"
+                      value={variation.stock ? variation.stock.toString() : ''}
+                      onChangeText={text =>
+                        onUpdateVariation(
+                          variation.id,
+                          'stock',
+                          parseInt(text, 10) || 0
+                        )
+                      }
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+              </View>
+              <View key={index}>
                 <TouchableOpacity
+                  className="flex-row items-center justify-center w-full"
                   onPress={() => onRemoveVariation(variation.id)}
                 >
-                  <MaterialCommunityIcons
-                    name="delete-outline"
-                    size={22}
-                    color="#EF4444"
-                  />
+                  <Text className="bg-primary w-full py-2 text-center border rounded-2xl text-secondary">
+                    Delete
+                  </Text>
                 </TouchableOpacity>
-              </View>
-
-              <FormField
-                label="Nome da Variação"
-                value={variation.name}
-                onChangeText={text =>
-                  onUpdateVariation(variation.id, 'name', text)
-                }
-                placeholder="Ex: P, M, G ou Azul, Preto"
-              />
-
-              <View className="flex-row gap-4">
-                <View className="flex-1">
-                  <FormField
-                    label="Preço"
-                    value={
-                      variation.price
-                        ? formatCurrencyValue(variation.price)
-                        : ''
-                    }
-                    onChangeText={text =>
-                      onVariationPriceChange(variation.id, text)
-                    }
-                    keyboardType="numeric"
-                    placeholder="0,00"
-                  />
-                </View>
-                <View className="flex-1">
-                  <FormField
-                    label="Estoque"
-                    value={variation.stock ? variation.stock.toString() : ''}
-                    onChangeText={text =>
-                      onUpdateVariation(
-                        variation.id,
-                        'stock',
-                        parseInt(text, 10) || 0
-                      )
-                    }
-                    keyboardType="numeric"
-                  />
-                </View>
               </View>
             </View>
           ))}
 
           <TouchableOpacity
             onPress={onAddVariation}
-            className="border-primary flex-row items-center justify-center rounded-2xl border border-dashed py-4 bg-primary/5"
+            className="border-primary flex-row items-center justify-center rounded-2xl border border-dashed py-4 bg-primary/5 mt-4"
           >
             <MaterialCommunityIcons name="plus" size={24} color="#A34211" />
             <Text className="text-primary ml-2 font-bold">
