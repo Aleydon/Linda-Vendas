@@ -61,7 +61,7 @@ export function VariationSection({
               key={variation.id}
               className="border-secondary mb-4 rounded-2xl border bg-white p-4 shadow-sm"
             >
-              <View className="flex-col items-center mb-4">
+              <View className="mb-4">
                 <FormField
                   label="Nome da Variação"
                   value={variation.name}

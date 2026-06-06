@@ -19,7 +19,7 @@ export function FormField({
   multiline = false
 }: FormFieldProps): React.JSX.Element {
   return (
-    <View className="mb-4">
+    <View className="mb-4 w-full">
       <Text className="mb-2 text-text-secondary font-medium text-sm uppercase tracking-wider">
         {label}
       </Text>
@@ -28,7 +28,7 @@ export function FormField({
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         multiline={multiline}
-        className="rounded-2xl border border-secondary bg-white px-4 py-4 text-text-primary"
+        className="rounded-2xl border border-secondary bg-white px-4 py-4 text-text-primary w-full"
         placeholder={placeholder || `Insira o ${label.toLowerCase()}`}
         placeholderTextColor="#9CA3AF"
       />
