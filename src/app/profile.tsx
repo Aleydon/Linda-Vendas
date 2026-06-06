@@ -321,7 +321,39 @@ export default function Profile() {
             Configurações
           </Text>
 
-          {/* Theme Switch Card */}
+          {/* Notifications Section */}
+          <View className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-secondary dark:border-zinc-800 overflow-hidden mb-4">
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              activeOpacity={0.7}
+              className="flex-row items-center justify-between p-4"
+            >
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 items-center justify-center">
+                  <MaterialCommunityIcons
+                    name="bell-outline"
+                    size={24}
+                    color="#A34211"
+                  />
+                </View>
+                <View className="ml-3">
+                  <Text className="text-text-primary dark:text-zinc-100 font-bold">
+                    Notificações
+                  </Text>
+                  <Text className="text-text-secondary dark:text-zinc-400 text-xs">
+                    Gerenciar alertas e avisos
+                  </Text>
+                </View>
+              </View>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color="#BDB2B2"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Theme Section */}
           <View className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-secondary dark:border-zinc-800 overflow-hidden mb-4">
             <View className="flex-row items-center justify-between p-4">
               <View className="flex-row items-center">

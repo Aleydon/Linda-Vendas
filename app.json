@@ -18,8 +18,9 @@
         "backgroundColor": "#ffffff"
       },
       "icon": "./assets/images/icon.png",
-      "permissions": ["INTERNET"],
-      "package": "com.aleydon.lindavendas"
+      "permissions": ["INTERNET", "NOTIFICATIONS"],
+      "package": "com.aleydon.lindavendas",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

@@ -1,9 +1,10 @@
+/* eslint-disable simple-import-sort/imports */
 import js from '@eslint/js';
-import { defineConfig } from 'eslint/config';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import pluginReact from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import testingLibrary from 'eslint-plugin-testing-library';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -18,6 +19,11 @@ export default defineConfig([
         project: './tsconfig.json'
       }
     }
+  },
+  {
+    ignores: [
+      'supabase/functions/**/*' // Ignora tudo dentro das Edge Functions de forma recursiva
+    ]
   },
 
   js.configs.recommended,

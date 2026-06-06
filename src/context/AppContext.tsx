@@ -1,5 +1,6 @@
-import { User } from '@supabase/supabase-js';
+import { RealtimeChannel, User } from '@supabase/supabase-js';
 import * as AuthSession from 'expo-auth-session';
+import * as Notifications from 'expo-notifications';
 import * as WebBrowser from 'expo-web-browser';
 import { useColorScheme } from 'nativewind';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -25,6 +26,10 @@ export interface Profile {
   pix_key?: string;
   pix_name?: string;
   pix_city?: string;
+  expo_push_token?: string;
+  notifications_enabled?: boolean;
+  low_stock_notifications?: boolean;
+  sales_notifications?: boolean;
 }
 
 export interface Variation {
@@ -224,6 +229,7 @@ export function AppProvider({
 
   useEffect(() => {
     let profileSubscription: RealtimeChannel | null = null;
+    let salesSubscription: RealtimeChannel | null = null;
 
     const setupProfileSubscription = (userId: string) => {
       if (profileSubscription) {
@@ -248,12 +254,52 @@ export function AppProvider({
         .subscribe();
     };
 
+    const setupSalesSubscription = () => {
+      if (salesSubscription) {
+        supabase.removeChannel(salesSubscription);
+      }
+
+      salesSubscription = supabase
+        .channel('public:sales')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'sales'
+          },
+          payload => {
+            const newSale = payload.new;
+            // Notify admin if it's not their sale
+            if (
+              profile?.role === 'admin' &&
+              profile?.notifications_enabled &&
+              profile?.sales_notifications &&
+              newSale.user_id !== user?.id
+            ) {
+              void Notifications.scheduleNotificationAsync({
+                content: {
+                  title: 'Nova Venda Realizada!',
+                  body: `Uma nova venda de R$ ${Number(newSale.total).toFixed(2)} foi registrada por outro vendedor.`,
+                  data: { saleId: newSale.id }
+                },
+                trigger: null
+              });
+            }
+            // Refresh data to show new sale in history
+            void fetchData();
+          }
+        )
+        .subscribe();
+    };
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         void fetchProfile(session.user.id);
         setupProfileSubscription(session.user.id);
+        setupSalesSubscription();
         void fetchData();
       } else {
         setLoading(false);
@@ -268,11 +314,16 @@ export function AppProvider({
       if (session?.user) {
         void fetchProfile(session.user.id);
         setupProfileSubscription(session.user.id);
+        setupSalesSubscription();
         void fetchData();
       } else {
         if (profileSubscription) {
           supabase.removeChannel(profileSubscription);
           profileSubscription = null;
+        }
+        if (salesSubscription) {
+          supabase.removeChannel(salesSubscription);
+          salesSubscription = null;
         }
         setProfile(null);
         setProducts([]);
@@ -287,8 +338,15 @@ export function AppProvider({
       if (profileSubscription) {
         supabase.removeChannel(profileSubscription);
       }
+      if (salesSubscription) {
+        supabase.removeChannel(salesSubscription);
+      }
     };
-  }, []);
+  }, [
+    profile?.role,
+    profile?.notifications_enabled,
+    profile?.sales_notifications
+  ]);
 
   const signInWithGoogle = async () => {
     try {
