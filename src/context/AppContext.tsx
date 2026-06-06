@@ -111,6 +111,8 @@ export interface AppContextType {
   deleteCategory: (id: string) => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   fetchSalesByUser: (userId: string) => Promise<Sale[]>;
+  fetchAllProfiles: () => Promise<Profile[]>;
+  updateUserRole: (userId: string, role: UserRole) => Promise<void>;
   refreshData: () => Promise<void>;
   colorScheme: 'light' | 'dark';
   toggleColorScheme: () => void;
@@ -221,11 +223,37 @@ export function AppProvider({
   };
 
   useEffect(() => {
+    let profileSubscription: RealtimeChannel | null = null;
+
+    const setupProfileSubscription = (userId: string) => {
+      if (profileSubscription) {
+        supabase.removeChannel(profileSubscription);
+      }
+
+      profileSubscription = supabase
+        .channel(`public:profiles:id=eq.${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${userId}`
+          },
+          payload => {
+            console.log('Perfil atualizado em tempo real:', payload.new);
+            setProfile(payload.new as Profile);
+          }
+        )
+        .subscribe();
+    };
+
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        void fetchProfile(session.user.id);
+        setupProfileSubscription(session.user.id);
         void fetchData();
       } else {
         setLoading(false);
@@ -238,9 +266,14 @@ export function AppProvider({
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        void fetchProfile(session.user.id);
+        setupProfileSubscription(session.user.id);
         void fetchData();
       } else {
+        if (profileSubscription) {
+          supabase.removeChannel(profileSubscription);
+          profileSubscription = null;
+        }
         setProfile(null);
         setProducts([]);
         setSales([]);
@@ -249,7 +282,12 @@ export function AppProvider({
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (profileSubscription) {
+        supabase.removeChannel(profileSubscription);
+      }
+    };
   }, []);
 
   const signInWithGoogle = async () => {
@@ -442,6 +480,33 @@ export function AppProvider({
     }
   };
 
+  const fetchAllProfiles = async (): Promise<Profile[]> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      return await api.fetchAllProfiles();
+    } catch (error) {
+      console.error('Error fetching all profiles:', error);
+      return [];
+    }
+  };
+
+  const updateUserRole = async (
+    userId: string,
+    role: UserRole
+  ): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    // Safety check: Don't allow changing own role from the UI side as well
+    if (userId === user?.id) {
+      throw new Error('Você não pode alterar sua própria role.');
+    }
+    try {
+      await api.updateUserRole(userId, role);
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
+  };
+
   const contextValue: AppContextType = {
     products,
     sales,
@@ -463,6 +528,8 @@ export function AppProvider({
     deleteCategory,
     updateProfile,
     fetchSalesByUser,
+    fetchAllProfiles,
+    updateUserRole,
     refreshData: fetchData,
     colorScheme: colorScheme ?? 'light',
     toggleColorScheme

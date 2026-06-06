@@ -1,4 +1,11 @@
-import { Category, DBProduct, Product, Sale } from '@/context/types';
+import {
+  Category,
+  DBProduct,
+  Product,
+  Profile,
+  Sale,
+  UserRole
+} from '@/context/types';
 import { supabase } from '@/lib/supabase';
 
 export const api = {
@@ -6,6 +13,23 @@ export const api = {
     const { data, error } = await supabase.from('categories').select('*');
     if (error) throw error;
     return (data as Category[]) || [];
+  },
+
+  async fetchAllProfiles(): Promise<Profile[]> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('email');
+    if (error) throw error;
+    return (data as Profile[]) || [];
+  },
+
+  async updateUserRole(userId: string, role: UserRole): Promise<void> {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role })
+      .eq('id', userId);
+    if (error) throw error;
   },
 
   async fetchProducts(): Promise<Product[]> {

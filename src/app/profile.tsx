@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -16,19 +16,25 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAppContext } from '@/context/AppContext';
+import { Profile as UserProfile, useAppContext } from '@/context/AppContext';
 
 export default function Profile() {
   const {
     user,
     profile,
+    isAdmin,
     signOut,
     updateProfile,
     colorScheme,
-    toggleColorScheme
+    toggleColorScheme,
+    fetchAllProfiles,
+    updateUserRole
   } = useAppContext();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isPixExpanded, setIsPixExpanded] = useState(false);
+  const [isAdminPanelExpanded, setIsAdminPanelExpanded] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
 
   const [pixKey, setPixKey] = useState(profile?.pix_key || '');
   const [pixName, setPixName] = useState(profile?.pix_name || '');
@@ -39,6 +45,60 @@ export default function Profile() {
     profile?.pix_name &&
     profile?.pix_city
   );
+
+  useEffect(() => {
+    if (isAdminPanelExpanded && isAdmin) {
+      void loadProfiles();
+    }
+  }, [isAdminPanelExpanded]);
+
+  const loadProfiles = async () => {
+    try {
+      setIsLoadingProfiles(true);
+      const data = await fetchAllProfiles();
+      setAllProfiles(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoadingProfiles(false);
+    }
+  };
+
+  const handleToggleAdmin = async (targetUser: UserProfile) => {
+    if (targetUser.id === user?.id) {
+      Alert.alert(
+        'Segurança',
+        'Você não pode alterar seu próprio acesso administrativo por segurança.'
+      );
+      return;
+    }
+
+    const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
+    const actionStr = newRole === 'admin' ? 'conceder' : 'remover';
+
+    Alert.alert(
+      'Alterar Acesso',
+      `Deseja ${actionStr} acesso de administrador para ${targetUser.email}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              await updateUserRole(targetUser.id, newRole);
+              void loadProfiles();
+              Alert.alert('Sucesso', 'Permissão atualizada com sucesso.');
+            } catch {
+              Alert.alert(
+                'Erro',
+                'Não foi possível atualizar a permissão. Verifique as políticas de segurança do banco de dados.'
+              );
+            }
+          }
+        }
+      ]
+    );
+  };
 
   // Dynamic keyboard detection
   const getKeyboardType = (): KeyboardTypeOptions => {
@@ -162,6 +222,100 @@ export default function Profile() {
               />
             </TouchableOpacity>
           </View>
+
+          {/* Admin Management Section */}
+          {isAdmin && (
+            <>
+              <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">
+                Administração
+              </Text>
+              <View className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-secondary dark:border-zinc-800 overflow-hidden mb-4">
+                <TouchableOpacity
+                  onPress={() => setIsAdminPanelExpanded(!isAdminPanelExpanded)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-between p-4"
+                >
+                  <View className="flex-row items-center">
+                    <View className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 items-center justify-center">
+                      <MaterialCommunityIcons
+                        name="shield-account-outline"
+                        size={24}
+                        color={colorScheme === 'dark' ? '#a78bfa' : '#7c3aed'}
+                      />
+                    </View>
+                    <View className="ml-3">
+                      <Text className="text-text-primary dark:text-zinc-100 font-bold">
+                        Gestão de Administradores
+                      </Text>
+                      <Text className="text-text-secondary dark:text-zinc-400 text-xs">
+                        Configurar acesso administrativo
+                      </Text>
+                    </View>
+                  </View>
+                  <MaterialCommunityIcons
+                    name={isAdminPanelExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={24}
+                    color="#BDB2B2"
+                  />
+                </TouchableOpacity>
+
+                {isAdminPanelExpanded && (
+                  <Animated.View
+                    entering={FadeIn}
+                    exiting={FadeOut}
+                    className="px-4 pb-6 border-t border-secondary dark:border-zinc-800 pt-4"
+                  >
+                    {isLoadingProfiles ? (
+                      <ActivityIndicator
+                        color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+                        className="my-4"
+                      />
+                    ) : (
+                      allProfiles.map(p => (
+                        <View
+                          key={p.id}
+                          className="flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-zinc-800 last:border-b-0"
+                        >
+                          <View className="flex-1">
+                            <Text
+                              className="text-text-primary dark:text-zinc-100 font-medium"
+                              numberOfLines={1}
+                            >
+                              {p.email}
+                            </Text>
+                            <Text
+                              className={`text-[10px] uppercase font-bold ${p.role === 'admin' ? 'text-primary dark:text-orange-400' : 'text-text-secondary dark:text-zinc-500'}`}
+                            >
+                              {p.role === 'admin'
+                                ? 'Administrador'
+                                : 'Vendedor'}
+                            </Text>
+                          </View>
+                          <Switch
+                            value={p.role === 'admin'}
+                            onValueChange={() => handleToggleAdmin(p)}
+                            disabled={p.id === user?.id}
+                            trackColor={{ false: '#D1D5DB', true: '#A34211' }}
+                            thumbColor={
+                              p.role === 'admin' ? '#FFFFFF' : '#F3F4F6'
+                            }
+                          />
+                        </View>
+                      ))
+                    )}
+                    <TouchableOpacity
+                      onPress={loadProfiles}
+                      className="mt-4 items-center"
+                    >
+                      <Text className="text-text-secondary dark:text-zinc-500 text-xs underline">
+                        Atualizar lista
+                      </Text>
+                    </TouchableOpacity>
+                  </Animated.View>
+                )}
+              </View>
+            </>
+          )}
 
           <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">
             Configurações
