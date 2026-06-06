@@ -11,13 +11,13 @@ import { useAppContext } from '@/context/AppContext';
 import { formatCurrencyValue } from '@/utils/formatters';
 
 export function Home(): React.JSX.Element {
-  const { products, loading, categories } = useAppContext();
+  const { products, loading, categories, colorScheme } = useAppContext();
   const [activeCategoryId, setActiveCategoryId] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
 
   if (loading) {
     return (
-      <View className="bg-background flex-1 items-center justify-center">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
         <Loading />
       </View>
     );
@@ -44,7 +44,7 @@ export function Home(): React.JSX.Element {
       : categories.filter(cat => cat.id === activeCategoryId);
 
   return (
-    <View className="bg-background flex-1">
+    <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
       <ScrollView
@@ -88,7 +88,7 @@ export function Home(): React.JSX.Element {
 
             return (
               <View key={section.id} className="mb-6">
-                <Text className="text-text-secondary mb-4 font-bold text-xs uppercase tracking-widest">
+                <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
                   {section.name}
                 </Text>
 
@@ -113,9 +113,9 @@ export function Home(): React.JSX.Element {
               <MaterialCommunityIcons
                 name="package-variant"
                 size={48}
-                color="#D1D5DB"
+                color={colorScheme === 'dark' ? '#3f3f46' : '#D1D5DB'}
               />
-              <Text className="text-text-secondary mt-2 text-base">
+              <Text className="text-text-secondary dark:text-zinc-500 mt-2 text-base">
                 {activeCategoryId === 'Todos'
                   ? 'Nenhum produto cadastrado'
                   : 'Nenhum produto nesta categoria'}

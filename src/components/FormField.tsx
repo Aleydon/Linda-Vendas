@@ -1,6 +1,8 @@
 import React from 'react';
 import { Text, TextInput, View } from 'react-native';
 
+import { useAppContext } from '@/context/AppContext';
+
 interface FormFieldProps {
   label: string;
   value: string;
@@ -18,9 +20,11 @@ export function FormField({
   placeholder,
   multiline = false
 }: FormFieldProps): React.JSX.Element {
+  const { colorScheme } = useAppContext();
+
   return (
     <View className="mb-4 w-full">
-      <Text className="mb-2 text-text-secondary font-medium text-sm uppercase tracking-wider">
+      <Text className="mb-2 text-text-secondary dark:text-zinc-400 font-medium text-sm uppercase tracking-wider">
         {label}
       </Text>
       <TextInput
@@ -28,9 +32,9 @@ export function FormField({
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         multiline={multiline}
-        className="rounded-2xl border border-secondary bg-white px-4 py-4 text-text-primary w-full"
+        className="rounded-2xl border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-4 text-text-primary dark:text-zinc-100 w-full"
         placeholder={placeholder || `Insira o ${label.toLowerCase()}`}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colorScheme === 'dark' ? '#71717a' : '#9CA3AF'}
       />
     </View>
   );

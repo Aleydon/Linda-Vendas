@@ -37,7 +37,8 @@ export function Stock(): React.JSX.Element {
     deleteProduct,
     addCategory,
     deleteCategory,
-    isAdmin
+    isAdmin,
+    colorScheme
   } = useAppContext();
   const [showOptions, setShowOptions] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
@@ -127,14 +128,14 @@ export function Stock(): React.JSX.Element {
 
   if (loading) {
     return (
-      <View className="bg-background flex-1 items-center justify-center">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
         <Loading />
       </View>
     );
   }
 
   return (
-    <View className="bg-background flex-1">
+    <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
       <ScrollView
@@ -143,10 +144,10 @@ export function Stock(): React.JSX.Element {
       >
         <View className="px-6 py-6">
           <View className="mb-6">
-            <Text className="text-text-primary font-bold text-2xl">
+            <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
               Gestão de Estoque
             </Text>
-            <Text className="text-text-secondary text-base">
+            <Text className="text-text-secondary dark:text-zinc-400 text-base">
               Acompanhe as quantidades disponíveis em tempo real.
             </Text>
           </View>
@@ -165,7 +166,7 @@ export function Stock(): React.JSX.Element {
               return (
                 <View
                   key={product.id}
-                  className="border-secondary rounded-2xl border bg-white shadow-sm overflow-hidden"
+                  className="border-secondary dark:border-zinc-800 rounded-2xl border bg-white dark:bg-zinc-900 shadow-sm overflow-hidden"
                 >
                   <TouchableOpacity
                     activeOpacity={product.has_variations ? 0.7 : 1}
@@ -175,21 +176,23 @@ export function Stock(): React.JSX.Element {
                     className="flex-row items-center justify-between p-5"
                   >
                     <View className="flex-1">
-                      <Text className="text-text-primary font-bold text-lg">
+                      <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg">
                         {product.name}
                       </Text>
-                      <Text className="text-text-secondary text-sm">
+                      <Text className="text-text-secondary dark:text-zinc-400 text-sm">
                         {product.category || 'Sem Categoria'}
                       </Text>
                       {product.has_variations && (
                         <View className="flex-row items-center mt-1">
-                          <Text className="text-primary text-[10px] font-bold uppercase mr-1">
+                          <Text className="text-primary dark:text-orange-400 text-[10px] font-bold uppercase mr-1">
                             {product.variations?.length || 0} Variações
                           </Text>
                           <MaterialCommunityIcons
                             name={isExpanded ? 'chevron-up' : 'chevron-down'}
                             size={14}
-                            color="#A34211"
+                            color={
+                              colorScheme === 'dark' ? '#fb923c' : '#A34211'
+                            }
                           />
                         </View>
                       )}
@@ -199,25 +202,25 @@ export function Stock(): React.JSX.Element {
                       <View
                         className={`rounded-full px-3 py-1 ${
                           totalStock > 10
-                            ? 'bg-teal-50'
+                            ? 'bg-teal-50 dark:bg-teal-900/20'
                             : totalStock > 0
-                              ? 'bg-orange-50'
-                              : 'bg-red-50'
+                              ? 'bg-orange-50 dark:bg-orange-900/20'
+                              : 'bg-red-50 dark:bg-red-900/20'
                         }`}
                       >
                         <Text
                           className={`font-bold text-sm ${
                             totalStock > 10
-                              ? 'text-teal-700'
+                              ? 'text-teal-700 dark:text-teal-400'
                               : totalStock > 0
-                                ? 'text-orange-700'
-                                : 'text-red-700'
+                                ? 'text-orange-700 dark:text-orange-400'
+                                : 'text-red-700 dark:text-red-400'
                           }`}
                         >
                           {totalStock} un
                         </Text>
                       </View>
-                      <Text className="text-text-muted mt-1 text-[10px] uppercase">
+                      <Text className="text-text-muted dark:text-zinc-500 mt-1 text-[10px] uppercase">
                         {totalStock === 0 ? 'Esgotado' : 'Disponível'}
                       </Text>
                     </View>
@@ -225,7 +228,7 @@ export function Stock(): React.JSX.Element {
                     {isAdmin && (
                       <View className="ml-4 flex-row">
                         <TouchableOpacity
-                          className="mr-2 rounded-full bg-gray-100 p-2"
+                          className="mr-2 rounded-full bg-gray-100 dark:bg-zinc-800 p-2"
                           onPress={() => {
                             Haptics.selectionAsync();
                             router.push(`/edit-product/${product.id}`);
@@ -234,12 +237,14 @@ export function Stock(): React.JSX.Element {
                           <MaterialCommunityIcons
                             name="pencil"
                             size={20}
-                            color="#4B5563"
+                            color={
+                              colorScheme === 'dark' ? '#fb923c' : '#4B5563'
+                            }
                           />
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                          className="rounded-full bg-red-50 p-2"
+                          className="rounded-full bg-red-50 dark:bg-red-900/30 p-2"
                           onPress={() =>
                             handleDeleteProduct(product.id, product.name)
                           }
@@ -261,18 +266,18 @@ export function Stock(): React.JSX.Element {
                       <Animated.View
                         entering={FadeIn.duration(300)}
                         exiting={FadeOut.duration(200)}
-                        className="bg-secondary/10 px-5 pb-4 border-t border-secondary/20"
+                        className="bg-secondary/10 dark:bg-zinc-800/50 px-5 pb-4 border-t border-secondary/20 dark:border-zinc-800"
                       >
                         {product.variations.map(v => (
                           <View
                             key={v.id}
-                            className="flex-row justify-between py-3 border-b border-secondary/10 last:border-b-0"
+                            className="flex-row justify-between py-3 border-b border-secondary/10 dark:border-zinc-700/50 last:border-b-0"
                           >
-                            <Text className="text-text-secondary text-sm">
+                            <Text className="text-text-secondary dark:text-zinc-400 text-sm">
                               {v.name}
                             </Text>
                             <View className="flex-row items-center">
-                              <Text className="text-text-primary font-bold text-sm mr-2">
+                              <Text className="text-text-primary dark:text-zinc-100 font-bold text-sm mr-2">
                                 {v.stock} un
                               </Text>
                               <View
@@ -295,13 +300,13 @@ export function Stock(): React.JSX.Element {
             const totalStock = p.stock;
             return totalStock <= 5 && totalStock > 0;
           }) && (
-            <View className="mt-10 flex-row items-center rounded-2xl bg-orange-50 p-4 border border-orange-100">
+            <View className="mt-10 flex-row items-center rounded-2xl bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-100 dark:border-orange-900/30">
               <MaterialCommunityIcons
                 name="alert-circle-outline"
                 size={24}
-                color="#C2410C"
+                color={colorScheme === 'dark' ? '#fb923c' : '#C2410C'}
               />
-              <Text className="text-orange-800 ml-3 flex-1 font-medium">
+              <Text className="text-orange-800 dark:text-orange-300 ml-3 flex-1 font-medium">
                 Existem itens com baixo estoque. Considere reabastecer em breve.
               </Text>
             </View>
@@ -331,14 +336,14 @@ export function Stock(): React.JSX.Element {
           <Animated.View
             entering={ZoomIn.springify().damping(15)}
             exiting={ZoomOut}
-            className="bg-white w-full rounded-3xl p-6 overflow-hidden shadow-2xl"
+            className="bg-white dark:bg-zinc-900 w-full rounded-3xl p-6 overflow-hidden shadow-2xl"
           >
-            <Text className="text-text-primary font-bold text-xl mb-6 text-center">
+            <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl mb-6 text-center">
               O que deseja fazer?
             </Text>
 
             <TouchableOpacity
-              className="bg-primary flex-row items-center justify-center py-4 rounded-2xl mb-4"
+              className="bg-primary dark:bg-orange-600 flex-row items-center justify-center py-4 rounded-2xl mb-4"
               onPress={() => {
                 Haptics.selectionAsync();
                 setShowOptions(false);
@@ -352,7 +357,7 @@ export function Stock(): React.JSX.Element {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-secondary flex-row items-center justify-center py-4 rounded-2xl"
+              className="bg-secondary dark:bg-zinc-800 flex-row items-center justify-center py-4 rounded-2xl"
               onPress={() => {
                 Haptics.selectionAsync();
                 setShowOptions(false);
@@ -362,9 +367,9 @@ export function Stock(): React.JSX.Element {
               <MaterialCommunityIcons
                 name="shape-outline"
                 size={24}
-                color="#A34211"
+                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
               />
-              <Text className="text-primary font-bold ml-2 text-lg">
+              <Text className="text-primary dark:text-orange-400 font-bold ml-2 text-lg">
                 Gerenciar Categorias
               </Text>
             </TouchableOpacity>
@@ -398,10 +403,10 @@ export function Stock(): React.JSX.Element {
             <Animated.View
               entering={SlideInDown.springify().damping(15)}
               exiting={SlideOutDown}
-              className="bg-white h-[70%] rounded-t-3xl p-6 shadow-2xl"
+              className="bg-white dark:bg-zinc-900 h-[70%] rounded-t-3xl p-6 shadow-2xl"
             >
               <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-text-primary font-bold text-xl">
+                <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
                   Gerenciar Categorias
                 </Text>
                 <TouchableOpacity
@@ -411,20 +416,23 @@ export function Stock(): React.JSX.Element {
                   <MaterialCommunityIcons
                     name="close"
                     size={28}
-                    color="#3C2F2F"
+                    color={colorScheme === 'dark' ? '#fb923c' : '#3C2F2F'}
                   />
                 </TouchableOpacity>
               </View>
 
               <View className="flex-row mb-6">
                 <TextInput
-                  className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-text-primary mr-2"
+                  className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100 mr-2"
                   placeholder="Nova categoria..."
+                  placeholderTextColor={
+                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
+                  }
                   value={newCategoryName}
                   onChangeText={setNewCategoryName}
                 />
                 <TouchableOpacity
-                  className="bg-primary p-3 rounded-xl items-center justify-center"
+                  className="bg-primary dark:bg-orange-600 p-3 rounded-xl items-center justify-center"
                   onPress={handleAddCategory}
                 >
                   <MaterialCommunityIcons name="plus" size={24} color="white" />
@@ -436,8 +444,8 @@ export function Stock(): React.JSX.Element {
                 keyExtractor={item => item.id}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
-                  <View className="flex-row items-center justify-between py-4 border-b border-gray-100">
-                    <Text className="text-text-primary text-lg">
+                  <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-zinc-800">
+                    <Text className="text-text-primary dark:text-zinc-200 text-lg">
                       {item.name}
                     </Text>
                     <TouchableOpacity
@@ -453,7 +461,7 @@ export function Stock(): React.JSX.Element {
                   </View>
                 )}
                 ListEmptyComponent={() => (
-                  <Text className="text-text-secondary text-center mt-10">
+                  <Text className="text-text-secondary dark:text-zinc-500 text-center mt-10">
                     Nenhuma categoria cadastrada.
                   </Text>
                 )}
@@ -466,7 +474,7 @@ export function Stock(): React.JSX.Element {
       {/* Floating Action Button */}
       {isAdmin && (
         <TouchableOpacity
-          className="bg-primary shadow-primary/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
+          className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
           activeOpacity={0.8}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

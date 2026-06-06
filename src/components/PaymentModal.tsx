@@ -16,6 +16,7 @@ import Animated, {
   ZoomOut
 } from 'react-native-reanimated';
 
+import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/utils/formatters';
 
 interface PaymentModalProps {
@@ -35,6 +36,8 @@ export function PaymentModal({
   loading,
   pixString
 }: PaymentModalProps) {
+  const { colorScheme } = useAppContext();
+
   return (
     <Modal
       visible={visible}
@@ -54,34 +57,34 @@ export function PaymentModal({
         <Animated.View
           entering={ZoomIn.springify().damping(15)}
           leaving={ZoomOut}
-          className="w-full rounded-3xl bg-white p-6 shadow-2xl"
+          className="w-full rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-2xl"
         >
           <View className="mb-6 items-center">
-            <Text className="text-text-primary mb-2 text-xl font-bold">
+            <Text className="text-text-primary dark:text-zinc-100 mb-2 text-xl font-bold">
               Confirmar Pagamento
             </Text>
-            <Text className="text-text-secondary text-center">
+            <Text className="text-text-secondary dark:text-zinc-400 text-center">
               Aponte a câmera para o QR Code abaixo para realizar o pagamento
               via PIX.
             </Text>
           </View>
 
-          <View className="mb-6 items-center justify-center rounded-2xl bg-secondary p-4">
+          <View className="mb-6 items-center justify-center rounded-2xl bg-secondary dark:bg-white p-4">
             {pixString ? (
               <QRCode
                 value={pixString}
                 size={200}
-                color="#3C2F2F"
-                backgroundColor="transparent"
+                color="#09090b"
+                backgroundColor="white"
               />
             ) : (
               <View className="h-[200px] w-[200px] items-center justify-center">
                 <MaterialCommunityIcons
                   name="qrcode-remove"
                   size={48}
-                  color="#BDB2B2"
+                  color={colorScheme === 'dark' ? '#09090b' : '#BDB2B2'}
                 />
-                <Text className="text-text-secondary mt-2 text-center text-xs">
+                <Text className="text-text-secondary dark:text-zinc-950 mt-2 text-center text-xs">
                   PIX não configurado
                 </Text>
               </View>
@@ -89,9 +92,11 @@ export function PaymentModal({
           </View>
 
           <View className="mb-6">
-            <View className="flex-row justify-between border-b border-secondary pb-2">
-              <Text className="text-text-secondary">Total a pagar:</Text>
-              <Text className="text-primary font-bold text-lg">
+            <View className="flex-row justify-between border-b border-secondary dark:border-zinc-800 pb-2">
+              <Text className="text-text-secondary dark:text-zinc-400">
+                Total a pagar:
+              </Text>
+              <Text className="text-primary dark:text-orange-400 font-bold text-lg">
                 {formatCurrency(total)}
               </Text>
             </View>
@@ -100,15 +105,17 @@ export function PaymentModal({
           <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={onClose}
-              className="flex-1 items-center justify-center rounded-xl border border-secondary py-4"
+              className="flex-1 items-center justify-center rounded-xl border border-secondary dark:border-zinc-800 py-4"
             >
-              <Text className="text-text-primary font-bold">Cancelar</Text>
+              <Text className="text-text-primary dark:text-zinc-100 font-bold">
+                Cancelar
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onConfirm}
               disabled={loading}
-              className="bg-primary flex-[2] flex-row items-center justify-center rounded-xl py-4 shadow-lg shadow-orange-500/40"
+              className="bg-primary dark:bg-orange-600 flex-[2] flex-row items-center justify-center rounded-xl py-4 shadow-lg shadow-orange-500/40"
             >
               {loading ? (
                 <ActivityIndicator color="white" />

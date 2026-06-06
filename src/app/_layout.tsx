@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -44,6 +45,29 @@ function InitialLayout() {
   return <Slot />;
 }
 
+function MainContent() {
+  const { colorScheme } = useColorScheme();
+
+  return (
+    <>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
+      <SafeAreaProvider>
+        <SafeAreaView
+          edges={[]}
+          style={{ flex: 1 }}
+          className="bg-background dark:bg-zinc-950"
+        >
+          <InitialLayout />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </>
+  );
+}
+
 export function RootLayout() {
   const [fontsIsLoaded] = useFonts({
     Inter_100Thin,
@@ -63,16 +87,7 @@ export function RootLayout() {
 
   return (
     <AppProvider>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      <SafeAreaProvider>
-        <SafeAreaView edges={[]} style={{ flex: 1 }}>
-          <InitialLayout />
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <MainContent />
     </AppProvider>
   );
 }

@@ -17,12 +17,14 @@ export function CategoryItem({
       onPress={onPress}
       activeOpacity={0.7}
       className={`mr-3 rounded-full border px-6 py-2 ${
-        isActive ? 'border-primary bg-primary' : 'border-secondary bg-secondary'
+        isActive
+          ? 'border-primary bg-primary dark:bg-orange-600 dark:border-orange-600'
+          : 'border-secondary bg-secondary dark:bg-zinc-800 dark:border-zinc-800'
       }`}
     >
       <Text
         className={`font-semibold text-sm ${
-          isActive ? 'text-white' : 'text-text-primary'
+          isActive ? 'text-white' : 'text-text-primary dark:text-zinc-300'
         }`}
       >
         {label}

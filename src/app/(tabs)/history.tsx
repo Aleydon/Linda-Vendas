@@ -14,7 +14,7 @@ import {
 } from '@/utils/formatters';
 
 export function History() {
-  const { sales, loading } = useAppContext();
+  const { sales, loading, colorScheme } = useAppContext();
   const [search, setSearch] = useState('');
 
   const filteredSales = useMemo(() => {
@@ -79,14 +79,14 @@ export function History() {
 
   if (loading) {
     return (
-      <View className="bg-background flex-1 items-center justify-center">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
         <Loading />
       </View>
     );
   }
 
   return (
-    <View className="bg-background flex-1">
+    <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
       <SearchBar
@@ -103,20 +103,20 @@ export function History() {
         <View className="px-6">
           {/* Grand Total Summary */}
           {filteredSales.length > 0 && (
-            <View className="bg-white rounded-[32px] p-6 mb-8 border border-secondary/20 shadow-sm flex-row items-center justify-between">
+            <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 mb-8 border border-secondary/20 dark:border-zinc-800 shadow-sm flex-row items-center justify-between">
               <View>
-                <Text className="text-primary text-xs uppercase font-bold tracking-widest mb-1">
+                <Text className="text-primary dark:text-orange-400 text-xs uppercase font-bold tracking-widest mb-1">
                   Total do Período
                 </Text>
-                <Text className="text-[#22c55e] font-bold text-3xl">
+                <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-3xl">
                   {formatCurrency(grandTotal)}
                 </Text>
               </View>
-              <View className="bg-primary/10 p-3 rounded-2xl">
+              <View className="bg-primary/10 dark:bg-orange-500/10 p-3 rounded-2xl">
                 <MaterialCommunityIcons
                   name="finance"
                   size={32}
-                  color="#A34211"
+                  color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
                 />
               </View>
             </View>
@@ -126,7 +126,7 @@ export function History() {
             groupedSales.map(([date, data]) => (
               <View key={date} className="mb-8">
                 <View className="mb-4 flex-row items-center justify-between">
-                  <Text className="text-text-secondary font-bold text-xs uppercase tracking-widest">
+                  <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest">
                     {date}
                   </Text>
                 </View>
@@ -142,7 +142,7 @@ export function History() {
               </View>
             ))
           ) : (
-            <EmptyState search={search} />
+            <EmptyState search={search} colorScheme={colorScheme} />
           )}
         </View>
       </ScrollView>
@@ -150,11 +150,21 @@ export function History() {
   );
 }
 
-function EmptyState({ search }: { search: string }) {
+function EmptyState({
+  search,
+  colorScheme
+}: {
+  search: string;
+  colorScheme: 'light' | 'dark';
+}) {
   return (
     <View className="items-center py-20">
-      <MaterialCommunityIcons name="text-search" size={48} color="#BDB2B2" />
-      <Text className="text-text-secondary mt-4 text-center text-lg italic">
+      <MaterialCommunityIcons
+        name="text-search"
+        size={48}
+        color={colorScheme === 'dark' ? '#3f3f46' : '#BDB2B2'}
+      />
+      <Text className="text-text-secondary dark:text-zinc-500 mt-4 text-center text-lg italic">
         {search
           ? 'Nenhuma venda encontrada para sua busca.'
           : 'Nenhuma venda registrada ainda.'}

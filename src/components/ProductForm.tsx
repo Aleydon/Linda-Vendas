@@ -32,7 +32,7 @@ export function ProductForm({
   title
 }: ProductFormProps): React.JSX.Element {
   const router = useRouter();
-  const { categories } = useAppContext();
+  const { categories, colorScheme } = useAppContext();
   const {
     name,
     setName,
@@ -64,22 +64,24 @@ export function ProductForm({
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <View className="bg-background flex-1">
+      <View className="bg-background dark:bg-zinc-950 flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 pb-4 pt-12">
           <TouchableOpacity onPress={() => router.back()} className="p-1">
             <MaterialCommunityIcons
               name="arrow-left"
               size={28}
-              color="#3C2F2F"
+              color={colorScheme === 'dark' ? '#F5EBE0' : '#3C2F2F'}
             />
           </TouchableOpacity>
-          <Text className="text-text-primary font-bold text-xl">{title}</Text>
-          <View className="border-secondary bg-secondary h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
+          <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
+            {title}
+          </Text>
+          <View className="border-secondary dark:border-zinc-800 bg-secondary dark:bg-zinc-800 h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
             <MaterialCommunityIcons
               name={initialData ? 'pencil' : 'plus'}
               size={22}
-              color="#A34211"
+              color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
             />
           </View>
         </View>
@@ -146,11 +148,11 @@ export function ProductForm({
         </ScrollView>
 
         {/* Footer Button */}
-        <View className="px-6 pb-10 bg-background">
+        <View className="px-6 pb-10 bg-background dark:bg-zinc-950">
           <TouchableOpacity
             onPress={handleSave}
             disabled={isSaving || isUploading}
-            className="bg-primary flex-row items-center justify-center rounded-2xl py-5 shadow-lg shadow-orange-500/40"
+            className="bg-primary dark:bg-orange-600 flex-row items-center justify-center rounded-2xl py-5 shadow-lg shadow-orange-500/40"
             activeOpacity={0.8}
           >
             {isSaving ? (

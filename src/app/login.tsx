@@ -26,20 +26,22 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-950 items-center justify-center px-6">
       <View className="items-center mb-12">
-        <View className="w-24 h-24 bg-red-800 rounded-full items-center justify-center mb-4">
+        <View className="w-24 h-24 bg-red-800 dark:bg-orange-800 rounded-full items-center justify-center mb-4">
           <AntDesign name="shoppingcart" size={48} color="white" />
         </View>
-        <Text className="text-3xl font-bold text-gray-800">Linda Vendas</Text>
-        <Text className="text-gray-500 mt-2 text-center">
+        <Text className="text-3xl font-bold text-gray-800 dark:text-zinc-100">
+          Linda Vendas
+        </Text>
+        <Text className="text-gray-500 dark:text-zinc-400 mt-2 text-center">
           Gerencie suas vendas e estoque de forma simples e eficiente.
         </Text>
       </View>
 
       <TouchableOpacity
         onPress={handleGoogleLogin}
-        className="flex-row items-center justify-center w-full bg-white border border-gray-300 py-4 rounded-xl shadow-sm"
+        className="flex-row items-center justify-center w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-800 py-4 rounded-xl shadow-sm"
       >
         <Image
           source={{
@@ -47,12 +49,12 @@ export default function Login() {
           }}
           className="w-6 h-6 mr-3"
         />
-        <Text className="text-gray-700 text-lg font-medium">
+        <Text className="text-gray-700 dark:text-zinc-200 text-lg font-medium">
           Continuar com Google
         </Text>
       </TouchableOpacity>
 
-      <Text className="text-gray-400 mt-8 text-xs text-center">
+      <Text className="text-gray-400 dark:text-zinc-600 mt-8 text-xs text-center">
         Ao continuar, você concorda com nossos Termos de Serviço e Política de
         Privacidade.
       </Text>

@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
-import { Product } from '@/context/AppContext';
+import { Product, useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/utils/formatters';
 
 interface SaleProductItemProps {
@@ -22,6 +22,7 @@ export function SaleProductItem({
   onUpdateQuantity,
   searchQuery = ''
 }: SaleProductItemProps) {
+  const { colorScheme } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Auto-expand if search matches a variation
@@ -49,9 +50,9 @@ export function SaleProductItem({
       <TouchableOpacity
         activeOpacity={item.has_variations ? 0.7 : 1}
         onPress={() => item.has_variations && setIsExpanded(!isExpanded)}
-        className="border-secondary bg-white flex-row items-center rounded-2xl border p-4 shadow-sm"
+        className="border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-row items-center rounded-2xl border p-4 shadow-sm"
       >
-        <View className="bg-secondary h-16 w-16 items-center justify-center overflow-hidden rounded-xl">
+        <View className="bg-secondary dark:bg-zinc-800 h-16 w-16 items-center justify-center overflow-hidden rounded-xl">
           {item.imageUrl ? (
             <Image
               source={{ uri: item.imageUrl }}
@@ -62,83 +63,91 @@ export function SaleProductItem({
             <MaterialCommunityIcons
               name="image-outline"
               size={24}
-              color="#BDB2B2"
+              color={colorScheme === 'dark' ? '#71717a' : '#BDB2B2'}
             />
           )}
         </View>
 
         <View className="ml-4 flex-1">
           <Text
-            className="text-text-primary font-semibold text-base"
+            className="text-text-primary dark:text-zinc-100 font-semibold text-base"
             numberOfLines={1}
           >
             {item.name}
           </Text>
           {!item.has_variations ? (
             <>
-              <Text className="text-primary font-bold text-lg">
+              <Text className="text-primary dark:text-orange-400 font-bold text-lg">
                 {formatCurrency(item.price)}
               </Text>
-              <Text className="text-text-secondary text-xs">
+              <Text className="text-text-secondary dark:text-zinc-400 text-xs">
                 Estoque: {item.stock} un
               </Text>
             </>
           ) : (
             <View className="flex-row items-center mt-1">
-              <Text className="text-primary text-[10px] font-bold uppercase mr-1">
+              <Text className="text-primary dark:text-orange-400 text-[10px] font-bold uppercase mr-1">
                 {item.variations?.length || 0} Variações
               </Text>
               <MaterialCommunityIcons
                 name={isExpanded ? 'chevron-up' : 'chevron-down'}
                 size={14}
-                color="#A34211"
+                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
               />
             </View>
           )}
         </View>
 
         {!item.has_variations && (
-          <View className="flex-row items-center rounded-xl bg-secondary px-2 py-1">
+          <View className="flex-row items-center rounded-xl bg-secondary dark:bg-zinc-800 px-2 py-1">
             <TouchableOpacity
               onPress={() => onUpdateQuantity(item.id, -1)}
               className="p-1"
             >
-              <MaterialCommunityIcons name="minus" size={20} color="#A34211" />
+              <MaterialCommunityIcons
+                name="minus"
+                size={20}
+                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+              />
             </TouchableOpacity>
-            <Text className="text-text-primary mx-2 font-bold text-base">
+            <Text className="text-text-primary dark:text-zinc-100 mx-2 font-bold text-base">
               {getQuantity()}
             </Text>
             <TouchableOpacity
               onPress={() => onUpdateQuantity(item.id, 1)}
               className="p-1"
             >
-              <MaterialCommunityIcons name="plus" size={20} color="#A34211" />
+              <MaterialCommunityIcons
+                name="plus"
+                size={20}
+                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+              />
             </TouchableOpacity>
           </View>
         )}
       </TouchableOpacity>
 
       {item.has_variations && isExpanded && item.variations && (
-        <View className="bg-secondary/10 mx-2 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary/20">
+        <View className="bg-secondary/10 dark:bg-zinc-800/20 mx-2 -mt-2 rounded-b-2xl px-4 pb-4 pt-4 border-x border-b border-secondary/20 dark:border-zinc-800">
           {item.variations.map(v => (
             <View
               key={v.id}
-              className="flex-row items-center justify-between py-3 border-b border-secondary/10 last:border-b-0"
+              className="flex-row items-center justify-between py-3 border-b border-secondary/10 dark:border-zinc-700/50 last:border-b-0"
             >
               <View className="flex-1 mr-4">
-                <Text className="text-text-primary font-medium text-base">
+                <Text className="text-text-primary dark:text-zinc-100 font-medium text-base">
                   {v.name}
                 </Text>
-                <Text className="text-primary font-bold text-base">
+                <Text className="text-primary dark:text-orange-400 font-bold text-base">
                   {formatCurrency(v.price)}
                 </Text>
-                <Text className="text-text-muted text-sm">
+                <Text className="text-text-muted dark:text-zinc-500 text-sm">
                   Estoque: {v.stock} un
                 </Text>
               </View>
 
               <View
-                className={`flex-row items-center rounded-xl bg-white border border-secondary/30 px-2 py-1 ${
+                className={`flex-row items-center rounded-xl bg-white dark:bg-zinc-900 border border-secondary/30 dark:border-zinc-700 px-2 py-1 ${
                   v.stock <= 0 ? 'opacity-50' : ''
                 }`}
               >
@@ -150,10 +159,10 @@ export function SaleProductItem({
                   <MaterialCommunityIcons
                     name="minus"
                     size={18}
-                    color="#A34211"
+                    color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
                   />
                 </TouchableOpacity>
-                <Text className="text-text-primary mx-2 font-bold text-sm">
+                <Text className="text-text-primary dark:text-zinc-100 mx-2 font-bold text-sm">
                   {getQuantity(v.id)}
                 </Text>
                 <TouchableOpacity
@@ -167,7 +176,9 @@ export function SaleProductItem({
                     color={
                       v.stock <= 0 || getQuantity(v.id) >= v.stock
                         ? '#BDB2B2'
-                        : '#A34211'
+                        : colorScheme === 'dark'
+                          ? '#fb923c'
+                          : '#A34211'
                     }
                   />
                 </TouchableOpacity>

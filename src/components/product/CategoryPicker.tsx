@@ -9,7 +9,7 @@ import {
   View
 } from 'react-native';
 
-import { Category } from '@/context/AppContext';
+import { Category, useAppContext } from '@/context/AppContext';
 
 interface CategoryPickerProps {
   categories: Category[];
@@ -26,28 +26,33 @@ export function CategoryPicker({
   showDropdown,
   setShowDropdown
 }: CategoryPickerProps) {
+  const { colorScheme } = useAppContext();
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-text-secondary font-medium text-sm uppercase tracking-wider">
+      <Text className="mb-2 text-text-secondary dark:text-zinc-400 font-medium text-sm uppercase tracking-wider">
         Categoria
       </Text>
       <TouchableOpacity
         onPress={() => setShowDropdown(true)}
         activeOpacity={0.7}
-        className="flex-row items-center justify-between rounded-2xl border border-secondary bg-white px-4 py-4"
+        className="flex-row items-center justify-between rounded-2xl border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-4"
       >
         <Text
           className={
             selectedCategoryId
-              ? 'text-text-primary font-medium'
-              : 'text-text-muted'
+              ? 'text-text-primary dark:text-zinc-100 font-medium'
+              : 'text-text-muted dark:text-zinc-500'
           }
         >
           {selectedCategory ? selectedCategory.name : 'Selecione uma categoria'}
         </Text>
-        <MaterialCommunityIcons name="chevron-down" size={24} color="#8C7E7E" />
+        <MaterialCommunityIcons
+          name="chevron-down"
+          size={24}
+          color={colorScheme === 'dark' ? '#71717a' : '#8C7E7E'}
+        />
       </TouchableOpacity>
 
       <Modal
@@ -60,16 +65,16 @@ export function CategoryPicker({
           className="flex-1 bg-black/40 justify-center px-6"
           onPress={() => setShowDropdown(false)}
         >
-          <View className="bg-white rounded-3xl overflow-hidden max-h-[60%] shadow-2xl">
-            <View className="p-4 border-b border-secondary flex-row justify-between items-center bg-gray-50">
-              <Text className="text-text-primary font-bold text-lg">
+          <View className="bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden max-h-[60%] shadow-2xl">
+            <View className="p-4 border-b border-secondary dark:border-zinc-800 flex-row justify-between items-center bg-gray-50 dark:bg-zinc-800/50">
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg">
                 Escolher Categoria
               </Text>
               <TouchableOpacity onPress={() => setShowDropdown(false)}>
                 <MaterialCommunityIcons
                   name="close"
                   size={24}
-                  color="#3C2F2F"
+                  color={colorScheme === 'dark' ? '#F5EBE0' : '#3C2F2F'}
                 />
               </TouchableOpacity>
             </View>
@@ -82,15 +87,17 @@ export function CategoryPicker({
                     onSelectCategory(item.id);
                     setShowDropdown(false);
                   }}
-                  className={`px-6 py-4 border-b border-gray-50 flex-row items-center justify-between ${
-                    selectedCategoryId === item.id ? 'bg-primary/5' : ''
+                  className={`px-6 py-4 border-b border-gray-50 dark:border-zinc-800/50 flex-row items-center justify-between ${
+                    selectedCategoryId === item.id
+                      ? 'bg-primary/5 dark:bg-orange-500/10'
+                      : ''
                   }`}
                 >
                   <Text
                     className={`text-base ${
                       selectedCategoryId === item.id
-                        ? 'text-primary font-bold'
-                        : 'text-text-primary'
+                        ? 'text-primary dark:text-orange-400 font-bold'
+                        : 'text-text-primary dark:text-zinc-200'
                     }`}
                   >
                     {item.name}
@@ -99,14 +106,14 @@ export function CategoryPicker({
                     <MaterialCommunityIcons
                       name="check"
                       size={20}
-                      color="#A34211"
+                      color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
                     />
                   )}
                 </TouchableOpacity>
               )}
               ListEmptyComponent={() => (
                 <View className="p-10 items-center">
-                  <Text className="text-text-secondary text-center">
+                  <Text className="text-text-secondary dark:text-zinc-500 text-center">
                     Nenhuma categoria encontrada.
                   </Text>
                 </View>

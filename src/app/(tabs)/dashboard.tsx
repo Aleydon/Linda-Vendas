@@ -11,7 +11,7 @@ import { formatCurrency } from '@/utils/formatters';
 
 export function Dashboard() {
   const router = useRouter();
-  const { sales, products, loading } = useAppContext();
+  const { sales, products, loading, colorScheme } = useAppContext();
 
   const metrics = useMemo(() => {
     const now = new Date();
@@ -101,14 +101,14 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <View className="bg-background flex-1 items-center justify-center">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
         <Loading />
       </View>
     );
   }
 
   return (
-    <View className="bg-background flex-1">
+    <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
       <ScrollView
@@ -119,7 +119,7 @@ export function Dashboard() {
           {/* Main Card: Faturamento */}
           <Animated.View
             entering={FadeInDown.duration(600)}
-            className="bg-[#065F46] rounded-[32px] p-8 shadow-xl shadow-emerald-950/30 mb-8"
+            className="bg-[#065F46] dark:bg-emerald-900 rounded-[32px] p-8 shadow-xl shadow-emerald-950/30 mb-8"
           >
             <View className="flex-row justify-between items-center mb-4">
               <View className="bg-white/20 p-2 rounded-2xl">
@@ -169,46 +169,46 @@ export function Dashboard() {
           {/* Top 5 Products Section */}
           <View className="mb-8">
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-text-primary font-bold text-xl">
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
                 Top 5 Produtos
               </Text>
               <TouchableOpacity onPress={() => router.push('/history')}>
-                <Text className="text-primary font-bold text-sm">
+                <Text className="text-primary dark:text-orange-400 font-bold text-sm">
                   Histórico
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <View className="bg-white rounded-[32px] p-2 border border-secondary/20 shadow-sm">
+            <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-2 border border-secondary/20 dark:border-zinc-800 shadow-sm">
               {metrics.topProducts.length > 0 ? (
                 metrics.topProducts.map((item, index) => (
                   <View
                     key={item.name}
-                    className={`flex-row items-center p-4 ${index !== metrics.topProducts.length - 1 ? 'border-b border-secondary/5' : ''}`}
+                    className={`flex-row items-center p-4 ${index !== metrics.topProducts.length - 1 ? 'border-b border-secondary/5 dark:border-zinc-800/50' : ''}`}
                   >
-                    <View className="bg-secondary/30 h-10 w-10 items-center justify-center rounded-2xl mr-4">
-                      <Text className="text-primary font-bold">
+                    <View className="bg-secondary/30 dark:bg-zinc-800 h-10 w-10 items-center justify-center rounded-2xl mr-4">
+                      <Text className="text-primary dark:text-orange-400 font-bold">
                         {index + 1}
                       </Text>
                     </View>
                     <View className="flex-1">
                       <Text
-                        className="text-text-primary font-bold text-sm"
+                        className="text-text-primary dark:text-zinc-100 font-bold text-sm"
                         numberOfLines={1}
                       >
                         {item.name}
                       </Text>
-                      <Text className="text-text-muted text-[10px] uppercase font-medium">
+                      <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-medium">
                         {item.quantity} unidades vendidas
                       </Text>
                     </View>
-                    <Text className="text-primary font-bold text-sm">
+                    <Text className="text-primary dark:text-orange-400 font-bold text-sm">
                       {formatCurrency(item.total)}
                     </Text>
                   </View>
                 ))
               ) : (
-                <Text className="text-text-secondary italic text-center py-8">
+                <Text className="text-text-secondary dark:text-zinc-500 italic text-center py-8">
                   Nenhuma venda registrada ainda.
                 </Text>
               )}
@@ -217,32 +217,32 @@ export function Dashboard() {
 
           {/* Categories Grid */}
           <View className="mb-8">
-            <Text className="text-text-primary font-bold text-xl mb-4">
+            <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl mb-4">
               Categorias em Destaque
             </Text>
             <View className="flex-row flex-wrap gap-4">
               {metrics.topCategories.map(item => (
                 <View
                   key={item.name}
-                  className="bg-white p-5 rounded-[28px] border border-secondary/20 shadow-sm w-[47%]"
+                  className="bg-white dark:bg-zinc-900 p-5 rounded-[28px] border border-secondary/20 dark:border-zinc-800 shadow-sm w-[47%]"
                 >
-                  <View className="bg-secondary/40 self-start p-3 rounded-2xl mb-3">
+                  <View className="bg-secondary/40 dark:bg-zinc-800 self-start p-3 rounded-2xl mb-3">
                     <MaterialCommunityIcons
                       name="tag-outline"
                       size={20}
-                      color="#A34211"
+                      color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
                     />
                   </View>
                   <Text
-                    className="text-text-primary font-bold text-sm mb-1"
+                    className="text-text-primary dark:text-zinc-100 font-bold text-sm mb-1"
                     numberOfLines={1}
                   >
                     {item.name}
                   </Text>
-                  <Text className="text-primary font-bold text-lg">
+                  <Text className="text-primary dark:text-orange-400 font-bold text-lg">
                     {formatCurrency(item.total)}
                   </Text>
-                  <Text className="text-text-muted text-[10px] uppercase mt-1">
+                  <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase mt-1">
                     {item.quantity} vendas
                   </Text>
                 </View>
@@ -253,24 +253,28 @@ export function Dashboard() {
           {/* Low Stock Warning */}
           <View>
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-text-primary font-bold text-xl  px-2 py-1 ">
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl  px-2 py-1 ">
                 Atenção ao Estoque
               </Text>
               <TouchableOpacity onPress={() => router.push('/stock')}>
-                <Text className="text-primary font-bold text-sm">
+                <Text className="text-primary dark:text-orange-400 font-bold text-sm">
                   Repor Agora
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <View className="bg-white rounded-[32px] p-2 border border-secondary/20 shadow-sm">
+            <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-2 border border-secondary/20 dark:border-zinc-800 shadow-sm">
               {metrics.lowStockItems.map((item, index) => (
                 <View
                   key={item.id}
-                  className={`flex-row items-center p-4 ${index !== metrics.lowStockItems.length - 1 ? 'border-b border-secondary/5' : ''}`}
+                  className={`flex-row items-center p-4 ${index !== metrics.lowStockItems.length - 1 ? 'border-b border-secondary/5 dark:border-zinc-800/50' : ''}`}
                 >
                   <View
-                    className={`h-10 w-10 items-center justify-center rounded-2xl mr-4 ${item.stock <= 5 ? 'bg-red-50' : 'bg-teal-50'}`}
+                    className={`h-10 w-10 items-center justify-center rounded-2xl mr-4 ${
+                      item.stock <= 5
+                        ? 'bg-red-50 dark:bg-red-900/20'
+                        : 'bg-teal-50 dark:bg-teal-900/20'
+                    }`}
                   >
                     <MaterialCommunityIcons
                       name={
@@ -282,20 +286,24 @@ export function Dashboard() {
                   </View>
                   <View className="flex-1">
                     <Text
-                      className="text-text-primary font-bold text-sm"
+                      className="text-text-primary dark:text-zinc-100 font-bold text-sm"
                       numberOfLines={1}
                     >
                       {item.name}
                     </Text>
-                    <Text className="text-text-muted text-[10px] uppercase font-medium">
+                    <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-medium">
                       {item.category || 'Sem Categoria'}
                     </Text>
                   </View>
                   <View
-                    className={`px-3 py-1 rounded-full ${item.stock <= 5 ? 'bg-red-50' : 'bg-teal-50'}`}
+                    className={`px-3 py-1 rounded-full ${
+                      item.stock <= 5
+                        ? 'bg-red-50 dark:bg-red-900/30'
+                        : 'bg-teal-50 dark:bg-teal-900/30'
+                    }`}
                   >
                     <Text
-                      className={`font-bold text-xs ${item.stock <= 5 ? 'text-red-600' : 'text-teal-600'}`}
+                      className={`font-bold text-xs ${item.stock <= 5 ? 'text-red-600 dark:text-red-400' : 'text-teal-600 dark:text-teal-400'}`}
                     >
                       {item.stock} un
                     </Text>

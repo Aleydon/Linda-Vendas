@@ -24,7 +24,7 @@ interface CartItem {
 }
 
 export function NewSale() {
-  const { products, addSale, loading, categories, profile, user } =
+  const { products, addSale, loading, categories, profile, user, colorScheme } =
     useAppContext();
   const [search, setSearch] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
@@ -171,7 +171,7 @@ export function NewSale() {
   };
 
   return (
-    <View className="bg-surface flex-1">
+    <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
       <ScrollView
@@ -179,10 +179,10 @@ export function NewSale() {
         contentContainerStyle={{ paddingBottom: 180 }}
       >
         <View className="px-6 pt-2">
-          <Text className="text-text-primary font-bold text-2xl">
+          <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
             Nova Venda
           </Text>
-          <Text className="text-text-secondary text-base">
+          <Text className="text-text-secondary dark:text-zinc-400 text-base">
             Selecione os produtos para gerar o QR Code.
           </Text>
         </View>
@@ -224,7 +224,7 @@ export function NewSale() {
 
             return (
               <View key={section.id} className="mb-6">
-                <Text className="text-text-secondary mb-4 font-bold text-xs uppercase tracking-widest">
+                <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
                   {section.name}
                 </Text>
 
@@ -246,9 +246,9 @@ export function NewSale() {
               <MaterialCommunityIcons
                 name="package-variant"
                 size={48}
-                color="#D1D5DB"
+                color={colorScheme === 'dark' ? '#3f3f46' : '#D1D5DB'}
               />
-              <Text className="text-text-secondary mt-2 text-base text-center px-10">
+              <Text className="text-text-secondary dark:text-zinc-500 mt-2 text-base text-center px-10">
                 {search || activeCategoryId !== 'Todos'
                   ? 'Nenhum produto encontrado com estes filtros.'
                   : 'Nenhum produto em estoque no momento.'}
@@ -259,16 +259,18 @@ export function NewSale() {
       </ScrollView>
 
       {/* Bottom Summary */}
-      <View className="border-secondary absolute bottom-0 left-0 right-0 border-t bg-white px-6 pb-2 pt-2 shadow-lg">
+      <View className="border-secondary dark:border-zinc-800 absolute bottom-0 left-0 right-0 border-t bg-white dark:bg-zinc-900 px-6 pb-2 pt-2 shadow-lg">
         <View className="mb-4 flex-row items-center justify-between">
           <View>
-            <Text className="text-text-secondary text-sm">Total da Venda</Text>
-            <Text className="text-text-primary font-bold text-3xl">
+            <Text className="text-text-secondary dark:text-zinc-400 text-sm">
+              Total da Venda
+            </Text>
+            <Text className="text-text-primary dark:text-zinc-100 font-bold text-3xl">
               {formatCurrency(total)}
             </Text>
           </View>
-          <View className="rounded-full bg-secondary px-4 py-2">
-            <Text className="text-primary font-bold">
+          <View className="rounded-full bg-secondary dark:bg-zinc-800 px-4 py-2">
+            <Text className="text-primary dark:text-orange-400 font-bold">
               {cart.reduce((acc, item) => acc + item.quantity, 0)} itens
             </Text>
           </View>
@@ -279,8 +281,8 @@ export function NewSale() {
           disabled={loading || cart.length === 0}
           className={`flex-row items-center justify-center rounded-2xl py-5 shadow-lg ${
             cart.length === 0
-              ? 'bg-gray-300'
-              : 'bg-primary shadow-orange-500/40'
+              ? 'bg-gray-300 dark:bg-zinc-800'
+              : 'bg-primary dark:bg-orange-600 shadow-orange-500/40'
           }`}
           activeOpacity={0.8}
         >

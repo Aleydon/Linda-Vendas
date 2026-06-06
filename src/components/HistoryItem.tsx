@@ -15,7 +15,7 @@ export function HistoryItem({
   sale,
   isInitiallyExpanded = false
 }: HistoryItemProps) {
-  const { isAdmin } = useAppContext();
+  const { isAdmin, colorScheme } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
 
   // Calculate total from items if sale.total is missing or 0
@@ -42,7 +42,7 @@ export function HistoryItem({
   const sellerName = sale.seller?.pix_name || sale.seller?.email || 'N/A';
 
   return (
-    <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-secondary/20">
+    <View className="bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-sm border border-secondary/20 dark:border-zinc-800">
       <Pressable onPress={() => setIsExpanded(!isExpanded)} className="p-4">
         {/* Header: Status, Total, and Date/Icon */}
         <View className="flex-row items-center justify-between">
@@ -50,14 +50,14 @@ export function HistoryItem({
             <MaterialCommunityIcons
               name="cart-outline"
               size={25}
-              color="#A34211"
+              color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
             />
             <View className="flex-row items-center pl-2">
               <View className="items-start">
-                <Text className="text-text-secondary font-bold text-[10px] uppercase tracking-wider">
+                <Text className="text-text-secondary dark:text-zinc-400 font-bold text-[10px] uppercase tracking-wider">
                   {timeStr}
                 </Text>
-                <Text className="text-text-muted text-[10px] uppercase font-medium">
+                <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-medium">
                   {dateStr}
                 </Text>
               </View>
@@ -65,10 +65,10 @@ export function HistoryItem({
           </View>
 
           <View className="items-end">
-            <Text className="text-green-500 font-bold text-[10px] uppercase mb-0.5">
+            <Text className="text-green-500 dark:text-emerald-400 font-bold text-[10px] uppercase mb-0.5">
               Concluída
             </Text>
-            <Text className="text-primary font-bold text-2xl">
+            <Text className="text-primary dark:text-orange-400 font-bold text-2xl">
               {formatCurrency(calculatedTotal)}
             </Text>
           </View>
@@ -91,7 +91,7 @@ export function HistoryItem({
           exiting={FadeOut.duration(200)}
           className="px-6 pb-4"
         >
-          <View className="h-[1px] bg-secondary/10 w-full mb-2" />
+          <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full mb-2" />
 
           {/* Sale Items */}
           <View className="gap-y-3">
@@ -110,20 +110,20 @@ export function HistoryItem({
                 >
                   <View className="flex-1 mr-4">
                     <Text
-                      className="text-text-primary font-bold text-base"
+                      className="text-text-primary dark:text-zinc-100 font-bold text-base"
                       numberOfLines={1}
                     >
                       {displayName}
                     </Text>
 
                     <View className="flex-row items-center mt-0.5">
-                      <Text className="text-text-secondary text-xs">
+                      <Text className="text-text-secondary dark:text-zinc-400 text-xs">
                         {item.quantity} un x {formatCurrency(item.unit_price)}
                       </Text>
                     </View>
                   </View>
 
-                  <Text className="text-text-primary font-bold text-base">
+                  <Text className="text-text-primary dark:text-zinc-100 font-bold text-base">
                     {formatCurrency(itemTotal)}
                   </Text>
                 </View>
@@ -133,27 +133,27 @@ export function HistoryItem({
 
           {isAdmin && (
             <>
-              <View className="h-[1px] bg-secondary/10 w-full my-4" />
+              <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full my-4" />
               <View className="flex-row items-center justify-between">
-                <Text className="text-text-secondary text-[10px] uppercase font-bold tracking-widest">
+                <Text className="text-text-secondary dark:text-zinc-500 text-[10px] uppercase font-bold tracking-widest">
                   Vendedor
                 </Text>
-                <Text className="text-text-primary font-bold text-sm">
+                <Text className="text-text-primary dark:text-zinc-200 font-bold text-sm">
                   {sellerName}
                 </Text>
               </View>
             </>
           )}
 
-          <View className="h-[1px] bg-secondary/10 w-full my-4" />
+          <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full my-4" />
 
           {/* Detailed Footer */}
           <View className="flex-row justify-between items-center">
-            <Text className="text-[9px] text-text-muted font-mono uppercase">
+            <Text className="text-[9px] text-text-muted dark:text-zinc-500 font-mono uppercase">
               ID: {sale.id.slice(0, 8)}
             </Text>
             <View className="flex-row items-center">
-              <Text className="text-[9px] text-text-muted ml-1 pb-2">
+              <Text className="text-[9px] text-text-muted dark:text-zinc-500 ml-1 pb-2">
                 Registrado em{' '}
                 {new Date(sale.created_at).toLocaleDateString('pt-BR')}
               </Text>

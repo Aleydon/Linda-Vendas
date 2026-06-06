@@ -1,15 +1,21 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
+import { useAppContext } from '@/context/AppContext';
+
 export function Layout() {
+  const { colorScheme } = useAppContext();
+
+  const isDark = colorScheme === 'dark';
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#A34211',
-        tabBarInactiveTintColor: '#8C7E7E',
+        tabBarActiveTintColor: isDark ? '#fb923c' : '#A34211',
+        tabBarInactiveTintColor: isDark ? '#71717a' : '#8C7E7E',
         tabBarStyle: {
-          backgroundColor: '#FFFBF7',
-          borderTopColor: '#F5EBE0',
+          backgroundColor: isDark ? '#09090b' : '#FFFBF7',
+          borderTopColor: isDark ? '#18181b' : '#F5EBE0',
           height: 80,
           paddingBottom: 20
         },

@@ -1,6 +1,7 @@
 import { User } from '@supabase/supabase-js';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import { useColorScheme } from 'nativewind';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
@@ -19,6 +20,7 @@ export function AppProvider({
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
+  const { colorScheme, toggleColorScheme } = useColorScheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -340,7 +342,9 @@ export function AppProvider({
         deleteCategory,
         updateProfile,
         fetchSalesByUser,
-        refreshData: fetchData
+        refreshData: fetchData,
+        colorScheme: colorScheme ?? 'light',
+        toggleColorScheme
       }}
     >
       {children}

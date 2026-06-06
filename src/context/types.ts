@@ -101,6 +101,8 @@ export interface AppContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   fetchSalesByUser: (userId: string) => Promise<Sale[]>;
   refreshData: () => Promise<void>;
+  colorScheme: 'light' | 'dark';
+  toggleColorScheme: () => void;
 }
 
 // Types for Supabase DB
