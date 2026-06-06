@@ -248,7 +248,7 @@ export default function Profile() {
             {isPixExpanded && (
               <Animated.View
                 entering={FadeIn}
-                leaving={FadeOut}
+                exiting={FadeOut}
                 className="px-4 pb-6 border-t border-secondary dark:border-zinc-800 pt-4"
               >
                 <View className="mb-4">

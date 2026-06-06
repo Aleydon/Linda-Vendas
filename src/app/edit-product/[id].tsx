@@ -17,17 +17,17 @@ export function EditProduct() {
 
   if (!product) {
     return (
-      <View className="bg-background flex-1 items-center justify-center px-6">
-        <Text className="text-text-primary text-xl font-bold">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center px-6">
+        <Text className="text-text-primary dark:text-zinc-100 text-xl font-bold">
           Produto não encontrado
         </Text>
-        <Text className="text-text-secondary mt-2 text-center">
+        <Text className="text-text-secondary dark:text-zinc-400 mt-2 text-center">
           Verifique se o item ainda existe e tente novamente.
         </Text>
 
         <TouchableOpacity
           onPress={() => router.back()}
-          className="mt-6 rounded-2xl bg-primary px-6 py-3"
+          className="mt-6 rounded-2xl bg-primary dark:bg-orange-600 px-6 py-3"
           activeOpacity={0.8}
         >
           <Text className="text-white font-bold text-base">Voltar</Text>

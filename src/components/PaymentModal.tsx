@@ -48,7 +48,7 @@ export function PaymentModal({
       <View className="flex-1 items-center justify-center px-6">
         <Animated.View
           entering={FadeIn}
-          leaving={FadeOut}
+          exiting={FadeOut}
           className="absolute inset-0 bg-black/50"
         >
           <Pressable className="flex-1" onPress={onClose} />
@@ -56,7 +56,7 @@ export function PaymentModal({
 
         <Animated.View
           entering={ZoomIn.springify().damping(15)}
-          leaving={ZoomOut}
+          exiting={ZoomOut}
           className="w-full rounded-3xl bg-white dark:bg-zinc-900 p-6 shadow-2xl"
         >
           <View className="mb-6 items-center">

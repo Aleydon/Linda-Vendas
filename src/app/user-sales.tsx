@@ -10,7 +10,7 @@ import { Sale, useAppContext } from '@/context/AppContext';
 import { formatCurrency, formatDateLong } from '@/utils/formatters';
 
 export default function UserSales() {
-  const { user, fetchSalesByUser } = useAppContext();
+  const { user, fetchSalesByUser, colorScheme } = useAppContext();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,29 +44,31 @@ export default function UserSales() {
 
   if (loading) {
     return (
-      <View className="bg-background flex-1 items-center justify-center">
+      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
         <Loading />
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-950">
       <View className="px-6 py-4 flex-row items-center justify-between">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <MaterialCommunityIcons
               name="arrow-left"
               size={24}
-              color="#A34211"
+              color={colorScheme === 'dark' ? '#F5EBE0' : '#A34211'}
             />
           </TouchableOpacity>
-          <Text className="text-text-primary text-xl font-bold">
+          <Text className="text-text-primary dark:text-zinc-100 text-xl font-bold">
             Minhas Vendas
           </Text>
         </View>
-        <View className="bg-secondary px-3 py-1 rounded-full">
-          <Text className="text-primary font-bold">{sales.length}</Text>
+        <View className="bg-secondary dark:bg-zinc-800 px-3 py-1 rounded-full">
+          <Text className="text-primary dark:text-orange-400 font-bold">
+            {sales.length}
+          </Text>
         </View>
       </View>
 
@@ -75,20 +77,20 @@ export default function UserSales() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View className="px-6">
-          <View className="bg-white rounded-[32px] p-6 mb-8 border border-secondary/20 shadow-sm flex-row items-center justify-between">
+          <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 mb-8 border border-secondary/20 dark:border-zinc-800 shadow-sm flex-row items-center justify-between">
             <View>
-              <Text className="text-primary text-xs uppercase font-bold tracking-widest mb-1">
+              <Text className="text-primary dark:text-orange-400 text-xs uppercase font-bold tracking-widest mb-1">
                 Total Acumulado
               </Text>
-              <Text className="text-[#22c55e] font-bold text-3xl">
+              <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-3xl">
                 {formatCurrency(totalAmount)}
               </Text>
             </View>
-            <View className="bg-primary/10 p-3 rounded-2xl">
+            <View className="bg-primary/10 dark:bg-orange-500/10 p-3 rounded-2xl">
               <MaterialCommunityIcons
                 name="finance"
                 size={32}
-                color="#A34211"
+                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
               />
             </View>
           </View>
@@ -96,7 +98,7 @@ export default function UserSales() {
           {groupedSales.length > 0 ? (
             groupedSales.map(([date, data]) => (
               <View key={date} className="mb-8">
-                <Text className="text-text-secondary font-bold text-xs uppercase tracking-widest mb-4">
+                <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4">
                   {date}
                 </Text>
                 <View className="gap-y-4">
@@ -115,9 +117,9 @@ export default function UserSales() {
               <MaterialCommunityIcons
                 name="cart-off"
                 size={48}
-                color="#BDB2B2"
+                color={colorScheme === 'dark' ? '#3f3f46' : '#BDB2B2'}
               />
-              <Text className="text-text-secondary mt-4 text-center text-lg italic">
+              <Text className="text-text-secondary dark:text-zinc-500 mt-4 text-center text-lg italic">
                 Você ainda não realizou nenhuma venda.
               </Text>
             </View>
