@@ -1,24 +1,14 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 
 export function Header() {
-  const { user, signOut } = useAppContext();
+  const { user } = useAppContext();
 
-  const handleSignOut = () => {
-    Alert.alert('Sair', 'Tem certeza que deseja sair da sua conta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/login');
-        }
-      }
-    ]);
+  const handleProfilePress = () => {
+    router.push('/profile');
   };
 
   return (
@@ -35,7 +25,7 @@ export function Header() {
       </View>
 
       <TouchableOpacity
-        onPress={handleSignOut}
+        onPress={handleProfilePress}
         className="border-secondary bg-secondary h-10 w-10 items-center justify-center overflow-hidden rounded-full border"
       >
         {user?.user_metadata?.avatar_url ? (

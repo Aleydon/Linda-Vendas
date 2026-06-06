@@ -32,17 +32,38 @@ export function AppProvider({
   const fetchData = async (): Promise<void> => {
     try {
       setLoading(true);
-      const [categoriesData, productsData, salesData] = await Promise.all([
-        api.fetchCategories(),
-        api.fetchProducts(),
-        api.fetchSales()
-      ]);
 
-      setCategories(categoriesData);
-      setProducts(productsData);
-      setSales(salesData);
+      // Fetch individually to prevent one failure from blocking others
+      const fetchCategories = async () => {
+        try {
+          const data = await api.fetchCategories();
+          setCategories(data);
+        } catch (error) {
+          console.error('Error fetching categories:', error);
+        }
+      };
+
+      const fetchProducts = async () => {
+        try {
+          const data = await api.fetchProducts();
+          setProducts(data);
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        }
+      };
+
+      const fetchSales = async () => {
+        try {
+          const data = await api.fetchSales();
+          setSales(data);
+        } catch (error) {
+          console.error('Error fetching sales:', error);
+        }
+      };
+
+      await Promise.all([fetchCategories(), fetchProducts(), fetchSales()]);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Unexpected error in fetchData:', error);
     } finally {
       setLoading(false);
     }
@@ -54,10 +75,17 @@ export function AppProvider({
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid error on 0 rows
 
       if (error) {
         console.error('Error fetching profile:', error);
+        return;
+      }
+
+      if (!data) {
+        console.warn('Profile not found for user:', userId);
+        // Optional: initialize a default profile state if needed
+        setProfile(null);
         return;
       }
 
@@ -220,12 +248,20 @@ export function AppProvider({
   };
 
   const addSale = async (
-    items: { product_id: string; quantity: number; unit_price: number }[],
-    total: number
+    items: {
+      product_id: string;
+      variation_id?: string;
+      quantity: number;
+      unit_price: number;
+    }[],
+    total: number,
+    userId?: string
   ): Promise<void> => {
     try {
       setLoading(true);
-      await api.addSale(items, total);
+      // Use the provided userId or fallback to the one in state
+      const sellerId = userId || user?.id;
+      await api.addSale(items, total, sellerId);
       await fetchData();
     } catch (error) {
       console.error('Error adding sale:', error);
@@ -256,6 +292,31 @@ export function AppProvider({
     }
   };
 
+  const updateProfile = async (updates: Partial<Profile>): Promise<void> => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) throw error;
+      await fetchProfile(user.id);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  };
+
+  const fetchSalesByUser = async (userId: string): Promise<Sale[]> => {
+    try {
+      return await api.fetchSalesByUser(userId);
+    } catch (error) {
+      console.error('Error fetching sales by user:', error);
+      return [];
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -277,6 +338,8 @@ export function AppProvider({
         addSale,
         addCategory,
         deleteCategory,
+        updateProfile,
+        fetchSalesByUser,
         refreshData: fetchData
       }}
     >

@@ -42,14 +42,58 @@ export const api = {
   },
 
   async fetchSales(): Promise<Sale[]> {
+    // We try to fetch with seller, but if it fails (PGRST200), we fallback to a simple fetch
     const { data, error } = await supabase
       .from('sales')
       .select(
-        '*, sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
+        '*, seller:profiles(email, pix_name), sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
       )
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST200') {
+        console.warn(
+          'Relationship sales->profiles not found. Fetching without seller info.'
+        );
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('sales')
+          .select(
+            '*, sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
+          )
+          .order('created_at', { ascending: false });
+
+        if (simpleError) throw simpleError;
+        return (simpleData as Sale[]) || [];
+      }
+      throw error;
+    }
+    return (data as Sale[]) || [];
+  },
+
+  async fetchSalesByUser(userId: string): Promise<Sale[]> {
+    const { data, error } = await supabase
+      .from('sales')
+      .select(
+        '*, seller:profiles(email, pix_name), sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
+      )
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      if (error.code === 'PGRST200') {
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('sales')
+          .select(
+            '*, sale_items(*, product:products(name, categories(name)), variation:product_variations(name))'
+          )
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (simpleError) throw simpleError;
+        return (simpleData as Sale[]) || [];
+      }
+      throw error;
+    }
     return (data as Sale[]) || [];
   },
 
@@ -191,12 +235,21 @@ export const api = {
       quantity: number;
       unit_price: number;
     }[],
-    total: number
+    total: number,
+    userId?: string
   ): Promise<void> {
     // 1. Create Sale
+    interface SaleInsert {
+      total: number;
+      user_id?: string;
+    }
+
+    const salePayload: SaleInsert = { total };
+    if (userId) salePayload.user_id = userId;
+
     const { data: saleData, error: saleError } = await supabase
       .from('sales')
-      .insert([{ total }])
+      .insert([salePayload])
       .select()
       .single();
 

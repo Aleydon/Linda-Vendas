@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
-import { Sale } from '@/context/AppContext';
+import { Sale, useAppContext } from '@/context/AppContext';
 import { formatCurrency, formatDateTime } from '@/utils/formatters';
 
 interface HistoryItemProps {
@@ -15,6 +15,7 @@ export function HistoryItem({
   sale,
   isInitiallyExpanded = false
 }: HistoryItemProps) {
+  const { isAdmin } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
 
   // Calculate total from items if sale.total is missing or 0
@@ -37,6 +38,8 @@ export function HistoryItem({
       month: 'short'
     })
     .replace('.', '');
+
+  const sellerName = sale.seller?.pix_name || sale.seller?.email || 'N/A';
 
   return (
     <View className="bg-white rounded-[32px] overflow-hidden shadow-sm border border-secondary/20">
@@ -127,6 +130,20 @@ export function HistoryItem({
               );
             })}
           </View>
+
+          {isAdmin && (
+            <>
+              <View className="h-[1px] bg-secondary/10 w-full my-4" />
+              <View className="flex-row items-center justify-between">
+                <Text className="text-text-secondary text-[10px] uppercase font-bold tracking-widest">
+                  Vendedor
+                </Text>
+                <Text className="text-text-primary font-bold text-sm">
+                  {sellerName}
+                </Text>
+              </View>
+            </>
+          )}
 
           <View className="h-[1px] bg-secondary/10 w-full my-4" />
 

@@ -24,7 +24,8 @@ interface CartItem {
 }
 
 export function NewSale() {
-  const { products, addSale, loading, categories } = useAppContext();
+  const { products, addSale, loading, categories, profile, user } =
+    useAppContext();
   const [search, setSearch] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -73,9 +74,9 @@ export function NewSale() {
   }, [cart, products]);
 
   const pixString = useMemo(() => {
-    const key = process.env.EXPO_PUBLIC_PIX_KEY;
-    const name = process.env.EXPO_PUBLIC_PIX_NAME;
-    const city = process.env.EXPO_PUBLIC_PIX_CITY;
+    const key = profile?.pix_key || process.env.EXPO_PUBLIC_PIX_KEY;
+    const name = profile?.pix_name || process.env.EXPO_PUBLIC_PIX_NAME;
+    const city = profile?.pix_city || process.env.EXPO_PUBLIC_PIX_CITY;
 
     if (!key || !name || !city || total <= 0) return '';
 
@@ -86,7 +87,7 @@ export function NewSale() {
       amount: total,
       description: 'Venda Linda Sales'
     });
-  }, [total]);
+  }, [total, profile]);
 
   const updateQuantity = (
     productId: string,
@@ -160,7 +161,7 @@ export function NewSale() {
         };
       });
 
-      await addSale(items, total);
+      await addSale(items, total, user?.id);
       setShowConfirmation(false);
       setCart([]);
       setSearch('');

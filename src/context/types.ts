@@ -11,6 +11,9 @@ export interface Profile {
   id: string;
   email: string;
   role: UserRole;
+  pix_key?: string;
+  pix_name?: string;
+  pix_city?: string;
 }
 
 export interface Variation {
@@ -54,6 +57,11 @@ export interface Sale {
   id: string;
   total: number;
   created_at: string;
+  user_id?: string;
+  seller?: {
+    email: string;
+    pix_name?: string;
+  } | null;
   sale_items?: SaleItem[];
 }
 
@@ -85,10 +93,13 @@ export interface AppContextType {
       quantity: number;
       unit_price: number;
     }[],
-    total: number
+    total: number,
+    userId?: string
   ) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  fetchSalesByUser: (userId: string) => Promise<Sale[]>;
   refreshData: () => Promise<void>;
 }
 
