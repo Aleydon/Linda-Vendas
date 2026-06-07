@@ -5,7 +5,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Header } from '@/components/Header';
-import { Loading } from '@/components/Loading';
+import { DashboardSkeleton } from '@/components/skeletons/DashboardSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { formatCurrency } from '@/utils/formatters';
@@ -17,8 +17,9 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
-        <Loading />
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <DashboardSkeleton />
       </View>
     );
   }

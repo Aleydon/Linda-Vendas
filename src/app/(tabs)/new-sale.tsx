@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Animated, {
+  FadeInDown,
+  LinearTransition
+} from 'react-native-reanimated';
 
 import { CategoryItem } from '@/components/CategoryItem';
 import { Header } from '@/components/Header';
 import { PaymentModal } from '@/components/PaymentModal';
 import { SaleProductItem } from '@/components/SaleProductItem';
 import { SearchBar } from '@/components/SearchBar';
+import { NewSaleSkeleton } from '@/components/skeletons/NewSaleSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/utils/formatters';
@@ -107,6 +112,15 @@ export function NewSale() {
     }
   };
 
+  if (loading && products.length === 0) {
+    return (
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <NewSaleSkeleton />
+      </View>
+    );
+  }
+
   return (
     <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
@@ -165,15 +179,22 @@ export function NewSale() {
                   {section.name}
                 </Text>
 
-                {sectionProducts.map(product => (
-                  <SaleProductItem
-                    key={product.id}
-                    item={product}
-                    cart={cart}
-                    onUpdateQuantity={updateQuantity}
-                    searchQuery={search}
-                  />
-                ))}
+                <Animated.View layout={LinearTransition} className="gap-y-4">
+                  {sectionProducts.map((product, index) => (
+                    <Animated.View
+                      key={product.id}
+                      entering={FadeInDown.delay(index * 30).duration(300)}
+                      layout={LinearTransition}
+                    >
+                      <SaleProductItem
+                        item={product}
+                        cart={cart}
+                        onUpdateQuantity={updateQuantity}
+                        searchQuery={search}
+                      />
+                    </Animated.View>
+                  ))}
+                </Animated.View>
               </View>
             );
           })}

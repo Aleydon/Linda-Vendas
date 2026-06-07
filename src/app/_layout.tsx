@@ -12,7 +12,7 @@ import {
   Inter_900Black
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
@@ -42,7 +42,32 @@ function InitialLayout() {
     return <Loading />;
   }
 
-  return <Slot />;
+  return (
+    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+      <Stack.Screen name="login" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen
+        name="profile"
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="user-sales"
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{ animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="new-product"
+        options={{ animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="edit-product/[id]"
+        options={{ animation: 'slide_from_right' }}
+      />
+    </Stack>
+  );
 }
 
 function MainContent() {

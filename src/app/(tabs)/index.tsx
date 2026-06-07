@@ -1,12 +1,16 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import Animated, {
+  FadeInDown,
+  LinearTransition
+} from 'react-native-reanimated';
 
 import { CategoryItem } from '@/components/CategoryItem';
 import { Header } from '@/components/Header';
-import { Loading } from '@/components/Loading';
 import { ProductCard } from '@/components/ProductCard';
 import { SearchBar } from '@/components/SearchBar';
+import { HomeSkeleton } from '@/components/skeletons/HomeSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import { formatCurrencyValue } from '@/utils/formatters';
 
@@ -17,8 +21,9 @@ export function Home(): React.JSX.Element {
 
   if (loading) {
     return (
-      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
-        <Loading />
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <HomeSkeleton />
       </View>
     );
   }
@@ -92,18 +97,25 @@ export function Home(): React.JSX.Element {
                   {section.name}
                 </Text>
 
-                {sectionProducts.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    name={product.name}
-                    price={formatCurrencyValue(product.price)}
-                    stock={product.stock}
-                    imageUrl={product.imageUrl}
-                    outOfStock={product.outOfStock}
-                    has_variations={product.has_variations}
-                    variations={product.variations}
-                  />
-                ))}
+                <Animated.View layout={LinearTransition} className="gap-y-2">
+                  {sectionProducts.map((product, index) => (
+                    <Animated.View
+                      key={product.id}
+                      entering={FadeInDown.delay(index * 30).duration(300)}
+                      layout={LinearTransition}
+                    >
+                      <ProductCard
+                        name={product.name}
+                        price={formatCurrencyValue(product.price)}
+                        stock={product.stock}
+                        imageUrl={product.imageUrl}
+                        outOfStock={product.outOfStock}
+                        has_variations={product.has_variations}
+                        variations={product.variations}
+                      />
+                    </Animated.View>
+                  ))}
+                </Animated.View>
               </View>
             );
           })}

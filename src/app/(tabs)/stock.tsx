@@ -13,15 +13,17 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeOut,
+  LinearTransition,
   ZoomIn,
   ZoomOut
 } from 'react-native-reanimated';
 
 import { CategoryManagerModal } from '@/components/CategoryManagerModal';
 import { Header } from '@/components/Header';
-import { Loading } from '@/components/Loading';
 import { SearchBar } from '@/components/SearchBar';
+import { StockSkeleton } from '@/components/skeletons/StockSkeleton';
 import { StockProductItem } from '@/components/StockProductItem';
 import { useAppContext } from '@/context/AppContext';
 
@@ -119,8 +121,9 @@ export function Stock(): React.JSX.Element {
 
   if (loading) {
     return (
-      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
-        <Loading />
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <StockSkeleton />
       </View>
     );
   }
@@ -149,23 +152,29 @@ export function Stock(): React.JSX.Element {
             customClass="mb-6"
           />
 
-          <View className="gap-y-4">
-            {filteredProducts.map(product => (
-              <StockProductItem
+          <Animated.View layout={LinearTransition} className="gap-y-4">
+            {filteredProducts.map((product, index) => (
+              <Animated.View
                 key={product.id}
-                product={product}
-                isExpanded={expandedProducts.includes(product.id)}
-                onToggleExpand={() => toggleExpand(product.id)}
-                isAdmin={isAdmin}
-                colorScheme={colorScheme}
-                onEdit={() => {
-                  Haptics.selectionAsync();
-                  router.push(`/edit-product/${product.id}`);
-                }}
-                onDelete={() => handleDeleteProduct(product.id, product.name)}
-              />
+                entering={FadeInDown.delay(index * 30).duration(300)}
+                exiting={FadeOut.duration(200)}
+                layout={LinearTransition}
+              >
+                <StockProductItem
+                  product={product}
+                  isExpanded={expandedProducts.includes(product.id)}
+                  onToggleExpand={() => toggleExpand(product.id)}
+                  isAdmin={isAdmin}
+                  colorScheme={colorScheme}
+                  onEdit={() => {
+                    Haptics.selectionAsync();
+                    router.push(`/edit-product/${product.id}`);
+                  }}
+                  onDelete={() => handleDeleteProduct(product.id, product.name)}
+                />
+              </Animated.View>
             ))}
-          </View>
+          </Animated.View>
 
           {/* Low Stock Warning */}
           {products.some(p => p.stock <= 5 && p.stock > 0) && (

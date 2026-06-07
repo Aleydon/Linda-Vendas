@@ -2,10 +2,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  FadeInDown,
+  LinearTransition
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HistoryItem } from '@/components/HistoryItem';
-import { Loading } from '@/components/Loading';
+import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
 import { formatCurrency, formatDateLong } from '@/utils/formatters';
 
@@ -42,11 +46,25 @@ export default function UserSales() {
     return sales.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
   }, [sales]);
 
-  if (loading) {
+  if (loading && sales.length === 0) {
     return (
-      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
-        <Loading />
-      </View>
+      <SafeAreaView className="flex-1 bg-background dark:bg-zinc-950">
+        <View className="px-6 py-4 flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <TouchableOpacity onPress={() => router.back()} className="mr-4">
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color={colorScheme === 'dark' ? '#F5EBE0' : '#A34211'}
+              />
+            </TouchableOpacity>
+            <Text className="text-text-primary dark:text-zinc-100 text-xl font-bold">
+              Minhas Vendas
+            </Text>
+          </View>
+        </View>
+        <HistorySkeleton />
+      </SafeAreaView>
     );
   }
 
@@ -101,15 +119,21 @@ export default function UserSales() {
                 <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4">
                   {date}
                 </Text>
-                <View className="gap-y-4">
+                <Animated.View layout={LinearTransition} className="gap-y-4">
                   {data.sales.map((sale, index) => (
-                    <HistoryItem
+                    <Animated.View
                       key={sale.id}
-                      sale={sale}
-                      isInitiallyExpanded={index === 0}
-                    />
+                      entering={FadeInDown.delay(index * 35).duration(300)}
+                      layout={LinearTransition}
+                    >
+                      <HistoryItem
+                        key={sale.id}
+                        sale={sale}
+                        isInitiallyExpanded={index === 0}
+                      />
+                    </Animated.View>
                   ))}
-                </View>
+                </Animated.View>
               </View>
             ))
           ) : (

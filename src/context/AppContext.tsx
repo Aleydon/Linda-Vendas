@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
 import { useColorScheme } from 'nativewind';
@@ -42,8 +43,36 @@ export function AppProvider({
 }: {
   children: React.ReactNode;
 }): React.JSX.Element {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const [loading, setLoading] = useState(true);
+
+  // Load saved theme or default to light on mount
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme_preference');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          setColorScheme(savedTheme);
+        } else {
+          setColorScheme('light');
+        }
+      } catch (error) {
+        console.error('Error loading theme preference:', error);
+        setColorScheme('light');
+      }
+    };
+    void loadTheme();
+  }, [setColorScheme]);
+
+  const toggleColorScheme = async (): Promise<void> => {
+    const newScheme = colorScheme === 'dark' ? 'light' : 'dark';
+    try {
+      setColorScheme(newScheme);
+      await AsyncStorage.setItem('theme_preference', newScheme);
+    } catch (error) {
+      console.error('Error saving theme preference:', error);
+    }
+  };
 
   // 1. Auth Hook
   const { user, profile, isAdmin, signInWithGoogle, signOut, updateProfile } =

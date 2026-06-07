@@ -1,11 +1,15 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import Animated, {
+  FadeInDown,
+  LinearTransition
+} from 'react-native-reanimated';
 
 import { Header } from '@/components/Header';
 import { HistoryItem } from '@/components/HistoryItem';
-import { Loading } from '@/components/Loading';
 import { SearchBar } from '@/components/SearchBar';
+import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
 import {
   formatCurrency,
@@ -77,10 +81,11 @@ export function History() {
     return Object.entries(groups);
   }, [filteredSales]);
 
-  if (loading) {
+  if (loading && sales.length === 0) {
     return (
-      <View className="bg-background dark:bg-zinc-950 flex-1 items-center justify-center">
-        <Loading />
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <HistorySkeleton />
       </View>
     );
   }
@@ -130,15 +135,20 @@ export function History() {
                     {date}
                   </Text>
                 </View>
-                <View className="gap-y-4">
+                <Animated.View layout={LinearTransition} className="gap-y-4">
                   {data.sales.map((sale, index) => (
-                    <HistoryItem
+                    <Animated.View
                       key={sale.id}
-                      sale={sale}
-                      isInitiallyExpanded={index < 3}
-                    />
+                      entering={FadeInDown.delay(index * 35).duration(300)}
+                      layout={LinearTransition}
+                    >
+                      <HistoryItem
+                        sale={sale}
+                        isInitiallyExpanded={index < 3}
+                      />
+                    </Animated.View>
                   ))}
-                </View>
+                </Animated.View>
               </View>
             ))
           ) : (
