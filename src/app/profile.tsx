@@ -177,8 +177,12 @@ export default function Profile() {
             icon="basket-outline"
             iconBgColor="bg-primary/10 dark:bg-orange-500/10"
             iconColor={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
-            title="Minhas Vendas"
-            description="Histórico pessoal de vendas"
+            title={isAdmin ? 'Histórico de Vendas' : 'Minhas Vendas'}
+            description={
+              isAdmin
+                ? 'Histórico geral de vendas'
+                : 'Histórico pessoal de vendas'
+            }
             onPress={() => router.push('/user-sales')}
           />
 

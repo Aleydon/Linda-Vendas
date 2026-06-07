@@ -58,7 +58,7 @@ function InitialLayout() {
       />
       <Stack.Screen
         name="notifications"
-        options={{ animation: 'slide_from_bottom' }}
+        options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="new-product"

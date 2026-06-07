@@ -46,20 +46,28 @@ export function HistoryItem({
       <Pressable onPress={() => setIsExpanded(!isExpanded)} className="p-4">
         {/* Header: Status, Total, and Date/Icon */}
         <View className="flex-row items-center justify-between">
-          <View className="rounded-2xl flex-row items-center">
+          <View className="rounded-2xl flex-row items-center flex-1 mr-2">
             <MaterialCommunityIcons
               name="cart-outline"
               size={25}
               color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
             />
-            <View className="flex-row items-center pl-2">
-              <View className="items-start">
+            <View className="flex-row items-center pl-2 flex-1">
+              <View className="items-start flex-1">
                 <Text className="text-text-secondary dark:text-zinc-400 font-bold text-[10px] uppercase tracking-wider">
                   {timeStr}
                 </Text>
                 <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-medium">
                   {dateStr}
                 </Text>
+                {isAdmin && (
+                  <Text
+                    className="text-primary dark:text-orange-400 text-[10px] font-bold mt-0.5"
+                    numberOfLines={1}
+                  >
+                    Por: {sellerName}
+                  </Text>
+                )}
               </View>
             </View>
           </View>

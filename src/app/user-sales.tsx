@@ -9,23 +9,35 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HistoryItem } from '@/components/HistoryItem';
+import { SellerGroup, SellerSalesCard } from '@/components/SellerSalesCard';
 import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
+import { api } from '@/services/api';
 import { formatCurrency, formatDateLong } from '@/utils/formatters';
 
 export default function UserSales() {
-  const { user, fetchSalesByUser, colorScheme } = useAppContext();
+  const { user, isAdmin, fetchSalesByUser, colorScheme } = useAppContext();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchSalesByUser(user.id).then(data => {
-        setSales(data);
-        setLoading(false);
-      });
+      const loadSales = async () => {
+        try {
+          setLoading(true);
+          const data = isAdmin
+            ? await api.fetchSales()
+            : await fetchSalesByUser(user.id);
+          setSales(data);
+        } catch (error) {
+          console.error('Error fetching sales:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      void loadSales();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
@@ -46,6 +58,39 @@ export default function UserSales() {
     return sales.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
   }, [sales]);
 
+  const salesBySeller = useMemo((): SellerGroup[] => {
+    if (!isAdmin) return [];
+
+    const groups: { [key: string]: SellerGroup } = {};
+
+    sales.forEach(sale => {
+      const sellerId = sale.user_id || 'unknown';
+      const sellerEmail = sale.seller?.email || 'Sem E-mail';
+      const sellerName =
+        sale.seller?.pix_name || sellerEmail.split('@')[0] || 'Desconhecido';
+
+      if (!groups[sellerId]) {
+        groups[sellerId] = {
+          sellerId,
+          sellerName,
+          sellerEmail,
+          sales: [],
+          totalAmount: 0,
+          totalItems: 0
+        };
+      }
+
+      groups[sellerId].sales.push(sale);
+      groups[sellerId].totalAmount += Number(sale.total || 0);
+
+      const itemsCount =
+        sale.sale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+      groups[sellerId].totalItems += itemsCount;
+    });
+
+    return Object.values(groups).sort((a, b) => b.totalAmount - a.totalAmount);
+  }, [sales, isAdmin]);
+
   if (loading && sales.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-zinc-950">
@@ -59,7 +104,7 @@ export default function UserSales() {
               />
             </TouchableOpacity>
             <Text className="text-text-primary dark:text-zinc-100 text-xl font-bold">
-              Minhas Vendas
+              {isAdmin ? 'Histórico de Vendas' : 'Minhas Vendas'}
             </Text>
           </View>
         </View>
@@ -80,7 +125,7 @@ export default function UserSales() {
             />
           </TouchableOpacity>
           <Text className="text-text-primary dark:text-zinc-100 text-xl font-bold">
-            Minhas Vendas
+            {isAdmin ? 'Histórico de Vendas' : 'Minhas Vendas'}
           </Text>
         </View>
         <View className="bg-secondary dark:bg-zinc-800 px-3 py-1 rounded-full">
@@ -98,7 +143,7 @@ export default function UserSales() {
           <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 mb-8 border border-secondary/20 dark:border-zinc-800 shadow-sm flex-row items-center justify-between">
             <View>
               <Text className="text-primary dark:text-orange-400 text-xs uppercase font-bold tracking-widest mb-1">
-                Total Acumulado
+                {isAdmin ? 'Faturamento Total' : 'Total Acumulado'}
               </Text>
               <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-3xl">
                 {formatCurrency(totalAmount)}
@@ -113,7 +158,28 @@ export default function UserSales() {
             </View>
           </View>
 
-          {groupedSales.length > 0 ? (
+          {isAdmin ? (
+            salesBySeller.length > 0 ? (
+              salesBySeller.map((group, index) => (
+                <SellerSalesCard
+                  key={group.sellerId}
+                  group={group}
+                  isInitiallyExpanded={index === 0}
+                />
+              ))
+            ) : (
+              <View className="items-center py-20">
+                <MaterialCommunityIcons
+                  name="cart-off"
+                  size={48}
+                  color={colorScheme === 'dark' ? '#3f3f46' : '#BDB2B2'}
+                />
+                <Text className="text-text-secondary dark:text-zinc-500 mt-4 text-center text-lg italic">
+                  Nenhuma venda registrada no sistema.
+                </Text>
+              </View>
+            )
+          ) : groupedSales.length > 0 ? (
             groupedSales.map(([date, data]) => (
               <View key={date} className="mb-8">
                 <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4">
