@@ -18,7 +18,9 @@ import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
+import { CustomAlertModal } from '@/components/CustomAlertModal';
 import { Loading } from '@/components/Loading';
+import { AlertProvider } from '@/context/AlertContext';
 import { AppProvider, useAppContext } from '@/context/AppContext';
 
 function InitialLayout() {
@@ -87,6 +89,7 @@ function MainContent() {
           className="bg-background dark:bg-zinc-950"
         >
           <InitialLayout />
+          <CustomAlertModal />
         </SafeAreaView>
       </SafeAreaProvider>
     </>
@@ -112,7 +115,9 @@ export function RootLayout() {
 
   return (
     <AppProvider>
-      <MainContent />
+      <AlertProvider>
+        <MainContent />
+      </AlertProvider>
     </AppProvider>
   );
 }

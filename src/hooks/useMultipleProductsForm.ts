@@ -3,8 +3,8 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
+import { useAlert } from '@/context/AlertContext';
 import { Product, Variation } from '@/context/types';
 import { supabase } from '@/lib/supabase';
 import {
@@ -34,6 +34,7 @@ export function useMultipleProductsForm({
   onSubmit
 }: UseMultipleProductsFormProps) {
   const router = useRouter();
+  const { showAlert } = useAlert();
 
   const createEmptyProduct = (): ProductFormState => ({
     id: Math.random().toString(36).substring(2, 9),
@@ -65,7 +66,11 @@ export function useMultipleProductsForm({
 
   const removeProductForm = (id: string): void => {
     if (productsList.length === 1) {
-      Alert.alert('Aviso', 'Você precisa cadastrar pelo menos um produto.');
+      showAlert({
+        title: 'Aviso',
+        description: 'Você precisa cadastrar pelo menos um produto.',
+        type: 'warning'
+      });
       return;
     }
     setProductsList(prev => prev.filter(p => p.id !== id));
@@ -101,7 +106,11 @@ export function useMultipleProductsForm({
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Erro', 'Não foi possível selecionar a imagem.');
+      showAlert({
+        title: 'Erro',
+        description: 'Não foi possível selecionar a imagem.',
+        type: 'error'
+      });
     }
   };
 
@@ -128,7 +137,11 @@ export function useMultipleProductsForm({
       updateProductField(productId, 'imageUrl', data.publicUrl);
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Erro', 'Falha ao fazer upload da imagem.');
+      showAlert({
+        title: 'Erro',
+        description: 'Falha ao fazer upload da imagem.',
+        type: 'error'
+      });
     } finally {
       setUploadingId(null);
     }
@@ -196,17 +209,29 @@ export function useMultipleProductsForm({
       const prodIndexStr = productsList.length > 1 ? ` (Produto ${i + 1})` : '';
 
       if (!p.name || !p.category_id) {
-        Alert.alert('Erro', `Preencha o nome e a categoria${prodIndexStr}.`);
+        showAlert({
+          title: 'Erro',
+          description: `Preencha o nome e a categoria${prodIndexStr}.`,
+          type: 'error'
+        });
         return;
       }
 
       if (!p.has_variations && (!p.price || !p.stock)) {
-        Alert.alert('Erro', `Preencha o preço e o estoque${prodIndexStr}.`);
+        showAlert({
+          title: 'Erro',
+          description: `Preencha o preço e o estoque${prodIndexStr}.`,
+          type: 'error'
+        });
         return;
       }
 
       if (p.has_variations && p.variations.length === 0) {
-        Alert.alert('Erro', `Adicione pelo menos uma variação${prodIndexStr}.`);
+        showAlert({
+          title: 'Erro',
+          description: `Adicione pelo menos uma variação${prodIndexStr}.`,
+          type: 'error'
+        });
         return;
       }
 
@@ -215,10 +240,11 @@ export function useMultipleProductsForm({
           v => !v.name || v.price <= 0
         );
         if (invalidVariation) {
-          Alert.alert(
-            'Erro',
-            `Preencha corretamente todas as variações${prodIndexStr}.`
-          );
+          showAlert({
+            title: 'Erro',
+            description: `Preencha corretamente todas as variações${prodIndexStr}.`,
+            type: 'error'
+          });
           return;
         }
       }
@@ -247,7 +273,11 @@ export function useMultipleProductsForm({
       router.replace('/(tabs)/stock');
     } catch (error) {
       console.error('Error saving products:', error);
-      Alert.alert('Erro', 'Não foi possível salvar os produtos.');
+      showAlert({
+        title: 'Erro',
+        description: 'Não foi possível salvar os produtos.',
+        type: 'error'
+      });
     } finally {
       setIsSaving(false);
     }

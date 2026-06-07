@@ -2,7 +2,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Image,
   ScrollView,
   Switch,
@@ -15,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AdminPanel } from '@/components/profile/AdminPanel';
 import { PixConfigPanel } from '@/components/profile/PixConfigPanel';
 import { ProfileMenuItem } from '@/components/ProfileMenuItem';
+import { useAlert } from '@/context/AlertContext';
 import { Profile as UserProfile, useAppContext } from '@/context/AppContext';
 
 export default function Profile() {
@@ -29,6 +29,7 @@ export default function Profile() {
     fetchAllProfiles,
     updateUserRole
   } = useAppContext();
+  const { showAlert } = useAlert();
 
   const [isPixExpanded, setIsPixExpanded] = useState(false);
   const [isAdminPanelExpanded, setIsAdminPanelExpanded] = useState(false);
@@ -55,20 +56,23 @@ export default function Profile() {
 
   const handleToggleAdmin = async (targetUser: UserProfile) => {
     if (targetUser.id === user?.id) {
-      Alert.alert(
-        'Segurança',
-        'Você não pode alterar seu próprio acesso administrativo por segurança.'
-      );
+      showAlert({
+        title: 'Segurança',
+        description:
+          'Você não pode alterar seu próprio acesso administrativo por segurança.',
+        type: 'warning'
+      });
       return;
     }
 
     const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
     const actionStr = newRole === 'admin' ? 'conceder' : 'remover';
 
-    Alert.alert(
-      'Alterar Acesso',
-      `Deseja ${actionStr} acesso de administrador para ${targetUser.email}?`,
-      [
+    showAlert({
+      title: 'Alterar Acesso',
+      description: `Deseja ${actionStr} acesso de administrador para ${targetUser.email}?`,
+      type: 'confirm',
+      buttons: [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Confirmar',
@@ -76,31 +80,42 @@ export default function Profile() {
             try {
               await updateUserRole(targetUser.id, newRole);
               void loadProfiles();
-              Alert.alert('Sucesso', 'Permissão atualizada com sucesso.');
+              showAlert({
+                title: 'Sucesso',
+                description: 'Permissão atualizada com sucesso.',
+                type: 'success'
+              });
             } catch {
-              Alert.alert(
-                'Erro',
-                'Não foi possível atualizar a permissão. Verifique as políticas de segurança do banco de dados.'
-              );
+              showAlert({
+                title: 'Erro',
+                description:
+                  'Não foi possível atualizar a permissão. Verifique as políticas de segurança do banco de dados.',
+                type: 'error'
+              });
             }
           }
         }
       ]
-    );
+    });
   };
 
   const handleSignOut = () => {
-    Alert.alert('Sair', 'Tem certeza que deseja sair da sua conta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/login');
+    showAlert({
+      title: 'Sair',
+      description: 'Tem certeza que deseja sair da sua conta?',
+      type: 'confirm',
+      buttons: [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/login');
+          }
         }
-      }
-    ]);
+      ]
+    });
   };
 
   return (

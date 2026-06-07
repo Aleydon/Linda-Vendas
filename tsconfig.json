@@ -19,5 +19,6 @@
     "babel.config.js",
     "src/assets/images/icon.png"
   ],
+  "exclude": ["node_modules", "supabase"],
   "extends": "expo/tsconfig.base"
 }

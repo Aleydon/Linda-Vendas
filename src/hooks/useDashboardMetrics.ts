@@ -76,12 +76,45 @@ export function useDashboardMetrics(sales: Sale[], products: Product[]) {
       .sort((a, b) => a.stock - b.stock)
       .slice(0, 5);
 
+    const salesChartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const date = d.getDate();
+
+      const dayName = d
+        .toLocaleDateString('pt-BR', { weekday: 'short' })
+        .replace('.', '');
+      const capitalizedDayName =
+        dayName.charAt(0).toUpperCase() + dayName.slice(1);
+      const dateString = `${String(date).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`;
+
+      const daySales = sales.filter(s => {
+        const sDate = new Date(s.created_at);
+        return (
+          sDate.getFullYear() === year &&
+          sDate.getMonth() === month &&
+          sDate.getDate() === date
+        );
+      });
+
+      const total = daySales.reduce((acc, s) => acc + s.total, 0);
+      salesChartData.push({
+        dayName: capitalizedDayName,
+        dateString,
+        total
+      });
+    }
+
     return {
       todaySales: tTotalSales,
       percentageChange: pChange,
       topProducts,
       topCategories,
-      lowStockItems
+      lowStockItems,
+      salesChartData
     };
   }, [sales, products]);
 

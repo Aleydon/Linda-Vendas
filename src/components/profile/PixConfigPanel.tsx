@@ -2,7 +2,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardTypeOptions,
   Text,
   TextInput,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
+import { useAlert } from '@/context/AlertContext';
 import { Profile } from '@/context/types';
 
 interface PixConfigPanelProps {
@@ -28,6 +28,7 @@ export function PixConfigPanel({
   isExpanded,
   onToggleExpand
 }: PixConfigPanelProps) {
+  const { showAlert } = useAlert();
   const [isUpdating, setIsUpdating] = useState(false);
   const [pixKey, setPixKey] = useState(profile?.pix_key || '');
   const [pixName, setPixName] = useState(profile?.pix_name || '');
@@ -54,10 +55,18 @@ export function PixConfigPanel({
         pix_name: pixName,
         pix_city: pixCity
       });
-      Alert.alert('Sucesso', 'Configurações de PIX atualizadas!');
+      showAlert({
+        title: 'Sucesso',
+        description: 'Configurações de PIX atualizadas!',
+        type: 'success'
+      });
       onToggleExpand();
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível atualizar o PIX.');
+      showAlert({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o PIX.',
+        type: 'error'
+      });
       console.error(error);
     } finally {
       setIsUpdating(false);

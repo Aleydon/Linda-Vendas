@@ -3,7 +3,6 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -25,6 +24,7 @@ import { Header } from '@/components/Header';
 import { SearchBar } from '@/components/SearchBar';
 import { StockSkeleton } from '@/components/skeletons/StockSkeleton';
 import { StockProductItem } from '@/components/StockProductItem';
+import { useAlert } from '@/context/AlertContext';
 import { useAppContext } from '@/context/AppContext';
 
 export function Stock(): React.JSX.Element {
@@ -38,6 +38,7 @@ export function Stock(): React.JSX.Element {
     isAdmin,
     colorScheme
   } = useAppContext();
+  const { showAlert } = useAlert();
   const [showOptions, setShowOptions] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,10 +63,11 @@ export function Stock(): React.JSX.Element {
 
   const handleDeleteProduct = (id: string, name: string): void => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      'Deletar Produto',
-      `Tem certeza que deseja deletar o produto "${name}"?`,
-      [
+    showAlert({
+      title: 'Deletar Produto',
+      description: `Tem certeza que deseja deletar o produto "${name}"?`,
+      type: 'confirm',
+      buttons: [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Deletar',
@@ -82,7 +84,7 @@ export function Stock(): React.JSX.Element {
           }
         }
       ]
-    );
+    });
   };
 
   const handleAddCategory = async (name: string) => {
@@ -96,10 +98,11 @@ export function Stock(): React.JSX.Element {
 
   const handleDeleteCategory = (id: string, name: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      'Deletar Categoria',
-      `Tem certeza que deseja deletar a categoria "${name}"?`,
-      [
+    showAlert({
+      title: 'Deletar Categoria',
+      description: `Tem certeza que deseja deletar a categoria "${name}"?`,
+      type: 'confirm',
+      buttons: [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Deletar',
@@ -116,7 +119,7 @@ export function Stock(): React.JSX.Element {
           }
         }
       ]
-    );
+    });
   };
 
   if (loading) {

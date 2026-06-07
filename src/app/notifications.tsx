@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Switch,
   Text,
@@ -13,10 +12,12 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAlert } from '@/context/AlertContext';
 import { useAppContext } from '@/context/AppContext';
 import { useNotifications } from '@/hooks/useNotifications';
 
 export default function NotificationsScreen() {
+  const { showAlert } = useAlert();
   const { profile, isAdmin, updateProfile } = useAppContext();
   const { toggleNotifications } = useNotifications();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -28,10 +29,11 @@ export default function NotificationsScreen() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
-      Alert.alert(
-        'Erro',
-        `Não foi possível atualizar as notificações: ${message}`
-      );
+      showAlert({
+        title: 'Erro',
+        description: `Não foi possível atualizar as notificações: ${message}`,
+        type: 'error'
+      });
     } finally {
       setIsUpdating(false);
     }
@@ -47,10 +49,11 @@ export default function NotificationsScreen() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Erro desconhecido';
-      Alert.alert(
-        'Erro',
-        `Não foi possível atualizar a configuração: ${message}`
-      );
+      showAlert({
+        title: 'Erro',
+        description: `Não foi possível atualizar a configuração: ${message}`,
+        type: 'error'
+      });
     } finally {
       setIsUpdating(false);
     }

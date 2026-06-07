@@ -3,8 +3,8 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
+import { useAlert } from '@/context/AlertContext';
 import { Product, Variation } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import {
@@ -21,6 +21,7 @@ interface UseProductFormProps {
 
 export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
   const router = useRouter();
+  const { showAlert } = useAlert();
 
   const [name, setName] = useState(initialData?.name ?? '');
   const [categoryId, setCategoryId] = useState(initialData?.category_id ?? '');
@@ -55,7 +56,11 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Erro', 'Não foi possível selecionar a imagem.');
+      showAlert({
+        title: 'Erro',
+        description: 'Não foi possível selecionar a imagem.',
+        type: 'error'
+      });
     }
   };
 
@@ -82,7 +87,11 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
       setImageUrl(data.publicUrl);
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Erro', 'Falha ao fazer upload da imagem.');
+      showAlert({
+        title: 'Erro',
+        description: 'Falha ao fazer upload da imagem.',
+        type: 'error'
+      });
     } finally {
       setIsUploading(false);
     }
@@ -126,24 +135,40 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
 
   const handleSave = async (): Promise<void> => {
     if (!name || !categoryId) {
-      Alert.alert('Erro', 'Preencha o nome e a categoria.');
+      showAlert({
+        title: 'Erro',
+        description: 'Preencha o nome e a categoria.',
+        type: 'error'
+      });
       return;
     }
 
     if (!hasVariations && (!price || !stock)) {
-      Alert.alert('Erro', 'Preencha o preço e o estoque.');
+      showAlert({
+        title: 'Erro',
+        description: 'Preencha o preço e o estoque.',
+        type: 'error'
+      });
       return;
     }
 
     if (hasVariations && variations.length === 0) {
-      Alert.alert('Erro', 'Adicione pelo menos uma variação.');
+      showAlert({
+        title: 'Erro',
+        description: 'Adicione pelo menos uma variação.',
+        type: 'error'
+      });
       return;
     }
 
     if (hasVariations) {
       const invalidVariation = variations.find(v => !v.name || v.price <= 0);
       if (invalidVariation) {
-        Alert.alert('Erro', 'Preencha corretamente todas as variações.');
+        showAlert({
+          title: 'Erro',
+          description: 'Preencha corretamente todas as variações.',
+          type: 'error'
+        });
         return;
       }
     }
@@ -166,7 +191,11 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
       router.replace('/(tabs)/stock');
     } catch (error) {
       console.error('Error saving product:', error);
-      Alert.alert('Erro', 'Não foi possível salvar o produto.');
+      showAlert({
+        title: 'Erro',
+        description: 'Não foi possível salvar o produto.',
+        type: 'error'
+      });
     } finally {
       setIsSaving(false);
     }
