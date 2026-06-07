@@ -17,7 +17,6 @@ import Svg, {
   Stop
 } from 'react-native-svg';
 
-import { useAppContext } from '@/context/AppContext';
 import { formatCurrency } from '@/utils/formatters';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -31,20 +30,21 @@ interface ChartDataItem {
 
 interface SalesChartProps {
   data: ChartDataItem[];
+  percentageChange: number;
 }
 
-export function SalesChart({ data }: SalesChartProps) {
-  const { colorScheme } = useAppContext();
+export function SalesChart({ data, percentageChange }: SalesChartProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(data.length - 1);
 
   // SVG dimensions
   const screenWidth = Dimensions.get('window').width;
   const paddingHorizontal = 24;
-  const chartWidth = screenWidth - paddingHorizontal * 2 - 24; // Padding card lateral
-  const chartHeight = 150;
+  const cardPadding = 24; // Padding interno do card
+  const chartWidth = screenWidth - paddingHorizontal * 2 - cardPadding * 2;
+  const chartHeight = 130;
 
-  const paddingTop = 20;
-  const paddingBottom = 20;
+  const paddingTop = 15;
+  const paddingBottom = 15;
   const paddingLeft = 10;
   const paddingRight = 10;
 
@@ -57,14 +57,12 @@ export function SalesChart({ data }: SalesChartProps) {
   const pointsScale = useSharedValue(0);
 
   useEffect(() => {
-    // Reset values on mount
     lineProgress.value = 1;
     areaOpacity.value = 0;
     pointsScale.value = 0;
 
-    // Trigger animations
     lineProgress.value = withTiming(0, { duration: 1000 });
-    areaOpacity.value = withDelay(400, withTiming(0.15, { duration: 800 }));
+    areaOpacity.value = withDelay(400, withTiming(0.25, { duration: 800 }));
     pointsScale.value = withDelay(800, withTiming(1, { duration: 500 }));
   }, [data]);
 
@@ -79,6 +77,47 @@ export function SalesChart({ data }: SalesChartProps) {
     return null;
   }
 
+  const todaySales = data[data.length - 1].total;
+
+  // Theme logic based on faturamento
+  const getTheme = () => {
+    if (todaySales === 0) {
+      // Sem vendas hoje: Tom terroso neutro escuro / Cinza
+      return {
+        bg: 'bg-[#3A3232] dark:bg-zinc-800 shadow-zinc-950/20',
+        textMuted: 'text-zinc-300/60',
+        textLabel: 'text-zinc-400',
+        badgeBg: 'bg-white/10',
+        badgeText: 'text-zinc-300',
+        grid: 'rgba(255, 255, 255, 0.05)',
+        accent: '#d4d4d8'
+      };
+    }
+    if (percentageChange < 0) {
+      // Vendas hoje <= ontem: Laranja Terracota (cor primária)
+      return {
+        bg: 'bg-[#A34211] dark:bg-[#803108] shadow-orange-950/30',
+        textMuted: 'text-orange-200/60',
+        textLabel: 'text-orange-300/80',
+        badgeBg: 'bg-white/10',
+        badgeText: 'text-orange-200',
+        grid: 'rgba(255, 255, 255, 0.08)',
+        accent: '#ffedd5'
+      };
+    }
+    // Vendas hoje > ontem: Verde Esmeralda (sucesso)
+    return {
+      bg: 'bg-[#065F46] dark:bg-[#043e2e] shadow-emerald-950/30',
+      textMuted: 'text-emerald-200/60',
+      textLabel: 'text-emerald-300/80',
+      badgeBg: 'bg-white/10',
+      badgeText: 'text-emerald-200',
+      grid: 'rgba(255, 255, 255, 0.08)',
+      accent: '#d1fae5'
+    };
+  };
+
+  const theme = getTheme();
   const maxVal = Math.max(...data.map(d => d.total), 100);
 
   // Calculate coordinates
@@ -118,48 +157,75 @@ export function SalesChart({ data }: SalesChartProps) {
   });
 
   const selectedPoint = points[selectedIndex];
-  const primaryColor = colorScheme === 'dark' ? '#fb923c' : '#A34211';
-  const gridColor =
-    colorScheme === 'dark'
-      ? 'rgba(255, 255, 255, 0.05)'
-      : 'rgba(0, 0, 0, 0.04)';
+  const isTodaySelected = selectedIndex === data.length - 1;
 
   return (
-    <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 border border-secondary/20 dark:border-zinc-800 shadow-sm mb-8">
+    <View className={`rounded-[32px] p-6 shadow-xl mb-8 ${theme.bg}`}>
       {/* Header Info */}
-      <View className="flex-row justify-between items-center mb-6">
-        <View>
-          <Text className="text-text-secondary dark:text-zinc-400 font-bold text-xs uppercase tracking-wider">
-            Desempenho de Vendas
+      <View className="flex-row justify-between items-start mb-4">
+        <View className="flex-1">
+          <Text
+            className={`font-bold text-xs uppercase tracking-widest ${theme.textLabel}`}
+          >
+            {isTodaySelected ? 'Faturamento de Hoje' : 'Faturamento'}
           </Text>
-          <Text className="text-text-primary dark:text-zinc-100 font-extrabold text-2xl mt-1">
+          <Text className="text-white font-extrabold text-4xl mt-1 tracking-tight">
             {selectedPoint
               ? formatCurrency(selectedPoint.total)
               : formatCurrency(0)}
           </Text>
-          <Text className="text-text-secondary dark:text-zinc-500 text-xs mt-0.5">
-            {selectedPoint
-              ? `${selectedPoint.dayName}, ${selectedPoint.dateString}`
-              : 'Nenhum dia selecionado'}
-          </Text>
+
+          <View className="flex-row items-center mt-2">
+            {isTodaySelected ? (
+              <>
+                <View
+                  className={`flex-row items-center px-2 py-0.5 rounded-lg ${theme.badgeBg}`}
+                >
+                  {todaySales > 0 && (
+                    <MaterialCommunityIcons
+                      name={percentageChange >= 0 ? 'arrow-up' : 'arrow-down'}
+                      size={12}
+                      color={percentageChange >= 0 ? '#34d399' : '#f87171'}
+                    />
+                  )}
+                  <Text
+                    className={`font-bold text-[10px] ${todaySales > 0 ? '' : 'ml-0'} ${theme.badgeText}`}
+                  >
+                    {todaySales > 0
+                      ? `${Math.abs(percentageChange).toFixed(0)}%`
+                      : 'Sem vendas'}
+                  </Text>
+                </View>
+                <Text
+                  className={`ml-2.5 text-xs font-medium ${theme.textMuted}`}
+                >
+                  {todaySales > 0 ? 'em relação a ontem' : 'registradas hoje'}
+                </Text>
+              </>
+            ) : (
+              <Text className={`text-xs font-semibold ${theme.textMuted}`}>
+                {selectedPoint.dayName}, {selectedPoint.dateString}
+              </Text>
+            )}
+          </View>
         </View>
 
-        <View className="bg-secondary/40 dark:bg-zinc-800 p-2.5 rounded-2xl">
+        <View className="bg-white/15 p-2.5 rounded-2xl">
           <MaterialCommunityIcons
-            name="trending-up"
+            name={todaySales === 0 ? 'wallet-plus-outline' : 'wallet-outline'}
             size={22}
-            color={primaryColor}
+            color="#ffffff"
           />
         </View>
       </View>
 
       {/* SVG Chart */}
-      <View className="items-center justify-center relative">
+      <View className="items-center justify-center relative my-2">
         <Svg width={chartWidth} height={chartHeight}>
           <Defs>
             <LinearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={primaryColor} stopOpacity={0.8} />
-              <Stop offset="1" stopColor={primaryColor} stopOpacity={0.0} />
+              <Stop offset="0" stopColor="#ffffff" stopOpacity={0.35} />
+              <Stop offset="1" stopColor="#ffffff" stopOpacity={0.0} />
             </LinearGradient>
           </Defs>
 
@@ -170,7 +236,7 @@ export function SalesChart({ data }: SalesChartProps) {
               <Path
                 key={index}
                 d={`M ${paddingLeft} ${y} L ${chartWidth - paddingRight} ${y}`}
-                stroke={gridColor}
+                stroke={theme.grid}
                 strokeWidth={1}
               />
             );
@@ -180,10 +246,9 @@ export function SalesChart({ data }: SalesChartProps) {
           {selectedPoint && (
             <Path
               d={`M ${selectedPoint.x} ${paddingTop} L ${selectedPoint.x} ${chartHeight - paddingBottom}`}
-              stroke={primaryColor}
+              stroke="rgba(255, 255, 255, 0.35)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
-              opacity={0.6}
             />
           )}
 
@@ -197,7 +262,7 @@ export function SalesChart({ data }: SalesChartProps) {
           {/* Line Chart */}
           <AnimatedPath
             d={linePath}
-            stroke={primaryColor}
+            stroke="#ffffff"
             strokeWidth={3}
             fill="none"
             strokeDasharray={800}
@@ -214,16 +279,10 @@ export function SalesChart({ data }: SalesChartProps) {
                 key={i}
                 cx={p.x}
                 cy={p.y}
-                r={isSelected ? 6 : 4}
-                fill={
-                  isSelected
-                    ? primaryColor
-                    : colorScheme === 'dark'
-                      ? '#18181b'
-                      : '#ffffff'
-                }
-                stroke={primaryColor}
-                strokeWidth={isSelected ? 3 : 2}
+                r={isSelected ? 5.5 : 3.5}
+                fill={isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.3)'}
+                stroke="#ffffff"
+                strokeWidth={isSelected ? 3 : 0}
                 opacity={pointsScale.value}
               />
             );
@@ -249,7 +308,7 @@ export function SalesChart({ data }: SalesChartProps) {
       </View>
 
       {/* X Axis Labels */}
-      <View className="flex-row justify-between mt-3 px-1">
+      <View className="flex-row justify-between mt-2 px-1">
         {data.map((d, i) => {
           const isSelected = i === selectedIndex;
           return (
@@ -261,19 +320,15 @@ export function SalesChart({ data }: SalesChartProps) {
             >
               <Text
                 className={`text-[10px] font-bold ${
-                  isSelected
-                    ? 'text-primary dark:text-orange-400 font-extrabold'
-                    : 'text-text-muted dark:text-zinc-500'
+                  isSelected ? 'text-white font-extrabold' : theme.textMuted
                 }`}
               >
                 {d.dayName}
               </Text>
               <Text
                 className={`text-[8px] mt-0.5 ${
-                  isSelected
-                    ? 'text-primary/80 dark:text-orange-400/80 font-bold'
-                    : 'text-text-muted/60 dark:text-zinc-600'
-                }`}
+                  isSelected ? 'text-white font-bold' : theme.textMuted
+                } opacity-60`}
               >
                 {d.dateString.split('/')[0]}
               </Text>

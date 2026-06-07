@@ -37,61 +37,12 @@ export function Dashboard() {
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           <View className="px-6 py-4">
-            {/* Main Card: Faturamento */}
-            <Animated.View
-              entering={FadeInDown.duration(600)}
-              className="bg-[#065F46] dark:bg-emerald-900 rounded-[32px] p-8 shadow-xl shadow-emerald-950/30 mb-8"
-            >
-              <View className="flex-row justify-between items-center mb-4">
-                <View className="bg-white/20 p-2 rounded-2xl">
-                  <MaterialCommunityIcons
-                    name="wallet-outline"
-                    size={24}
-                    color="white"
-                  />
-                </View>
-                <View className="bg-white/20 px-3 py-1 rounded-full">
-                  <Text className="text-white text-[10px] font-bold uppercase tracking-wider">
-                    Hoje
-                  </Text>
-                </View>
-              </View>
-
-              <Text className="text-white/70 font-bold text-xs uppercase tracking-widest">
-                Faturamento Total
-              </Text>
-              <Text className="text-white font-bold text-5xl my-1">
-                {formatCurrency(metrics.todaySales)}
-              </Text>
-
-              <View className="flex-row items-center mt-4">
-                <View
-                  className={`flex-row items-center px-2 py-1 rounded-lg ${metrics.percentageChange >= 0 ? 'bg-green-400/20' : 'bg-red-400/20'}`}
-                >
-                  <MaterialCommunityIcons
-                    name={
-                      metrics.percentageChange >= 0 ? 'arrow-up' : 'arrow-down'
-                    }
-                    size={14}
-                    color={
-                      metrics.percentageChange >= 0 ? '#4ade80' : '#f87171'
-                    }
-                  />
-                  <Text
-                    className={`ml-1 font-bold text-xs ${metrics.percentageChange >= 0 ? 'text-green-400' : 'text-red-400'}`}
-                  >
-                    {Math.abs(metrics.percentageChange).toFixed(0)}%
-                  </Text>
-                </View>
-                <Text className="ml-3 text-white/60 text-xs font-medium">
-                  em relação a ontem
-                </Text>
-              </View>
-            </Animated.View>
-
-            {/* Sales Chart Section */}
-            <Animated.View entering={FadeInDown.duration(600).delay(150)}>
-              <SalesChart data={metrics.salesChartData} />
+            {/* Main Integrated Sales Card & Chart */}
+            <Animated.View entering={FadeInDown.duration(600)}>
+              <SalesChart
+                data={metrics.salesChartData}
+                percentageChange={metrics.percentageChange}
+              />
             </Animated.View>
 
             {/* Top 5 Products Section */}
