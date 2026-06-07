@@ -246,15 +246,6 @@ export default function Profile() {
             isExpanded={isPixExpanded}
             onToggleExpand={() => setIsPixExpanded(!isPixExpanded)}
           />
-
-          {/* Personal Data (Static UI) */}
-          <ProfileMenuItem
-            icon="account-outline"
-            iconBgColor="bg-blue-100 dark:bg-blue-900/30"
-            iconColor={colorScheme === 'dark' ? '#60a5fa' : '#2563eb'}
-            title="Dados Pessoais"
-            onPress={() => {}}
-          />
         </View>
 
         {/* Logout Button */}

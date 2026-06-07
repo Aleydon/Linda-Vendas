@@ -9,11 +9,13 @@ import { formatCurrency, formatDateTime } from '@/utils/formatters';
 interface HistoryItemProps {
   sale: Sale;
   isInitiallyExpanded?: boolean;
+  hideSeller?: boolean;
 }
 
 export function HistoryItem({
   sale,
-  isInitiallyExpanded = false
+  isInitiallyExpanded = false,
+  hideSeller = false
 }: HistoryItemProps) {
   const { isAdmin, colorScheme } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
@@ -39,6 +41,7 @@ export function HistoryItem({
     })
     .replace('.', '');
 
+  const sellerEmail = sale.seller?.email || 'N/A';
   const sellerName = sale.seller?.pix_name || sale.seller?.email || 'N/A';
 
   return (
@@ -60,12 +63,12 @@ export function HistoryItem({
                 <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-medium">
                   {dateStr}
                 </Text>
-                {isAdmin && (
+                {isAdmin && !hideSeller && (
                   <Text
                     className="text-primary dark:text-orange-400 text-[10px] font-bold mt-0.5"
                     numberOfLines={1}
                   >
-                    Por: {sellerName}
+                    Por: {sellerEmail}
                   </Text>
                 )}
               </View>
@@ -139,7 +142,7 @@ export function HistoryItem({
             })}
           </View>
 
-          {isAdmin && (
+          {isAdmin && !hideSeller && (
             <>
               <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full my-4" />
               <View className="flex-row items-center justify-between">

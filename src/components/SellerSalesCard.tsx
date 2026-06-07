@@ -111,6 +111,7 @@ export function SellerSalesCard({
                 key={sale.id}
                 sale={sale}
                 isInitiallyExpanded={index === 0}
+                hideSeller={true}
               />
             ))}
           </View>

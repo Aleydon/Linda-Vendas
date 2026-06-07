@@ -14,8 +14,15 @@ import { formatCurrency } from '@/utils/formatters';
 
 export function Dashboard() {
   const router = useRouter();
-  const { sales, products, loading, colorScheme } = useAppContext();
-  const metrics = useDashboardMetrics(sales, products);
+  const { sales, products, loading, colorScheme, isAdmin, user } =
+    useAppContext();
+
+  const filteredSales = React.useMemo(() => {
+    if (isAdmin) return sales;
+    return sales.filter(sale => sale.user_id === user?.id);
+  }, [sales, isAdmin, user]);
+
+  const metrics = useDashboardMetrics(filteredSales, products);
   const focusAnimatedStyle = useFocusAnimation();
 
   if (loading) {
@@ -59,25 +66,30 @@ export function Dashboard() {
                   />
                 </View>
                 <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl text-center mb-2">
-                  Comece Cadastrando um Produto
+                  {isAdmin
+                    ? 'Comece Cadastrando um Produto'
+                    : 'Nenhum Produto no Inventário'}
                 </Text>
                 <Text className="text-text-secondary dark:text-zinc-500 text-sm text-center mb-6 px-4">
-                  Você ainda não possui produtos no seu inventário. Cadastre seu
-                  primeiro produto para começar a vender.
+                  {isAdmin
+                    ? 'Você ainda não possui produtos no seu inventário. Cadastre seu primeiro produto para começar a vender.'
+                    : 'Não há produtos cadastrados no inventário. Aguarde um administrador cadastrar produtos para iniciar as vendas.'}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/new-product')}
-                  className="bg-primary dark:bg-orange-500 px-6 py-3 rounded-full flex-row items-center"
-                >
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={20}
-                    color="#FFFFFF"
-                  />
-                  <Text className="text-white font-bold text-sm ml-1">
-                    Cadastrar Produto
-                  </Text>
-                </TouchableOpacity>
+                {isAdmin && (
+                  <TouchableOpacity
+                    onPress={() => router.push('/new-product')}
+                    className="bg-primary dark:bg-orange-500 px-6 py-3 rounded-full flex-row items-center"
+                  >
+                    <MaterialCommunityIcons
+                      name="plus"
+                      size={20}
+                      color="#FFFFFF"
+                    />
+                    <Text className="text-white font-bold text-sm ml-1">
+                      Cadastrar Produto
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </Animated.View>
             ) : (
               <View className="mb-8">
@@ -175,7 +187,7 @@ export function Dashboard() {
                   </Text>
                   <TouchableOpacity onPress={() => router.push('/stock')}>
                     <Text className="text-primary dark:text-orange-400 font-bold text-sm">
-                      Repor Agora
+                      {isAdmin ? 'Repor Agora' : 'Ver Estoque'}
                     </Text>
                   </TouchableOpacity>
                 </View>

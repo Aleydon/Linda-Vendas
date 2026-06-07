@@ -43,9 +43,33 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const messageTitle = '🎉 Nova Venda Registrada!';
     const valorVenda = record.total || 0;
-    const messageBody = `Venda #${record.id} concluída. Valor: R$ ${Number(valorVenda).toFixed(2)}`;
+    let sellerName = 'Vendedor';
+
+    try {
+      const { data: sellerProfile } = await supabase
+        .from('profiles')
+        .select('email, pix_name')
+        .eq('id', record.user_id)
+        .single();
+
+      if (sellerProfile) {
+        sellerName =
+          sellerProfile.pix_name ||
+          sellerProfile.email.split('@')[0] ||
+          'Vendedor';
+      }
+    } catch (err) {
+      console.error('Erro ao buscar perfil do vendedor:', err);
+    }
+
+    const valorFormatado = Number(valorVenda).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const messageTitle = `💰 Nova Venda de R$ ${valorFormatado}`;
+    const messageBody = `Vendido por: ${sellerName}`;
 
     // 4. Busca os Perfis de Administradores com notificações ativadas
     // Filtramos para não enviar para o próprio vendedor (user_id do record)
