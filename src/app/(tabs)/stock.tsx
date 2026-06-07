@@ -4,29 +4,25 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
-  FlatList,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
-  SlideInDown,
-  SlideOutDown,
   ZoomIn,
   ZoomOut
 } from 'react-native-reanimated';
 
+import { CategoryManagerModal } from '@/components/CategoryManagerModal';
 import { Header } from '@/components/Header';
 import { Loading } from '@/components/Loading';
 import { SearchBar } from '@/components/SearchBar';
+import { StockProductItem } from '@/components/StockProductItem';
 import { useAppContext } from '@/context/AppContext';
 
 export function Stock(): React.JSX.Element {
@@ -42,7 +38,6 @@ export function Stock(): React.JSX.Element {
   } = useAppContext();
   const [showOptions, setShowOptions] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
 
@@ -88,13 +83,9 @@ export function Stock(): React.JSX.Element {
     );
   };
 
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) {
-      return;
-    }
+  const handleAddCategory = async (name: string) => {
     try {
-      await addCategory(newCategoryName.trim());
-      setNewCategoryName('');
+      await addCategory(name);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('Erro ao adicionar categoria:', error);
@@ -159,147 +150,25 @@ export function Stock(): React.JSX.Element {
           />
 
           <View className="gap-y-4">
-            {filteredProducts.map(product => {
-              const isExpanded = expandedProducts.includes(product.id);
-              const totalStock = product.stock;
-
-              return (
-                <View
-                  key={product.id}
-                  className="border-secondary dark:border-zinc-800 rounded-2xl border bg-white dark:bg-zinc-900 shadow-sm overflow-hidden"
-                >
-                  <TouchableOpacity
-                    activeOpacity={product.has_variations ? 0.7 : 1}
-                    onPress={() =>
-                      product.has_variations && toggleExpand(product.id)
-                    }
-                    className="flex-row items-center justify-between p-5"
-                  >
-                    <View className="flex-1">
-                      <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg">
-                        {product.name}
-                      </Text>
-                      <Text className="text-text-secondary dark:text-zinc-400 text-sm">
-                        {product.category || 'Sem Categoria'}
-                      </Text>
-                      {product.has_variations && (
-                        <View className="flex-row items-center mt-1">
-                          <Text className="text-primary dark:text-orange-400 text-[10px] font-bold uppercase mr-1">
-                            {product.variations?.length || 0} Variações
-                          </Text>
-                          <MaterialCommunityIcons
-                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={14}
-                            color={
-                              colorScheme === 'dark' ? '#fb923c' : '#A34211'
-                            }
-                          />
-                        </View>
-                      )}
-                    </View>
-
-                    <View className="items-end">
-                      <View
-                        className={`rounded-full px-3 py-1 ${
-                          totalStock > 10
-                            ? 'bg-teal-50 dark:bg-teal-900/20'
-                            : totalStock > 0
-                              ? 'bg-orange-50 dark:bg-orange-900/20'
-                              : 'bg-red-50 dark:bg-red-900/20'
-                        }`}
-                      >
-                        <Text
-                          className={`font-bold text-sm ${
-                            totalStock > 10
-                              ? 'text-teal-700 dark:text-teal-400'
-                              : totalStock > 0
-                                ? 'text-orange-700 dark:text-orange-400'
-                                : 'text-red-700 dark:text-red-400'
-                          }`}
-                        >
-                          {totalStock} un
-                        </Text>
-                      </View>
-                      <Text className="text-text-muted dark:text-zinc-500 mt-1 text-[10px] uppercase">
-                        {totalStock === 0 ? 'Esgotado' : 'Disponível'}
-                      </Text>
-                    </View>
-
-                    {isAdmin && (
-                      <View className="ml-4 flex-row">
-                        <TouchableOpacity
-                          className="mr-2 rounded-full bg-gray-100 dark:bg-zinc-800 p-2"
-                          onPress={() => {
-                            Haptics.selectionAsync();
-                            router.push(`/edit-product/${product.id}`);
-                          }}
-                        >
-                          <MaterialCommunityIcons
-                            name="pencil"
-                            size={20}
-                            color={
-                              colorScheme === 'dark' ? '#fb923c' : '#4B5563'
-                            }
-                          />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          className="rounded-full bg-red-50 dark:bg-red-900/30 p-2"
-                          onPress={() =>
-                            handleDeleteProduct(product.id, product.name)
-                          }
-                        >
-                          <MaterialCommunityIcons
-                            name="trash-can-outline"
-                            size={20}
-                            color="#EF4444"
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-
-                  {product.has_variations &&
-                    isExpanded &&
-                    product.variations &&
-                    product.variations.length > 0 && (
-                      <Animated.View
-                        entering={FadeIn.duration(300)}
-                        exiting={FadeOut.duration(200)}
-                        className="bg-secondary/10 dark:bg-zinc-800/50 px-5 pb-4 border-t border-secondary/20 dark:border-zinc-800"
-                      >
-                        {product.variations.map(v => (
-                          <View
-                            key={v.id}
-                            className="flex-row justify-between py-3 border-b border-secondary/10 dark:border-zinc-700/50 last:border-b-0"
-                          >
-                            <Text className="text-text-secondary dark:text-zinc-400 text-sm">
-                              {v.name}
-                            </Text>
-                            <View className="flex-row items-center">
-                              <Text className="text-text-primary dark:text-zinc-100 font-bold text-sm mr-2">
-                                {v.stock} un
-                              </Text>
-                              <View
-                                className={`w-2 h-2 rounded-full ${
-                                  v.stock > 0 ? 'bg-teal-500' : 'bg-red-500'
-                                }`}
-                              />
-                            </View>
-                          </View>
-                        ))}
-                      </Animated.View>
-                    )}
-                </View>
-              );
-            })}
+            {filteredProducts.map(product => (
+              <StockProductItem
+                key={product.id}
+                product={product}
+                isExpanded={expandedProducts.includes(product.id)}
+                onToggleExpand={() => toggleExpand(product.id)}
+                isAdmin={isAdmin}
+                colorScheme={colorScheme}
+                onEdit={() => {
+                  Haptics.selectionAsync();
+                  router.push(`/edit-product/${product.id}`);
+                }}
+                onDelete={() => handleDeleteProduct(product.id, product.name)}
+              />
+            ))}
           </View>
 
           {/* Low Stock Warning */}
-          {products.some(p => {
-            const totalStock = p.stock;
-            return totalStock <= 5 && totalStock > 0;
-          }) && (
+          {products.some(p => p.stock <= 5 && p.stock > 0) && (
             <View className="mt-10 flex-row items-center rounded-2xl bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-100 dark:border-orange-900/30">
               <MaterialCommunityIcons
                 name="alert-circle-outline"
@@ -378,98 +247,14 @@ export function Stock(): React.JSX.Element {
       </Modal>
 
       {/* Category Manager Modal */}
-      <Modal
+      <CategoryManagerModal
         visible={showCategoryManager}
-        transparent
-        animationType="none"
-        onRequestClose={() => setShowCategoryManager(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}
-        >
-          <View className="flex-1 justify-end">
-            <Animated.View
-              entering={FadeIn}
-              exiting={FadeOut}
-              className="absolute inset-0 bg-black/50"
-            >
-              <Pressable
-                className="flex-1"
-                onPress={() => setShowCategoryManager(false)}
-              />
-            </Animated.View>
-
-            <Animated.View
-              entering={SlideInDown.springify().damping(15)}
-              exiting={SlideOutDown}
-              className="bg-white dark:bg-zinc-900 h-[70%] rounded-t-3xl p-6 shadow-2xl"
-            >
-              <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
-                  Gerenciar Categorias
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setShowCategoryManager(false)}
-                  className="p-1"
-                >
-                  <MaterialCommunityIcons
-                    name="close"
-                    size={28}
-                    color={colorScheme === 'dark' ? '#fb923c' : '#3C2F2F'}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View className="flex-row mb-6">
-                <TextInput
-                  className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100 mr-2"
-                  placeholder="Nova categoria..."
-                  placeholderTextColor={
-                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
-                  }
-                  value={newCategoryName}
-                  onChangeText={setNewCategoryName}
-                />
-                <TouchableOpacity
-                  className="bg-primary dark:bg-orange-600 p-3 rounded-xl items-center justify-center"
-                  onPress={handleAddCategory}
-                >
-                  <MaterialCommunityIcons name="plus" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
-
-              <FlatList
-                data={categories}
-                keyExtractor={item => item.id}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-zinc-800">
-                    <Text className="text-text-primary dark:text-zinc-200 text-lg">
-                      {item.name}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => handleDeleteCategory(item.id, item.name)}
-                      className="p-2"
-                    >
-                      <MaterialCommunityIcons
-                        name="trash-can-outline"
-                        size={22}
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                ListEmptyComponent={() => (
-                  <Text className="text-text-secondary dark:text-zinc-500 text-center mt-10">
-                    Nenhuma categoria cadastrada.
-                  </Text>
-                )}
-              />
-            </Animated.View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        onClose={() => setShowCategoryManager(false)}
+        categories={categories}
+        colorScheme={colorScheme}
+        onAddCategory={handleAddCategory}
+        onDeleteCategory={handleDeleteCategory}
+      />
 
       {/* Floating Action Button */}
       {isAdmin && (
@@ -477,7 +262,7 @@ export function Stock(): React.JSX.Element {
           className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
           activeOpacity={0.8}
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Haptics.selectionAsync();
             setShowOptions(true);
           }}
         >

@@ -1,103 +1,19 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Header } from '@/components/Header';
 import { Loading } from '@/components/Loading';
 import { useAppContext } from '@/context/AppContext';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { formatCurrency } from '@/utils/formatters';
 
 export function Dashboard() {
   const router = useRouter();
   const { sales, products, loading, colorScheme } = useAppContext();
-
-  const metrics = useMemo(() => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const todaySalesData = sales.filter(s => new Date(s.created_at) >= today);
-    const yesterdaySalesData = sales.filter(s => {
-      const date = new Date(s.created_at);
-      return date >= yesterday && date < today;
-    });
-
-    const tTotalSales = todaySalesData.reduce((acc, s) => acc + s.total, 0);
-    const yTotalSales = yesterdaySalesData.reduce((acc, s) => acc + s.total, 0);
-
-    let pChange = 0;
-    if (yTotalSales > 0) {
-      pChange = ((tTotalSales - yTotalSales) / yTotalSales) * 100;
-    } else if (tTotalSales > 0) {
-      pChange = 100;
-    }
-
-    // Top 5 Products/Variations
-    const productStats: {
-      [key: string]: { name: string; quantity: number; total: number };
-    } = {};
-    const categoryStats: {
-      [key: string]: { name: string; quantity: number; total: number };
-    } = {};
-
-    sales.forEach(sale => {
-      sale.sale_items?.forEach(item => {
-        const prodName = item.product?.name || 'Produto';
-        const varName = item.variation?.name;
-        const displayName = varName ? `${prodName} (${varName})` : prodName;
-        const categoryName = item.product?.categories?.name || 'Sem Categoria';
-
-        // Aggregating products/variations
-        if (!productStats[displayName]) {
-          productStats[displayName] = {
-            name: displayName,
-            quantity: 0,
-            total: 0
-          };
-        }
-        productStats[displayName].quantity += item.quantity;
-        productStats[displayName].total +=
-          item.quantity * Number(item.unit_price);
-
-        // Aggregating categories
-        if (!categoryStats[categoryName]) {
-          categoryStats[categoryName] = {
-            name: categoryName,
-            quantity: 0,
-            total: 0
-          };
-        }
-        categoryStats[categoryName].quantity += item.quantity;
-        categoryStats[categoryName].total +=
-          item.quantity * Number(item.unit_price);
-      });
-    });
-
-    const topProducts = Object.values(productStats)
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
-
-    const topCategories = Object.values(categoryStats)
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 4);
-
-    // Stock items (filtering only low stock and sorting by lowest)
-    const lowStockItems = products
-      .filter(p => p.stock <= 10)
-      .sort((a, b) => a.stock - b.stock)
-      .slice(0, 5);
-
-    return {
-      todaySales: tTotalSales,
-      percentageChange: pChange,
-      topProducts,
-      topCategories,
-      lowStockItems
-    };
-  }, [sales, products]);
+  const metrics = useDashboardMetrics(sales, products);
 
   if (loading) {
     return (
@@ -253,7 +169,7 @@ export function Dashboard() {
           {/* Low Stock Warning */}
           <View>
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl  px-2 py-1 ">
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl px-2 py-1">
                 Atenção ao Estoque
               </Text>
               <TouchableOpacity onPress={() => router.push('/stock')}>

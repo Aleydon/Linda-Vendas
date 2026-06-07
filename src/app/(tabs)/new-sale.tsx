@@ -14,22 +14,19 @@ import { PaymentModal } from '@/components/PaymentModal';
 import { SaleProductItem } from '@/components/SaleProductItem';
 import { SearchBar } from '@/components/SearchBar';
 import { useAppContext } from '@/context/AppContext';
+import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/utils/formatters';
 import { generatePixPayload } from '@/utils/pix';
-
-interface CartItem {
-  productId: string;
-  variationId?: string;
-  quantity: number;
-}
 
 export function NewSale() {
   const { products, addSale, loading, categories, profile, user, colorScheme } =
     useAppContext();
   const [search, setSearch] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const { cart, total, totalItemsCount, updateQuantity, clearCart } =
+    useCart(products);
 
   const filteredProducts = useMemo(() => {
     const lowerQuery = search.toLowerCase();
@@ -57,22 +54,6 @@ export function NewSale() {
     return categories.filter(cat => cat.id === activeCategoryId);
   }, [categories, filteredProducts, activeCategoryId]);
 
-  const total = useMemo(() => {
-    return cart.reduce((acc, item) => {
-      const product = products.find(p => p.id === item.productId);
-      if (!product) return acc;
-
-      if (item.variationId && product.variations) {
-        const variation = product.variations.find(
-          v => v.id === item.variationId
-        );
-        return acc + (variation?.price || 0) * item.quantity;
-      }
-
-      return acc + (product.price || 0) * item.quantity;
-    }, 0);
-  }, [cart, products]);
-
   const pixString = useMemo(() => {
     const key = profile?.pix_key || process.env.EXPO_PUBLIC_PIX_KEY;
     const name = profile?.pix_name || process.env.EXPO_PUBLIC_PIX_NAME;
@@ -88,50 +69,6 @@ export function NewSale() {
       description: 'Venda Linda Sales'
     });
   }, [total, profile]);
-
-  const updateQuantity = (
-    productId: string,
-    delta: number,
-    variationId?: string
-  ) => {
-    setCart(prev => {
-      const existingIndex = prev.findIndex(
-        item => item.productId === productId && item.variationId === variationId
-      );
-      const product = products.find(p => p.id === productId);
-
-      if (!product) return prev;
-
-      let maxStock = product.stock;
-      if (variationId && product.variations) {
-        const v = product.variations.find(
-          varItem => varItem.id === variationId
-        );
-        if (v) maxStock = v.stock;
-      }
-
-      if (existingIndex > -1) {
-        const existing = prev[existingIndex];
-        const newQuantity = existing.quantity + delta;
-
-        if (newQuantity <= 0) {
-          return prev.filter((_, i) => i !== existingIndex);
-        }
-
-        if (newQuantity > maxStock) {
-          return prev;
-        }
-
-        const newCart = [...prev];
-        newCart[existingIndex] = { ...existing, quantity: newQuantity };
-        return newCart;
-      } else if (delta > 0) {
-        if (maxStock <= 0) return prev;
-        return [...prev, { productId, variationId, quantity: 1 }];
-      }
-      return prev;
-    });
-  };
 
   const handleFinalize = () => {
     if (cart.length === 0) {
@@ -163,7 +100,7 @@ export function NewSale() {
 
       await addSale(items, total, user?.id);
       setShowConfirmation(false);
-      setCart([]);
+      clearCart();
       setSearch('');
     } catch (error) {
       console.error('Error finalizing sale:', error);
@@ -271,7 +208,7 @@ export function NewSale() {
           </View>
           <View className="rounded-full bg-secondary dark:bg-zinc-800 px-4 py-2">
             <Text className="text-primary dark:text-orange-400 font-bold">
-              {cart.reduce((acc, item) => acc + item.quantity, 0)} itens
+              {totalItemsCount} itens
             </Text>
           </View>
         </View>
