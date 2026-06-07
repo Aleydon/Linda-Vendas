@@ -11,11 +11,13 @@ import { HistoryItem } from '@/components/HistoryItem';
 import { SearchBar } from '@/components/SearchBar';
 import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
+import { useFocusAnimation } from '@/hooks/useFocusAnimation';
 import { formatDateLong, formatDateTime } from '@/utils/formatters';
 
 export function History() {
   const { sales, loading, colorScheme } = useAppContext();
   const [search, setSearch] = useState('');
+  const focusAnimatedStyle = useFocusAnimation();
 
   const filteredSales = useMemo(() => {
     if (!search) return sales;
@@ -77,47 +79,49 @@ export function History() {
     <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        onClear={() => setSearch('')}
-        placeholder="Buscar por produto, variação, data ou hora..."
-      />
+      <Animated.View style={focusAnimatedStyle} className="flex-1">
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          onClear={() => setSearch('')}
+          placeholder="Buscar por produto, variação, data ou hora..."
+        />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
-        <View className="px-6">
-          {groupedSales.length > 0 ? (
-            groupedSales.map(([date, data]) => (
-              <View key={date} className="mb-8">
-                <View className="mb-4 flex-row items-center justify-between">
-                  <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest">
-                    {date}
-                  </Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          <View className="px-6">
+            {groupedSales.length > 0 ? (
+              groupedSales.map(([date, data]) => (
+                <View key={date} className="mb-8">
+                  <View className="mb-4 flex-row items-center justify-between">
+                    <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase tracking-widest">
+                      {date}
+                    </Text>
+                  </View>
+                  <Animated.View layout={LinearTransition} className="gap-y-4">
+                    {data.sales.map((sale, index) => (
+                      <Animated.View
+                        key={sale.id}
+                        entering={FadeInDown.delay(index * 35).duration(300)}
+                        layout={LinearTransition}
+                      >
+                        <HistoryItem
+                          sale={sale}
+                          isInitiallyExpanded={index < 3}
+                        />
+                      </Animated.View>
+                    ))}
+                  </Animated.View>
                 </View>
-                <Animated.View layout={LinearTransition} className="gap-y-4">
-                  {data.sales.map((sale, index) => (
-                    <Animated.View
-                      key={sale.id}
-                      entering={FadeInDown.delay(index * 35).duration(300)}
-                      layout={LinearTransition}
-                    >
-                      <HistoryItem
-                        sale={sale}
-                        isInitiallyExpanded={index < 3}
-                      />
-                    </Animated.View>
-                  ))}
-                </Animated.View>
-              </View>
-            ))
-          ) : (
-            <EmptyState search={search} colorScheme={colorScheme} />
-          )}
-        </View>
-      </ScrollView>
+              ))
+            ) : (
+              <EmptyState search={search} colorScheme={colorScheme} />
+            )}
+          </View>
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }

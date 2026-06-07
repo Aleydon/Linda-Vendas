@@ -20,6 +20,7 @@ import { SearchBar } from '@/components/SearchBar';
 import { NewSaleSkeleton } from '@/components/skeletons/NewSaleSkeleton';
 import { useAppContext } from '@/context/AppContext';
 import { useCart } from '@/hooks/useCart';
+import { useFocusAnimation } from '@/hooks/useFocusAnimation';
 import { formatCurrency } from '@/utils/formatters';
 import { generatePixPayload } from '@/utils/pix';
 
@@ -29,6 +30,7 @@ export function NewSale() {
   const [search, setSearch] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const focusAnimatedStyle = useFocusAnimation();
 
   const { cart, total, totalItemsCount, updateQuantity, clearCart } =
     useCart(products);
@@ -125,141 +127,143 @@ export function NewSale() {
     <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 180 }}
-      >
-        <View className="px-6 pt-2">
-          <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
-            Nova Venda
-          </Text>
-          <Text className="text-text-secondary dark:text-zinc-400 text-base">
-            Selecione os produtos para gerar o QR Code.
-          </Text>
-        </View>
-
-        <SearchBar
-          value={search}
-          onChangeText={setSearch}
-          onClear={() => setSearch('')}
-        />
-
+      <Animated.View style={focusAnimatedStyle} className="flex-1">
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-6 px-6"
-          contentContainerStyle={{ paddingRight: 40 }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 180 }}
         >
-          <CategoryItem
-            label="Todos"
-            isActive={activeCategoryId === 'Todos'}
-            onPress={() => setActiveCategoryId('Todos')}
+          <View className="px-6 pt-2">
+            <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
+              Nova Venda
+            </Text>
+            <Text className="text-text-secondary dark:text-zinc-400 text-base">
+              Selecione os produtos para gerar o QR Code.
+            </Text>
+          </View>
+
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+            onClear={() => setSearch('')}
           />
-          {categories.map(category => (
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-6 px-6"
+            contentContainerStyle={{ paddingRight: 40 }}
+          >
             <CategoryItem
-              key={category.id}
-              label={category.name}
-              isActive={activeCategoryId === category.id}
-              onPress={() => setActiveCategoryId(category.id)}
+              label="Todos"
+              isActive={activeCategoryId === 'Todos'}
+              onPress={() => setActiveCategoryId('Todos')}
             />
-          ))}
+            {categories.map(category => (
+              <CategoryItem
+                key={category.id}
+                label={category.name}
+                isActive={activeCategoryId === category.id}
+                onPress={() => setActiveCategoryId(category.id)}
+              />
+            ))}
+          </ScrollView>
+
+          <View className="px-6">
+            {displayedSections.map(section => {
+              const sectionProducts = filteredProducts.filter(
+                p => p.category_id === section.id
+              );
+
+              if (sectionProducts.length === 0) return null;
+
+              return (
+                <View key={section.id} className="mb-6">
+                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
+                    {section.name}
+                  </Text>
+
+                  <Animated.View layout={LinearTransition} className="gap-y-4">
+                    {sectionProducts.map((product, index) => (
+                      <Animated.View
+                        key={product.id}
+                        entering={FadeInDown.delay(index * 30).duration(300)}
+                        layout={LinearTransition}
+                      >
+                        <SaleProductItem
+                          item={product}
+                          cart={cart}
+                          onUpdateQuantity={updateQuantity}
+                          searchQuery={search}
+                        />
+                      </Animated.View>
+                    ))}
+                  </Animated.View>
+                </View>
+              );
+            })}
+
+            {filteredProducts.length === 0 && (
+              <View className="py-20 items-center justify-center">
+                <MaterialCommunityIcons
+                  name="package-variant"
+                  size={48}
+                  color={colorScheme === 'dark' ? '#3f3f46' : '#D1D5DB'}
+                />
+                <Text className="text-text-secondary dark:text-zinc-500 mt-2 text-base text-center px-10">
+                  {search || activeCategoryId !== 'Todos'
+                    ? 'Nenhum produto encontrado com estes filtros.'
+                    : 'Nenhum produto em estoque no momento.'}
+                </Text>
+              </View>
+            )}
+          </View>
         </ScrollView>
 
-        <View className="px-6">
-          {displayedSections.map(section => {
-            const sectionProducts = filteredProducts.filter(
-              p => p.category_id === section.id
-            );
-
-            if (sectionProducts.length === 0) return null;
-
-            return (
-              <View key={section.id} className="mb-6">
-                <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
-                  {section.name}
-                </Text>
-
-                <Animated.View layout={LinearTransition} className="gap-y-4">
-                  {sectionProducts.map((product, index) => (
-                    <Animated.View
-                      key={product.id}
-                      entering={FadeInDown.delay(index * 30).duration(300)}
-                      layout={LinearTransition}
-                    >
-                      <SaleProductItem
-                        item={product}
-                        cart={cart}
-                        onUpdateQuantity={updateQuantity}
-                        searchQuery={search}
-                      />
-                    </Animated.View>
-                  ))}
-                </Animated.View>
-              </View>
-            );
-          })}
-
-          {filteredProducts.length === 0 && (
-            <View className="py-20 items-center justify-center">
-              <MaterialCommunityIcons
-                name="package-variant"
-                size={48}
-                color={colorScheme === 'dark' ? '#3f3f46' : '#D1D5DB'}
-              />
-              <Text className="text-text-secondary dark:text-zinc-500 mt-2 text-base text-center px-10">
-                {search || activeCategoryId !== 'Todos'
-                  ? 'Nenhum produto encontrado com estes filtros.'
-                  : 'Nenhum produto em estoque no momento.'}
+        {/* Bottom Summary */}
+        <View className="border-secondary dark:border-zinc-800 absolute bottom-0 left-0 right-0 border-t bg-white dark:bg-zinc-900 px-6 pb-2 pt-2 shadow-lg">
+          <View className="mb-4 flex-row items-center justify-between">
+            <View>
+              <Text className="text-text-secondary dark:text-zinc-400 text-sm">
+                Total da Venda
+              </Text>
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-3xl">
+                {formatCurrency(total)}
               </Text>
             </View>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Bottom Summary */}
-      <View className="border-secondary dark:border-zinc-800 absolute bottom-0 left-0 right-0 border-t bg-white dark:bg-zinc-900 px-6 pb-2 pt-2 shadow-lg">
-        <View className="mb-4 flex-row items-center justify-between">
-          <View>
-            <Text className="text-text-secondary dark:text-zinc-400 text-sm">
-              Total da Venda
-            </Text>
-            <Text className="text-text-primary dark:text-zinc-100 font-bold text-3xl">
-              {formatCurrency(total)}
-            </Text>
-          </View>
-          <View className="rounded-full bg-secondary dark:bg-zinc-800 px-4 py-2">
-            <Text className="text-primary dark:text-orange-400 font-bold">
-              {totalItemsCount} itens
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={handleFinalize}
-          disabled={loading || cart.length === 0}
-          className={`flex-row items-center justify-center rounded-2xl py-5 shadow-lg ${
-            cart.length === 0
-              ? 'bg-gray-300 dark:bg-zinc-800'
-              : 'bg-primary dark:bg-orange-600 shadow-orange-500/40'
-          }`}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <>
-              <MaterialCommunityIcons
-                name="qrcode-scan"
-                size={20}
-                color="white"
-              />
-              <Text className="ml-2 font-bold text-white text-lg">
-                Gerar QR Code
+            <View className="rounded-full bg-secondary dark:bg-zinc-800 px-4 py-2">
+              <Text className="text-primary dark:text-orange-400 font-bold">
+                {totalItemsCount} itens
               </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleFinalize}
+            disabled={loading || cart.length === 0}
+            className={`flex-row items-center justify-center rounded-2xl py-5 shadow-lg ${
+              cart.length === 0
+                ? 'bg-gray-300 dark:bg-zinc-800'
+                : 'bg-primary dark:bg-orange-600 shadow-orange-500/40'
+            }`}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="qrcode-scan"
+                  size={20}
+                  color="white"
+                />
+                <Text className="ml-2 font-bold text-white text-lg">
+                  Gerar QR Code
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
 
       <PaymentModal
         visible={showConfirmation}
