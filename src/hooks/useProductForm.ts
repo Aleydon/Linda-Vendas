@@ -163,7 +163,7 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
         variations: hasVariations ? variations : []
       });
 
-      router.back();
+      router.replace('/(tabs)/stock');
     } catch (error) {
       console.error('Error saving product:', error);
       Alert.alert('Erro', 'Não foi possível salvar o produto.');

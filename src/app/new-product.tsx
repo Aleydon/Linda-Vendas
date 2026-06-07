@@ -1,7 +1,8 @@
 import { Redirect } from 'expo-router';
 
-import { ProductForm } from '@/components/ProductForm';
+import { MultipleProductsForm } from '@/components/MultipleProductsForm';
 import { useAppContext } from '@/context/AppContext';
+import { Product } from '@/context/types';
 
 export function NewProduct() {
   const { addProduct, isAdmin } = useAppContext();
@@ -10,13 +11,17 @@ export function NewProduct() {
     return <Redirect href="/(tabs)/stock" />;
   }
 
+  const handleSaveAll = async (
+    productsList: Omit<Product, 'id' | 'outOfStock' | 'category'>[]
+  ) => {
+    // Save sequentially to avoid connection race conditions
+    for (const prod of productsList) {
+      await addProduct(prod);
+    }
+  };
+
   return (
-    <ProductForm
-      title="Novo Produto"
-      onSubmit={data => {
-        void addProduct(data);
-      }}
-    />
+    <MultipleProductsForm title="Novos Produtos" onSubmit={handleSaveAll} />
   );
 }
 
