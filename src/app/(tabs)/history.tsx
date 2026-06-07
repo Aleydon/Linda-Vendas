@@ -109,7 +109,7 @@ export function History() {
                       >
                         <HistoryItem
                           sale={sale}
-                          isInitiallyExpanded={index < 3}
+                          isInitiallyExpanded={index === 0}
                         />
                       </Animated.View>
                     ))}

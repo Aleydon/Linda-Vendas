@@ -160,11 +160,11 @@ export default function UserSales() {
 
           {isAdmin ? (
             salesBySeller.length > 0 ? (
-              salesBySeller.map((group, index) => (
+              salesBySeller.map(group => (
                 <SellerSalesCard
                   key={group.sellerId}
                   group={group}
-                  isInitiallyExpanded={index === 0}
+                  isInitiallyExpanded={false}
                 />
               ))
             ) : (
