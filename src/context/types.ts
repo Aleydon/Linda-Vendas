@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 export interface Category {
   id: string;
   name: string;
+  display_order?: number;
 }
 
 export type UserRole = 'admin' | 'user';
@@ -73,6 +74,7 @@ export interface AppContextType {
   products: Product[];
   sales: Sale[];
   loading: boolean;
+  initialLoading: boolean;
   categories: Category[];
   user: User | null;
   profile: Profile | null;
@@ -102,6 +104,7 @@ export interface AppContextType {
   ) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
+  reorderCategories: (newCategories: Category[]) => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   fetchSalesByUser: (userId: string) => Promise<Sale[]>;
   fetchAllProfiles: () => Promise<Profile[]>;

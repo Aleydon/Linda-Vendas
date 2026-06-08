@@ -45,11 +45,34 @@ export function useAppCategories({
     }
   };
 
+  const reorderCategories = async (
+    newCategories: Category[]
+  ): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      // Optimistic update
+      setCategories(newCategories);
+
+      const updates = newCategories.map((cat, index) => ({
+        id: cat.id,
+        display_order: index
+      }));
+
+      await api.updateCategoryOrder(updates);
+    } catch (error) {
+      console.error('Error reordering categories:', error);
+      // Revert on error
+      await fetchCategories();
+      throw error;
+    }
+  };
+
   return {
     categories,
     setCategories,
     fetchCategories,
     addCategory,
-    deleteCategory
+    deleteCategory,
+    reorderCategories
   };
 }

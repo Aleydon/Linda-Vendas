@@ -24,12 +24,12 @@ import { AlertProvider } from '@/context/AlertContext';
 import { AppProvider, useAppContext } from '@/context/AppContext';
 
 function InitialLayout() {
-  const { user, loading } = useAppContext();
+  const { user, initialLoading } = useAppContext();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return;
+    if (initialLoading) return;
 
     const inAuthGroup = segments[0] === 'login';
 
@@ -38,9 +38,9 @@ function InitialLayout() {
     } else if (user && inAuthGroup) {
       router.replace('/(tabs)/dashboard');
     }
-  }, [user, segments, loading]);
+  }, [user, segments, initialLoading]);
 
-  if (loading) {
+  if (initialLoading) {
     return <Loading />;
   }
 

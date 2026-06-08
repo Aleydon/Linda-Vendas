@@ -10,9 +10,24 @@ import { supabase } from '@/lib/supabase';
 
 export const api = {
   async fetchCategories(): Promise<Category[]> {
-    const { data, error } = await supabase.from('categories').select('*');
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('display_order', { ascending: true });
     if (error) throw error;
     return (data as Category[]) || [];
+  },
+
+  async updateCategoryOrder(
+    categories: { id: string; display_order: number }[]
+  ): Promise<void> {
+    for (const cat of categories) {
+      const { error } = await supabase
+        .from('categories')
+        .update({ display_order: cat.display_order })
+        .eq('id', cat.id);
+      if (error) throw error;
+    }
   },
 
   async fetchAllProfiles(): Promise<Profile[]> {

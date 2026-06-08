@@ -1,11 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import React, { useState } from 'react';
 import {
-  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,7 +14,9 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeOut,
+  LinearTransition,
   SlideInDown,
   SlideOutDown
 } from 'react-native-reanimated';
@@ -27,6 +30,7 @@ interface CategoryManagerModalProps {
   colorScheme: 'light' | 'dark';
   onAddCategory: (name: string) => Promise<void>;
   onDeleteCategory: (id: string, name: string) => void;
+  onReorderCategories: (newCategories: Category[]) => Promise<void>;
 }
 
 export function CategoryManagerModal({
@@ -35,7 +39,8 @@ export function CategoryManagerModal({
   categories,
   colorScheme,
   onAddCategory,
-  onDeleteCategory
+  onDeleteCategory,
+  onReorderCategories
 }: CategoryManagerModalProps) {
   const [newCategoryName, setNewCategoryName] = useState('');
 
@@ -43,6 +48,21 @@ export function CategoryManagerModal({
     if (!newCategoryName.trim()) return;
     await onAddCategory(newCategoryName.trim());
     setNewCategoryName('');
+  };
+
+  const handleMove = async (index: number, direction: 'up' | 'down') => {
+    const newCategories = [...categories];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (targetIndex < 0 || targetIndex >= newCategories.length) return;
+
+    Haptics.selectionAsync();
+    [newCategories[index], newCategories[targetIndex]] = [
+      newCategories[targetIndex],
+      newCategories[index]
+    ];
+
+    await onReorderCategories(newCategories);
   };
 
   return (
@@ -101,33 +121,72 @@ export function CategoryManagerModal({
               </TouchableOpacity>
             </View>
 
-            <FlatList
-              data={categories}
-              keyExtractor={item => item.id}
+            <ScrollView
               showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-zinc-800">
-                  <Text className="text-text-primary dark:text-zinc-200 text-lg">
-                    {item.name}
+              contentContainerStyle={{ paddingBottom: 40 }}
+            >
+              <Animated.View layout={LinearTransition}>
+                {categories.length > 0 ? (
+                  categories.map((item, index) => (
+                    <Animated.View
+                      key={item.id}
+                      entering={FadeInDown.delay(index * 30).duration(300)}
+                      exiting={FadeOut}
+                      layout={LinearTransition}
+                      className="flex-row items-center py-3 border-b border-gray-100 dark:border-zinc-800"
+                    >
+                      <View className="flex-row mr-2">
+                        <TouchableOpacity
+                          onPress={() => handleMove(index, 'up')}
+                          disabled={index === 0}
+                          className={`p-1 ${index === 0 ? 'opacity-20' : ''}`}
+                        >
+                          <MaterialCommunityIcons
+                            name="chevron-up"
+                            size={24}
+                            color={
+                              colorScheme === 'dark' ? '#fb923c' : '#3C2F2F'
+                            }
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleMove(index, 'down')}
+                          disabled={index === categories.length - 1}
+                          className={`p-1 ${index === categories.length - 1 ? 'opacity-20' : ''}`}
+                        >
+                          <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={24}
+                            color={
+                              colorScheme === 'dark' ? '#fb923c' : '#3C2F2F'
+                            }
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <Text className="flex-1 text-text-primary dark:text-zinc-200 text-lg">
+                        {item.name}
+                      </Text>
+
+                      <TouchableOpacity
+                        onPress={() => onDeleteCategory(item.id, item.name)}
+                        className="p-2"
+                      >
+                        <MaterialCommunityIcons
+                          name="trash-can-outline"
+                          size={22}
+                          color="#EF4444"
+                        />
+                      </TouchableOpacity>
+                    </Animated.View>
+                  ))
+                ) : (
+                  <Text className="text-text-secondary dark:text-zinc-500 text-center mt-10">
+                    Nenhuma categoria cadastrada.
                   </Text>
-                  <TouchableOpacity
-                    onPress={() => onDeleteCategory(item.id, item.name)}
-                    className="p-2"
-                  >
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={22}
-                      color="#EF4444"
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-              ListEmptyComponent={() => (
-                <Text className="text-text-secondary dark:text-zinc-500 text-center mt-10">
-                  Nenhuma categoria cadastrada.
-                </Text>
-              )}
-            />
+                )}
+              </Animated.View>
+            </ScrollView>
           </Animated.View>
         </View>
       </KeyboardAvoidingView>

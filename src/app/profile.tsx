@@ -248,7 +248,6 @@ export default function Profile() {
           />
         </View>
 
-        {/* Logout Button */}
         <View className="mt-8 px-6 mb-12">
           <TouchableOpacity
             onPress={handleSignOut}

@@ -36,6 +36,7 @@ export function Stock(): React.JSX.Element {
     deleteProduct,
     addCategory,
     deleteCategory,
+    reorderCategories,
     isAdmin,
     colorScheme
   } = useAppContext();
@@ -54,14 +55,16 @@ export function Stock(): React.JSX.Element {
     );
   };
 
-  const filteredProducts = products.filter(product => {
-    const lowerQuery = searchQuery.toLowerCase();
-    const matchesName = product.name.toLowerCase().includes(lowerQuery);
-    const matchesVariations = product.variations?.some(v =>
-      v.name.toLowerCase().includes(lowerQuery)
-    );
-    return matchesName || matchesVariations;
-  });
+  const filteredProducts = products
+    .filter(product => {
+      const lowerQuery = searchQuery.toLowerCase();
+      const matchesName = product.name.toLowerCase().includes(lowerQuery);
+      const matchesVariations = product.variations?.some(v =>
+        v.name.toLowerCase().includes(lowerQuery)
+      );
+      return matchesName || matchesVariations;
+    })
+    .sort((a, b) => a.stock - b.stock);
 
   const handleDeleteProduct = (id: string, name: string): void => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -291,6 +294,7 @@ export function Stock(): React.JSX.Element {
         colorScheme={colorScheme}
         onAddCategory={handleAddCategory}
         onDeleteCategory={handleDeleteCategory}
+        onReorderCategories={reorderCategories}
       />
 
       {/* Floating Action Button */}

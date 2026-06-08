@@ -45,6 +45,7 @@ export function AppProvider({
 }): React.JSX.Element {
   const { colorScheme, setColorScheme } = useColorScheme();
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // Load saved theme or default to light on mount
   useEffect(() => {
@@ -85,6 +86,7 @@ export function AppProvider({
         setCategories([]);
         setSales([]);
         setLoading(false);
+        setInitialLoading(false);
       }
     });
 
@@ -94,7 +96,8 @@ export function AppProvider({
     setCategories,
     fetchCategories,
     addCategory,
-    deleteCategory
+    deleteCategory,
+    reorderCategories
   } = useAppCategories({
     isAdmin,
     refreshData: () => fetchData()
@@ -140,6 +143,7 @@ export function AppProvider({
       console.error('Unexpected error in fetchData:', error);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -207,6 +211,7 @@ export function AppProvider({
     sales,
     categories,
     loading,
+    initialLoading,
     user,
     profile,
     isAdmin,
@@ -221,6 +226,7 @@ export function AppProvider({
     addSale,
     addCategory,
     deleteCategory,
+    reorderCategories,
     updateProfile,
     fetchSalesByUser,
     fetchAllProfiles,

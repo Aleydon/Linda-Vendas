@@ -1,10 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -26,8 +28,44 @@ export function CategoryPicker({
   showDropdown,
   setShowDropdown
 }: CategoryPickerProps) {
-  const { colorScheme } = useAppContext();
+  const { colorScheme, addCategory, isAdmin } = useAppContext();
   const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+
+  const [newCatName, setNewCatName] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [pendingSelectionName, setPendingSelectionName] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    if (pendingSelectionName) {
+      const found = categories.find(
+        c => c.name.toLowerCase() === pendingSelectionName.toLowerCase()
+      );
+      if (found) {
+        onSelectCategory(found.id);
+        setPendingSelectionName(null);
+        setShowDropdown(false);
+      }
+    }
+  }, [categories, pendingSelectionName, onSelectCategory, setShowDropdown]);
+
+  const handleCreateCategory = async () => {
+    const categoryName = newCatName.trim();
+    if (!categoryName) return;
+
+    setIsAdding(true);
+    try {
+      setPendingSelectionName(categoryName);
+      await addCategory(categoryName);
+      setNewCatName('');
+    } catch (error) {
+      console.error('Erro ao adicionar categoria rápida:', error);
+      setPendingSelectionName(null);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <View className="mb-4">
@@ -78,6 +116,38 @@ export function CategoryPicker({
                 />
               </TouchableOpacity>
             </View>
+
+            {isAdmin && (
+              <View className="px-4 py-3 border-b border-secondary dark:border-zinc-800 flex-row items-center bg-gray-50 dark:bg-zinc-800/20">
+                <TextInput
+                  className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100 mr-2 text-sm"
+                  placeholder="Criar nova categoria..."
+                  placeholderTextColor={
+                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
+                  }
+                  value={newCatName}
+                  onChangeText={setNewCatName}
+                  editable={!isAdding}
+                />
+                <TouchableOpacity
+                  className="bg-primary dark:bg-orange-600 p-3 rounded-xl items-center justify-center h-11 w-11"
+                  onPress={handleCreateCategory}
+                  disabled={isAdding}
+                  activeOpacity={0.8}
+                >
+                  {isAdding ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="plus"
+                      size={20}
+                      color="white"
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+
             <FlatList
               data={categories}
               keyExtractor={item => item.id}
@@ -125,3 +195,5 @@ export function CategoryPicker({
     </View>
   );
 }
+
+export default CategoryPicker;

@@ -71,8 +71,36 @@ export function useDashboardMetrics(sales: Sale[], products: Product[]) {
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 4);
 
-    const lowStockItems = products
-      .filter(p => p.stock <= 10)
+    const lowStockItems: Array<{
+      id: string;
+      name: string;
+      stock: number;
+      category: string | undefined;
+    }> = [];
+
+    products.forEach(p => {
+      if (p.has_variations && p.variations) {
+        p.variations.forEach(v => {
+          if (v.stock <= 10) {
+            lowStockItems.push({
+              id: `${p.id}-${v.id}`,
+              name: `${p.name} (${v.name})`,
+              stock: v.stock,
+              category: p.category
+            });
+          }
+        });
+      } else if (p.stock <= 10) {
+        lowStockItems.push({
+          id: p.id,
+          name: p.name,
+          stock: p.stock,
+          category: p.category
+        });
+      }
+    });
+
+    const sortedLowStockItems = lowStockItems
       .sort((a, b) => a.stock - b.stock)
       .slice(0, 5);
 
@@ -113,7 +141,7 @@ export function useDashboardMetrics(sales: Sale[], products: Product[]) {
       percentageChange: pChange,
       topProducts,
       topCategories,
-      lowStockItems,
+      lowStockItems: sortedLowStockItems,
       salesChartData
     };
   }, [sales, products]);
