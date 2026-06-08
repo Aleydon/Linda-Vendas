@@ -1,5 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import {
   Image,
@@ -35,6 +37,12 @@ export default function Profile() {
   const [isAdminPanelExpanded, setIsAdminPanelExpanded] = useState(false);
   const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
+
+  // App Info
+  const appVersion =
+    Constants.expoConfig?.version ?? Constants.nativeAppVersion;
+  const updateId = Updates.updateId?.substring(0, 8) ?? 'Desenvolvimento';
+  const runtimeVersion = Constants.expoConfig?.runtimeVersion ?? 'N/A';
 
   useEffect(() => {
     if (isAdminPanelExpanded && isAdmin) {
@@ -245,6 +253,18 @@ export default function Profile() {
             colorScheme={colorScheme}
             isExpanded={isPixExpanded}
             onToggleExpand={() => setIsPixExpanded(!isPixExpanded)}
+          />
+
+          <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">
+            Sobre o App
+          </Text>
+
+          <ProfileMenuItem
+            icon="information-outline"
+            iconBgColor="bg-zinc-100 dark:bg-zinc-800"
+            iconColor={colorScheme === 'dark' ? '#cbd5e1' : '#475569'}
+            title="Versão e Atualização"
+            description={`v${appVersion} • ID: ${updateId} • RT: ${runtimeVersion}`}
           />
         </View>
 
