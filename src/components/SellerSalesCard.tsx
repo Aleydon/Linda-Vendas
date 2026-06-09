@@ -17,6 +17,7 @@ export interface SellerGroup {
   sellerEmail: string;
   sales: Sale[];
   totalAmount: number;
+  totalPending: number;
   totalItems: number;
 }
 
@@ -78,12 +79,14 @@ export function SellerSalesCard({
         </View>
 
         <View className="items-end mr-2">
-          <Text className="text-text-muted dark:text-zinc-500 text-[10px] uppercase font-bold tracking-widest mb-0.5">
-            Total Vendido
-          </Text>
           <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-lg">
             {formatCurrency(group.totalAmount)}
           </Text>
+          {group.totalPending > 0 && (
+            <Text className="text-orange-500 font-bold text-[10px] mt-0.5">
+              + {formatCurrency(group.totalPending)} pend.
+            </Text>
+          )}
         </View>
 
         <MaterialCommunityIcons
@@ -101,16 +104,25 @@ export function SellerSalesCard({
         >
           <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full mb-4" />
 
-          <Text className="text-text-secondary dark:text-zinc-500 text-[10px] uppercase font-bold tracking-widest mb-3 pl-1">
-            Histórico de Vendas
-          </Text>
+          <View className="flex-row items-center justify-between mb-3 px-1">
+            <Text className="text-text-secondary dark:text-zinc-500 text-[10px] uppercase font-bold tracking-widest">
+              Histórico de Vendas
+            </Text>
+            {group.totalPending > 0 && (
+              <View className="bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-md">
+                <Text className="text-orange-600 dark:text-orange-400 text-[9px] font-bold">
+                  PENDENTE: {formatCurrency(group.totalPending)}
+                </Text>
+              </View>
+            )}
+          </View>
 
           <View className="gap-y-4">
-            {group.sales.map((sale, index) => (
+            {group.sales.map(sale => (
               <HistoryItem
                 key={sale.id}
                 sale={sale}
-                isInitiallyExpanded={index === 0}
+                isInitiallyExpanded={false}
                 hideSeller={true}
               />
             ))}

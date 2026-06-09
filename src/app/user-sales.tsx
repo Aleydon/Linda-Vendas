@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -12,41 +12,33 @@ import { HistoryItem } from '@/components/HistoryItem';
 import { SellerGroup, SellerSalesCard } from '@/components/SellerSalesCard';
 import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
-import { api } from '@/services/api';
 import { formatCurrency, formatDateLong } from '@/utils/formatters';
 
 export default function UserSales() {
-  const { user, isAdmin, fetchSalesByUser, colorScheme } = useAppContext();
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user, isAdmin, sales, loading, colorScheme } = useAppContext();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending'>(
+    'all'
+  );
 
-  useEffect(() => {
-    if (user) {
-      const loadSales = async () => {
-        try {
-          setLoading(true);
-          const data = isAdmin
-            ? await api.fetchSales()
-            : await fetchSalesByUser(user.id);
-          setSales(data);
-        } catch (error) {
-          console.error('Error fetching sales:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      void loadSales();
-    }
-  }, [user, isAdmin]);
+  // If not admin, we only show current user's sales
+  const userSales = useMemo(() => {
+    if (isAdmin) return sales;
+    return sales.filter(sale => sale.user_id === user?.id);
+  }, [sales, isAdmin, user?.id]);
+
+  const filteredSales = useMemo(() => {
+    if (statusFilter === 'all') return userSales;
+    return userSales.filter(sale => sale.status === statusFilter);
+  }, [userSales, statusFilter]);
 
   const paidSales = useMemo(() => {
-    return sales.filter(sale => sale.status !== 'pending');
-  }, [sales]);
+    return userSales.filter(sale => sale.status !== 'pending');
+  }, [userSales]);
 
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
 
-    sales.forEach(sale => {
+    filteredSales.forEach(sale => {
       const label = formatDateLong(sale.created_at);
       if (!groups[label]) {
         groups[label] = { sales: [], total: 0 };
@@ -58,18 +50,25 @@ export default function UserSales() {
     });
 
     return Object.entries(groups);
-  }, [sales]);
+  }, [filteredSales]);
 
   const totalAmount = useMemo(() => {
     return paidSales.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
   }, [paidSales]);
+
+  const totalPending = useMemo(() => {
+    return userSales
+      .filter(s => s.status === 'pending')
+      .reduce((acc, sale) => acc + Number(sale.total || 0), 0);
+  }, [userSales]);
 
   const salesBySeller = useMemo((): SellerGroup[] => {
     if (!isAdmin) return [];
 
     const groups: { [key: string]: SellerGroup } = {};
 
-    sales.forEach(sale => {
+    // Use filteredSales here so the status filter works for admins too
+    filteredSales.forEach(sale => {
       const isPaid = sale.status !== 'pending';
       const sellerId = sale.user_id || 'unknown';
       const sellerEmail = sale.seller?.email || 'Sem E-mail';
@@ -83,16 +82,18 @@ export default function UserSales() {
           sellerEmail,
           sales: [],
           totalAmount: 0,
+          totalPending: 0,
           totalItems: 0
         };
       }
 
       groups[sellerId].sales.push(sale);
-      if (!isPaid) {
-        return;
-      }
 
-      groups[sellerId].totalAmount += Number(sale.total || 0);
+      if (isPaid) {
+        groups[sellerId].totalAmount += Number(sale.total || 0);
+      } else {
+        groups[sellerId].totalPending += Number(sale.total || 0);
+      }
 
       const itemsCount =
         sale.sale_items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
@@ -100,9 +101,9 @@ export default function UserSales() {
     });
 
     return Object.values(groups).sort((a, b) => b.totalAmount - a.totalAmount);
-  }, [sales, isAdmin]);
+  }, [filteredSales, isAdmin]);
 
-  if (loading && sales.length === 0) {
+  if (loading && userSales.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-zinc-950">
         <View className="px-6 py-4 flex-row items-center justify-between">
@@ -141,9 +142,37 @@ export default function UserSales() {
         </View>
         <View className="bg-secondary dark:bg-zinc-800 px-3 py-1 rounded-full">
           <Text className="text-primary dark:text-orange-400 font-bold">
-            {sales.length}
+            {filteredSales.length}
           </Text>
         </View>
+      </View>
+
+      <View className="flex-row px-6 mb-4 gap-2">
+        {(['all', 'paid', 'pending'] as const).map(status => (
+          <TouchableOpacity
+            key={status}
+            onPress={() => setStatusFilter(status)}
+            className={`px-4 py-2 rounded-full border ${
+              statusFilter === status
+                ? 'bg-primary border-primary dark:bg-orange-600 dark:border-orange-600'
+                : 'bg-secondary border-secondary dark:bg-zinc-800 dark:border-zinc-800'
+            }`}
+          >
+            <Text
+              className={`text-xs font-bold ${
+                statusFilter === status
+                  ? 'text-white'
+                  : 'text-text-secondary dark:text-zinc-400'
+              }`}
+            >
+              {status === 'all'
+                ? 'Todas'
+                : status === 'paid'
+                  ? 'Pagas'
+                  : 'Pendentes'}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <ScrollView
@@ -151,22 +180,26 @@ export default function UserSales() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View className="px-6">
-          <View className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 mb-8 border border-secondary/20 dark:border-zinc-800 shadow-sm flex-row items-center justify-between">
-            <View>
-              <Text className="text-primary dark:text-orange-400 text-xs uppercase font-bold tracking-widest mb-1">
-                {isAdmin ? 'Faturamento Total' : 'Total Acumulado'}
+          <View className="flex-row gap-4 mb-8">
+            <View className="flex-1 bg-white dark:bg-zinc-900 rounded-[32px] p-5 border border-secondary/20 dark:border-zinc-800 shadow-sm">
+              <Text className="text-primary dark:text-orange-400 text-[10px] uppercase font-bold tracking-widest mb-1">
+                {isAdmin ? 'Faturamento' : 'Total Pago'}
               </Text>
-              <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-3xl">
+              <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-xl">
                 {formatCurrency(totalAmount)}
               </Text>
             </View>
-            <View className="bg-primary/10 dark:bg-orange-500/10 p-3 rounded-2xl">
-              <MaterialCommunityIcons
-                name="finance"
-                size={32}
-                color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
-              />
-            </View>
+
+            {totalPending > 0 && (
+              <View className="flex-1 bg-white dark:bg-zinc-900 rounded-[32px] p-5 border border-orange-100 dark:border-orange-900/20 shadow-sm">
+                <Text className="text-orange-500 text-[10px] uppercase font-bold tracking-widest mb-1">
+                  Pendente
+                </Text>
+                <Text className="text-orange-600 dark:text-orange-400 font-bold text-xl">
+                  {formatCurrency(totalPending)}
+                </Text>
+              </View>
+            )}
           </View>
 
           {isAdmin ? (
@@ -186,7 +219,7 @@ export default function UserSales() {
                   color={colorScheme === 'dark' ? '#3f3f46' : '#BDB2B2'}
                 />
                 <Text className="text-text-secondary dark:text-zinc-500 mt-4 text-center text-lg italic">
-                  Nenhuma venda registrada no sistema.
+                  Nenhuma venda encontrada com este filtro.
                 </Text>
               </View>
             )
@@ -221,7 +254,11 @@ export default function UserSales() {
                 color={colorScheme === 'dark' ? '#3f3f46' : '#BDB2B2'}
               />
               <Text className="text-text-secondary dark:text-zinc-500 mt-4 text-center text-lg italic">
-                Você ainda não realizou nenhuma venda.
+                {statusFilter === 'all'
+                  ? 'Você ainda não realizou nenhuma venda.'
+                  : statusFilter === 'paid'
+                    ? 'Nenhuma venda paga encontrada.'
+                    : 'Nenhuma venda pendente encontrada.'}
               </Text>
             </View>
           )}

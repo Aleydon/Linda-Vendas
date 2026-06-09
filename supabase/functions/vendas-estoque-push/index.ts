@@ -11,6 +11,8 @@ interface SaleRecord {
   id: string;
   total: number;
   user_id: string;
+  status: 'paid' | 'pending';
+  customer_name: string | null;
   [key: string]: unknown;
 }
 
@@ -25,7 +27,7 @@ Deno.serve(async (req: Request) => {
   try {
     // 1. Recebe o payload do Webhook do Banco de Dados
     const payload: WebhookPayload = await req.json();
-    const { table, type, record } = payload;
+    const { table, type, record, old_record } = payload;
 
     // 2. Inicializa o cliente do Supabase interno
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -34,42 +36,73 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 3. Define a mensagem apenas para Vendas
-    if (table !== 'sales' || type !== 'INSERT') {
+    if (table !== 'sales') {
       return new Response(
-        JSON.stringify({
-          message: 'Evento ignorado (apenas novas vendas são notificadas)'
-        }),
+        JSON.stringify({ message: 'Evento ignorado (apenas tabela sales)' }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    let messageTitle = '';
+    let messageBody = '';
     const valorVenda = record.total || 0;
-    let sellerName = 'Vendedor';
-
-    try {
-      const { data: sellerProfile } = await supabase
-        .from('profiles')
-        .select('email, pix_name')
-        .eq('id', record.user_id)
-        .single();
-
-      if (sellerProfile) {
-        sellerName =
-          sellerProfile.pix_name ||
-          sellerProfile.email.split('@')[0] ||
-          'Vendedor';
-      }
-    } catch (err) {
-      console.error('Erro ao buscar perfil do vendedor:', err);
-    }
-
     const valorFormatado = Number(valorVenda).toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
 
-    const messageTitle = `💰 Nova Venda de R$ ${valorFormatado}`;
-    const messageBody = `Vendido por: ${sellerName}`;
+    if (type === 'INSERT') {
+      const isFiado = record.status === 'pending';
+      const customerName = record.customer_name;
+      let sellerName = 'Vendedor';
+
+      try {
+        const { data: sellerProfile } = await supabase
+          .from('profiles')
+          .select('email, pix_name')
+          .eq('id', record.user_id)
+          .single();
+
+        if (sellerProfile) {
+          sellerName =
+            sellerProfile.pix_name ||
+            sellerProfile.email.split('@')[0] ||
+            'Vendedor';
+        }
+      } catch (err) {
+        console.error('Erro ao buscar perfil do vendedor:', err);
+      }
+
+      const statusEmoji = isFiado ? '📝' : '💰';
+      const statusText = isFiado ? 'Venda Fiada' : 'Nova Venda';
+      messageTitle = `${statusEmoji} ${statusText}: R$ ${valorFormatado}`;
+
+      messageBody = `Vendido por: ${sellerName}`;
+      if (customerName) {
+        messageBody += ` para ${customerName}`;
+      }
+    } else if (type === 'UPDATE' && old_record) {
+      // Notifica quando uma venda pendente (fiada) é paga
+      if (old_record.status === 'pending' && record.status === 'paid') {
+        const customerName = record.customer_name || 'Cliente';
+        messageTitle = `✅ Venda Paga: R$ ${valorFormatado}`;
+        messageBody = `A venda de ${customerName} foi confirmada como paga.`;
+      } else {
+        return new Response(
+          JSON.stringify({
+            message: 'Update ignorado (não é mudança de status relevante)'
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      return new Response(
+        JSON.stringify({
+          message: 'Evento ignorado (não é INSERT nem UPDATE relevante)'
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // 4. Busca os Perfis de Administradores com notificações ativadas
     // Filtramos para não enviar para o próprio vendedor (user_id do record)

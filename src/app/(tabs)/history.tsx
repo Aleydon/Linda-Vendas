@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   FadeInDown,
   LinearTransition
@@ -12,18 +12,32 @@ import { SearchBar } from '@/components/SearchBar';
 import { HistorySkeleton } from '@/components/skeletons/HistorySkeleton';
 import { Sale, useAppContext } from '@/context/AppContext';
 import { useFocusAnimation } from '@/hooks/useFocusAnimation';
-import { formatDateLong, formatDateTime } from '@/utils/formatters';
+import {
+  formatCurrency,
+  formatDateLong,
+  formatDateTime
+} from '@/utils/formatters';
 
 export function History() {
   const { sales, loading, colorScheme } = useAppContext();
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending'>(
+    'all'
+  );
   const focusAnimatedStyle = useFocusAnimation();
 
   const filteredSales = useMemo(() => {
-    if (!search) return sales;
+    let result = sales;
+
+    // Filter by status first
+    if (statusFilter !== 'all') {
+      result = result.filter(sale => sale.status === statusFilter);
+    }
+
+    if (!search) return result;
 
     const lowerSearch = search.toLowerCase();
-    return sales.filter(sale => {
+    return result.filter(sale => {
       // Search by product name or variation name
       const hasProduct = sale.sale_items?.some(
         item =>
@@ -34,14 +48,22 @@ export function History() {
       // Search by time/date
       const timeStr = formatDateTime(sale.created_at);
       const dateStr = formatDateLong(sale.created_at);
+      const customerStr = sale.customer_name?.toLowerCase() || '';
 
       return (
         hasProduct ||
         timeStr.includes(search) ||
-        dateStr.toLowerCase().includes(lowerSearch)
+        dateStr.toLowerCase().includes(lowerSearch) ||
+        customerStr.includes(lowerSearch)
       );
     });
-  }, [sales, search]);
+  }, [sales, search, statusFilter]);
+
+  const totalPending = useMemo(() => {
+    return sales
+      .filter(s => s.status === 'pending')
+      .reduce((acc, sale) => acc + Number(sale.total || 0), 0);
+  }, [sales]);
 
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
@@ -86,14 +108,75 @@ export function History() {
           value={search}
           onChangeText={setSearch}
           onClear={() => setSearch('')}
-          placeholder="Buscar por produto, variação, data ou hora..."
+          placeholder="Buscar por produto, cliente, data..."
         />
+
+        {/* Status Filter Tabs */}
+        <View className="flex-row px-6 mb-4 gap-2">
+          {(['all', 'paid', 'pending'] as const).map(status => (
+            <TouchableOpacity
+              key={status}
+              onPress={() => setStatusFilter(status)}
+              className={`px-4 py-2 rounded-full border ${
+                statusFilter === status
+                  ? 'bg-primary border-primary dark:bg-orange-600 dark:border-orange-600'
+                  : 'bg-secondary border-secondary dark:bg-zinc-800 dark:border-zinc-800'
+              }`}
+            >
+              <Text
+                className={`text-xs font-bold ${
+                  statusFilter === status
+                    ? 'text-white'
+                    : 'text-text-secondary dark:text-zinc-400'
+                }`}
+              >
+                {status === 'all'
+                  ? 'Todas'
+                  : status === 'paid'
+                    ? 'Pagas'
+                    : 'Pendentes'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           <View className="px-6">
+            {totalPending > 0 && statusFilter !== 'paid' && (
+              <View className="bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 mb-6 flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <View className="bg-orange-100 dark:bg-orange-900/40 p-2 rounded-xl mr-3">
+                    <MaterialCommunityIcons
+                      name="clock-alert-outline"
+                      size={20}
+                      color="#f97316"
+                    />
+                  </View>
+                  <View>
+                    <Text className="text-orange-800 dark:text-orange-300 text-[10px] font-bold uppercase tracking-wider">
+                      Total Pendente (Fiado)
+                    </Text>
+                    <Text className="text-orange-600 dark:text-orange-400 font-bold text-xl">
+                      {formatCurrency(totalPending)}
+                    </Text>
+                  </View>
+                </View>
+                {statusFilter === 'all' && (
+                  <TouchableOpacity
+                    onPress={() => setStatusFilter('pending')}
+                    className="bg-orange-500 px-3 py-1.5 rounded-lg"
+                  >
+                    <Text className="text-white text-[10px] font-bold">
+                      VER TODAS
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
             {groupedSales.length > 0 ? (
               groupedSales.map(([date, data]) => (
                 <View key={date} className="mb-8">
