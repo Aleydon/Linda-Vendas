@@ -1,7 +1,7 @@
 import { User } from '@supabase/supabase-js';
 import { useState } from 'react';
 
-import { Profile, Sale, UserRole } from '@/context/types';
+import { Profile, Sale, SaleStatus, UserRole } from '@/context/types';
 import { api } from '@/services/api';
 
 interface UseAppSalesProps {
@@ -36,15 +36,31 @@ export function useAppSales({
       unit_price: number;
     }[],
     total: number,
-    userId?: string
+    userId?: string,
+    status: SaleStatus = 'paid',
+    customerName?: string
   ): Promise<void> => {
     try {
       setLoading(true);
       const sellerId = userId || user?.id;
-      await api.addSale(items, total, sellerId);
+      await api.addSale(items, total, sellerId, status, customerName);
       await refreshData();
     } catch (error) {
       console.error('Error adding sale:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmPayment = async (saleId: string): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      setLoading(true);
+      await api.confirmSalePayment(saleId);
+      await refreshData();
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -85,13 +101,28 @@ export function useAppSales({
     }
   };
 
+  const updateUserFiado = async (
+    userId: string,
+    allowFiado: boolean
+  ): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      await api.updateUserFiado(userId, allowFiado);
+    } catch (error) {
+      console.error('Error updating user fiado:', error);
+      throw error;
+    }
+  };
+
   return {
     sales,
     setSales,
     fetchSales,
     addSale,
+    confirmPayment,
     fetchSalesByUser,
     fetchAllProfiles,
-    updateUserRole
+    updateUserRole,
+    updateUserFiado
   };
 }

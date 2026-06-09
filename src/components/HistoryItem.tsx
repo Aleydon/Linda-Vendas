@@ -1,6 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Sale, useAppContext } from '@/context/AppContext';
@@ -17,8 +23,9 @@ export function HistoryItem({
   isInitiallyExpanded = false,
   hideSeller = false
 }: HistoryItemProps) {
-  const { isAdmin, colorScheme } = useAppContext();
+  const { isAdmin, colorScheme, confirmPayment } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   // Calculate total from items if sale.total is missing or 0
   const calculatedTotal = useMemo(() => {
@@ -43,17 +50,41 @@ export function HistoryItem({
 
   const sellerEmail = sale.seller?.email || 'N/A';
   const sellerName = sale.seller?.pix_name || sale.seller?.email || 'N/A';
+  const isPending = sale.status === 'pending';
+
+  const handleConfirmPayment = async () => {
+    try {
+      setIsConfirming(true);
+      await confirmPayment(sale.id);
+    } catch (error) {
+      console.error('Failed to confirm payment:', error);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   return (
-    <View className="bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-sm border border-secondary/20 dark:border-zinc-800">
+    <View
+      className={`bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-sm border ${
+        isPending
+          ? 'border-orange-200 dark:border-orange-900/30'
+          : 'border-secondary/20 dark:border-zinc-800'
+      }`}
+    >
       <Pressable onPress={() => setIsExpanded(!isExpanded)} className="p-4">
         {/* Header: Status, Total, and Date/Icon */}
         <View className="flex-row items-center justify-between">
           <View className="rounded-2xl flex-row items-center flex-1 mr-2">
             <MaterialCommunityIcons
-              name="cart-outline"
+              name={isPending ? 'clock-outline' : 'cart-outline'}
               size={25}
-              color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+              color={
+                isPending
+                  ? '#fb923c'
+                  : colorScheme === 'dark'
+                    ? '#fb923c'
+                    : '#A34211'
+              }
             />
             <View className="flex-row items-center pl-2 flex-1">
               <View className="items-start flex-1">
@@ -76,8 +107,14 @@ export function HistoryItem({
           </View>
 
           <View className="items-end">
-            <Text className="text-green-500 dark:text-emerald-400 font-bold text-[10px] uppercase mb-0.5">
-              Concluída
+            <Text
+              className={`font-bold text-[10px] uppercase mb-0.5 ${
+                isPending
+                  ? 'text-orange-500'
+                  : 'text-green-500 dark:text-emerald-400'
+              }`}
+            >
+              {isPending ? 'Pendente' : 'Concluída'}
             </Text>
             <Text className="text-primary dark:text-orange-400 font-bold text-2xl">
               {formatCurrency(calculatedTotal)}
@@ -85,7 +122,7 @@ export function HistoryItem({
           </View>
         </View>
 
-        {/* Expansion indicator (Optional, keeping it subtle) */}
+        {/* Expansion indicator */}
         <View className="absolute bottom-1 left-1/2 -ml-3">
           <MaterialCommunityIcons
             name={isExpanded ? 'chevron-up' : 'chevron-down'}
@@ -103,6 +140,25 @@ export function HistoryItem({
           className="px-6 pb-4"
         >
           <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full mb-2" />
+
+          {/* Customer Name for Pending Sales */}
+          {isPending && sale.customer_name && (
+            <View className="bg-orange-50 dark:bg-orange-900/10 p-3 rounded-2xl mb-4 border border-orange-100 dark:border-orange-900/20">
+              <View className="flex-row items-center">
+                <MaterialCommunityIcons
+                  name="account-clock"
+                  size={18}
+                  color="#f97316"
+                />
+                <Text className="ml-2 text-orange-700 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
+                  Cliente (Pagar Depois)
+                </Text>
+              </View>
+              <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg mt-1">
+                {sale.customer_name}
+              </Text>
+            </View>
+          )}
 
           {/* Sale Items */}
           <View className="gap-y-3">
@@ -154,6 +210,29 @@ export function HistoryItem({
                 </Text>
               </View>
             </>
+          )}
+
+          {isAdmin && isPending && (
+            <TouchableOpacity
+              onPress={handleConfirmPayment}
+              disabled={isConfirming}
+              className="mt-6 bg-green-500 dark:bg-emerald-600 flex-row items-center justify-center py-4 rounded-2xl shadow-lg shadow-green-500/30"
+            >
+              {isConfirming ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    name="check-circle-outline"
+                    size={20}
+                    color="white"
+                  />
+                  <Text className="ml-2 text-white font-bold text-base">
+                    Confirmar Pagamento
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
           )}
 
           <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full my-4" />

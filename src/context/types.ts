@@ -19,6 +19,7 @@ export interface Profile {
   notifications_enabled?: boolean;
   low_stock_notifications?: boolean;
   sales_notifications?: boolean;
+  allow_fiado?: boolean;
 }
 
 export interface Variation {
@@ -58,11 +59,15 @@ export interface SaleItem {
   } | null;
 }
 
+export type SaleStatus = 'paid' | 'pending';
+
 export interface Sale {
   id: string;
   total: number;
   created_at: string;
   user_id?: string;
+  status: SaleStatus;
+  customer_name?: string;
   seller?: {
     email: string;
     pix_name?: string;
@@ -100,8 +105,11 @@ export interface AppContextType {
       unit_price: number;
     }[],
     total: number,
-    userId?: string
+    userId?: string,
+    status?: SaleStatus,
+    customerName?: string
   ) => Promise<void>;
+  confirmPayment: (saleId: string) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   reorderCategories: (newCategories: Category[]) => Promise<void>;
@@ -109,6 +117,7 @@ export interface AppContextType {
   fetchSalesByUser: (userId: string) => Promise<Sale[]>;
   fetchAllProfiles: () => Promise<Profile[]>;
   updateUserRole: (userId: string, role: UserRole) => Promise<void>;
+  updateUserFiado: (userId: string, allowFiado: boolean) => Promise<void>;
   refreshData: () => Promise<void>;
   colorScheme: 'light' | 'dark';
   toggleColorScheme: () => void;

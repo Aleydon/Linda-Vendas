@@ -19,18 +19,17 @@ import { SaleProductItem } from '@/components/SaleProductItem';
 import { SearchBar } from '@/components/SearchBar';
 import { NewSaleSkeleton } from '@/components/skeletons/NewSaleSkeleton';
 import { useAppContext } from '@/context/AppContext';
+import { SaleStatus } from '@/context/types';
 import { useCart } from '@/hooks/useCart';
-import { useFocusAnimation } from '@/hooks/useFocusAnimation';
 import { formatCurrency } from '@/utils/formatters';
 import { generatePixPayload } from '@/utils/pix';
 
-export function NewSale() {
+export default function NewSale() {
   const { products, addSale, loading, categories, profile, user, colorScheme } =
     useAppContext();
   const [search, setSearch] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const focusAnimatedStyle = useFocusAnimation();
 
   const { cart, total, totalItemsCount, updateQuantity, clearCart } =
     useCart(products);
@@ -84,7 +83,10 @@ export function NewSale() {
     setShowConfirmation(true);
   };
 
-  const confirmSale = async () => {
+  const confirmSale = async (
+    status: SaleStatus = 'paid',
+    customerName?: string
+  ) => {
     try {
       const items = cart.map(item => {
         const product = products.find(p => p.id === item.productId)!;
@@ -105,7 +107,7 @@ export function NewSale() {
         };
       });
 
-      await addSale(items, total, user?.id);
+      await addSale(items, total, user?.id, status, customerName);
       setShowConfirmation(false);
       clearCart();
       setSearch('');
@@ -127,7 +129,7 @@ export function NewSale() {
     <View className="bg-background dark:bg-zinc-950 flex-1">
       <Header />
 
-      <Animated.View style={focusAnimatedStyle} className="flex-1">
+      <View className="flex-1">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 180 }}
@@ -257,24 +259,26 @@ export function NewSale() {
                   color="white"
                 />
                 <Text className="ml-2 font-bold text-white text-lg">
-                  Gerar QR Code
+                  Confirmar Pagamento
                 </Text>
               </>
             )}
           </TouchableOpacity>
         </View>
-      </Animated.View>
+      </View>
 
-      <PaymentModal
-        visible={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
-        onConfirm={confirmSale}
-        total={total}
-        loading={loading}
-        pixString={pixString}
-      />
+      {showConfirmation && (
+        <PaymentModal
+          visible={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          onConfirm={confirmSale}
+          total={total}
+          loading={loading}
+          pixString={pixString}
+          allowFiado={profile?.allow_fiado}
+          colorScheme={colorScheme}
+        />
+      )}
     </View>
   );
 }
-
-export default NewSale;

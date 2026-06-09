@@ -52,7 +52,7 @@ export function CustomAlertModal() {
     }
   }, [isVisible, alertConfig?.type]);
 
-  if (!alertConfig) return null;
+  if (!isVisible || !alertConfig) return null;
 
   const { title, description, type = 'info', buttons } = alertConfig;
 
@@ -125,6 +125,7 @@ export function CustomAlertModal() {
       visible={isVisible}
       transparent
       animationType="none"
+      statusBarTranslucent
       onRequestClose={hideAlert}
     >
       <View className="flex-1 items-center justify-center px-6">
@@ -151,7 +152,6 @@ export function CustomAlertModal() {
           className="w-full max-w-[340px] rounded-[36px] bg-white dark:bg-zinc-900 p-6 shadow-2xl border border-secondary/15 dark:border-zinc-800"
         >
           <View className="items-center mb-5">
-            {/* Outer animated-like ring for aesthetic appeal */}
             <View
               className={`p-1.5 rounded-full border ${config.borderColor} mb-4`}
             >

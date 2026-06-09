@@ -39,6 +39,10 @@ export default function UserSales() {
     }
   }, [user, isAdmin]);
 
+  const paidSales = useMemo(() => {
+    return sales.filter(sale => sale.status !== 'pending');
+  }, [sales]);
+
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
 
@@ -48,15 +52,17 @@ export default function UserSales() {
         groups[label] = { sales: [], total: 0 };
       }
       groups[label].sales.push(sale);
-      groups[label].total += Number(sale.total || 0);
+      if (sale.status !== 'pending') {
+        groups[label].total += Number(sale.total || 0);
+      }
     });
 
     return Object.entries(groups);
   }, [sales]);
 
   const totalAmount = useMemo(() => {
-    return sales.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
-  }, [sales]);
+    return paidSales.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
+  }, [paidSales]);
 
   const salesBySeller = useMemo((): SellerGroup[] => {
     if (!isAdmin) return [];
@@ -64,6 +70,7 @@ export default function UserSales() {
     const groups: { [key: string]: SellerGroup } = {};
 
     sales.forEach(sale => {
+      const isPaid = sale.status !== 'pending';
       const sellerId = sale.user_id || 'unknown';
       const sellerEmail = sale.seller?.email || 'Sem E-mail';
       const sellerName =
@@ -81,6 +88,10 @@ export default function UserSales() {
       }
 
       groups[sellerId].sales.push(sale);
+      if (!isPaid) {
+        return;
+      }
+
       groups[sellerId].totalAmount += Number(sale.total || 0);
 
       const itemsCount =

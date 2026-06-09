@@ -54,12 +54,14 @@ export function History() {
       groups[label].sales.push(sale);
 
       const saleTotal =
-        sale.total ||
-        sale.sale_items?.reduce(
-          (sAcc, item) => sAcc + item.quantity * Number(item.unit_price),
-          0
-        ) ||
-        0;
+        sale.status !== 'pending'
+          ? sale.total ||
+            sale.sale_items?.reduce(
+              (sAcc, item) => sAcc + item.quantity * Number(item.unit_price),
+              0
+            ) ||
+            0
+          : 0;
       groups[label].total += Number(saleTotal);
     });
 

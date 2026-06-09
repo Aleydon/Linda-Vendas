@@ -39,7 +39,7 @@ export function SalesChart({ data, percentageChange }: SalesChartProps) {
   // SVG dimensions
   const screenWidth = Dimensions.get('window').width;
   const paddingHorizontal = 24;
-  const cardPadding = 24; // Padding interno do card
+  const cardPadding = 24;
   const chartWidth = screenWidth - paddingHorizontal * 2 - cardPadding * 2;
   const chartHeight = 130;
 
@@ -153,6 +153,12 @@ export function SalesChart({ data, percentageChange }: SalesChartProps) {
   const areaAnimatedStyle = useAnimatedProps(() => {
     return {
       opacity: areaOpacity.value
+    };
+  });
+
+  const pointAnimatedProps = useAnimatedProps(() => {
+    return {
+      opacity: pointsScale.value
     };
   });
 
@@ -283,7 +289,7 @@ export function SalesChart({ data, percentageChange }: SalesChartProps) {
                 fill={isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.3)'}
                 stroke="#ffffff"
                 strokeWidth={isSelected ? 3 : 0}
-                opacity={pointsScale.value}
+                animatedProps={pointAnimatedProps}
               />
             );
           })}

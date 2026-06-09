@@ -4,13 +4,16 @@ import { Product, Sale } from '@/context/types';
 
 export function useDashboardMetrics(sales: Sale[], products: Product[]) {
   const metrics = useMemo(() => {
+    const paidSales = sales.filter(s => s.status !== 'pending');
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const todaySalesData = sales.filter(s => new Date(s.created_at) >= today);
-    const yesterdaySalesData = sales.filter(s => {
+    const todaySalesData = paidSales.filter(
+      s => new Date(s.created_at) >= today
+    );
+    const yesterdaySalesData = paidSales.filter(s => {
       const date = new Date(s.created_at);
       return date >= yesterday && date < today;
     });
@@ -32,7 +35,7 @@ export function useDashboardMetrics(sales: Sale[], products: Product[]) {
       [key: string]: { name: string; quantity: number; total: number };
     } = {};
 
-    sales.forEach(sale => {
+    paidSales.forEach(sale => {
       sale.sale_items?.forEach(item => {
         const prodName = item.product?.name || 'Produto';
         const varName = item.variation?.name;
@@ -119,7 +122,7 @@ export function useDashboardMetrics(sales: Sale[], products: Product[]) {
         dayName.charAt(0).toUpperCase() + dayName.slice(1);
       const dateString = `${String(date).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`;
 
-      const daySales = sales.filter(s => {
+      const daySales = paidSales.filter(s => {
         const sDate = new Date(s.created_at);
         return (
           sDate.getFullYear() === year &&

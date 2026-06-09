@@ -17,6 +17,7 @@ interface AdminPanelProps {
   isLoading: boolean;
   onRefresh: () => void;
   onToggleAdmin: (profile: Profile) => void;
+  onToggleFiado: (profile: Profile) => void;
   colorScheme: 'light' | 'dark';
   isExpanded: boolean;
   onToggleExpand: () => void;
@@ -28,6 +29,7 @@ export function AdminPanel({
   isLoading,
   onRefresh,
   onToggleAdmin,
+  onToggleFiado,
   colorScheme,
   isExpanded,
   onToggleExpand
@@ -49,10 +51,10 @@ export function AdminPanel({
           </View>
           <View className="ml-3">
             <Text className="text-text-primary dark:text-zinc-100 font-bold">
-              Gestão de Administradores
+              Gestão de Usuários
             </Text>
             <Text className="text-text-secondary dark:text-zinc-400 text-xs">
-              Configurar acesso administrative
+              Configurar acesso e permissões
             </Text>
           </View>
         </View>
@@ -80,7 +82,7 @@ export function AdminPanel({
                 key={p.id}
                 className="flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-zinc-800 last:border-b-0"
               >
-                <View className="flex-1">
+                <View className="flex-1 mr-2">
                   <Text
                     className="text-text-primary dark:text-zinc-100 font-medium"
                     numberOfLines={1}
@@ -97,13 +99,32 @@ export function AdminPanel({
                     {p.role === 'admin' ? 'Administrador' : 'Vendedor'}
                   </Text>
                 </View>
-                <Switch
-                  value={p.role === 'admin'}
-                  onValueChange={() => onToggleAdmin(p)}
-                  disabled={p.id === user?.id}
-                  trackColor={{ false: '#D1D5DB', true: '#A34211' }}
-                  thumbColor={p.role === 'admin' ? '#FFFFFF' : '#F3F4F6'}
-                />
+
+                <View className="flex-row items-center gap-3">
+                  <View className="items-center">
+                    <Text className="text-[9px] text-text-secondary dark:text-zinc-500 mb-1 uppercase font-bold">
+                      Admin
+                    </Text>
+                    <Switch
+                      value={p.role === 'admin'}
+                      onValueChange={() => onToggleAdmin(p)}
+                      disabled={p.id === user?.id}
+                      trackColor={{ false: '#D1D5DB', true: '#A34211' }}
+                      thumbColor={p.role === 'admin' ? '#FFFFFF' : '#F3F4F6'}
+                    />
+                  </View>
+                  <View className="items-center">
+                    <Text className="text-[9px] text-text-secondary dark:text-zinc-500 mb-1 uppercase font-bold">
+                      Fiado
+                    </Text>
+                    <Switch
+                      value={!!p.allow_fiado}
+                      onValueChange={() => onToggleFiado(p)}
+                      trackColor={{ false: '#D1D5DB', true: '#10b981' }}
+                      thumbColor={p.allow_fiado ? '#FFFFFF' : '#F3F4F6'}
+                    />
+                  </View>
+                </View>
               </View>
             ))
           )}

@@ -125,9 +125,11 @@ export function AppProvider({
     setSales,
     fetchSales,
     addSale,
+    confirmPayment,
     fetchSalesByUser,
     fetchAllProfiles,
-    updateUserRole
+    updateUserRole,
+    updateUserFiado
   } = useAppSales({
     isAdmin,
     user,
@@ -224,6 +226,7 @@ export function AppProvider({
     addProduct,
     deleteProduct,
     addSale,
+    confirmPayment,
     addCategory,
     deleteCategory,
     reorderCategories,
@@ -231,6 +234,7 @@ export function AppProvider({
     fetchSalesByUser,
     fetchAllProfiles,
     updateUserRole,
+    updateUserFiado,
     refreshData: fetchData,
     colorScheme: colorScheme ?? 'light',
     toggleColorScheme

@@ -4,6 +4,7 @@ import {
   Product,
   Profile,
   Sale,
+  SaleStatus,
   UserRole
 } from '@/context/types';
 import { supabase } from '@/lib/supabase';
@@ -44,6 +45,22 @@ export const api = {
       .from('profiles')
       .update({ role })
       .eq('id', userId);
+    if (error) throw error;
+  },
+
+  async updateUserFiado(userId: string, allowFiado: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ allow_fiado: allowFiado })
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
+  async confirmSalePayment(saleId: string): Promise<void> {
+    const { error } = await supabase
+      .from('sales')
+      .update({ status: 'paid' })
+      .eq('id', saleId);
     if (error) throw error;
   },
 
@@ -275,16 +292,21 @@ export const api = {
       unit_price: number;
     }[],
     total: number,
-    userId?: string
+    userId?: string,
+    status: SaleStatus = 'paid',
+    customerName?: string
   ): Promise<void> {
     // 1. Create Sale
     interface SaleInsert {
       total: number;
       user_id?: string;
+      status: SaleStatus;
+      customer_name?: string;
     }
 
-    const salePayload: SaleInsert = { total };
+    const salePayload: SaleInsert = { total, status };
     if (userId) salePayload.user_id = userId;
+    if (customerName) salePayload.customer_name = customerName;
 
     const { data: saleData, error: saleError } = await supabase
       .from('sales')

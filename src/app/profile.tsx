@@ -28,7 +28,8 @@ export default function Profile() {
     colorScheme,
     toggleColorScheme,
     fetchAllProfiles,
-    updateUserRole
+    updateUserRole,
+    updateUserFiado
   } = useAppContext();
   const { showAlert } = useAlert();
 
@@ -102,6 +103,42 @@ export default function Profile() {
                 title: 'Erro',
                 description:
                   'Não foi possível atualizar a permissão. Verifique as políticas de segurança do banco de dados.',
+                type: 'error'
+              });
+            }
+          }
+        }
+      ]
+    });
+  };
+
+  const handleToggleFiado = async (targetUser: UserProfile) => {
+    const newValue = !targetUser.allow_fiado;
+    const actionStr = newValue ? 'permitir' : 'bloquear';
+
+    showAlert({
+      title: 'Venda Fiado',
+      description: `Deseja ${actionStr} a opção de venda fiado para ${targetUser.email}?`,
+      type: 'confirm',
+      buttons: [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              await updateUserFiado(targetUser.id, newValue);
+              void loadProfiles();
+              showAlert({
+                title: 'Sucesso',
+                description: 'Permissão de fiado atualizada.',
+                type: 'success'
+              });
+            } catch (error: unknown) {
+              const errorMessage =
+                error instanceof Error ? error.message : 'Erro desconhecido';
+              showAlert({
+                title: 'Erro ao Atualizar',
+                description: `Não foi possível atualizar a permissão. Detalhe: ${errorMessage}. Certifique-se de que as colunas novas foram criadas no banco de dados.`,
                 type: 'error'
               });
             }
@@ -210,6 +247,7 @@ export default function Profile() {
                 isLoading={isLoadingProfiles}
                 onRefresh={loadProfiles}
                 onToggleAdmin={handleToggleAdmin}
+                onToggleFiado={handleToggleFiado}
                 colorScheme={colorScheme}
                 isExpanded={isAdminPanelExpanded}
                 onToggleExpand={() =>

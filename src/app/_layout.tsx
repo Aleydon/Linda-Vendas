@@ -12,7 +12,7 @@ import {
   Inter_900Black
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { router, Stack, usePathname } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
@@ -23,52 +23,57 @@ import { Loading } from '@/components/Loading';
 import { AlertProvider } from '@/context/AlertContext';
 import { AppProvider, useAppContext } from '@/context/AppContext';
 
-function InitialLayout() {
+function AuthGuard() {
   const { user, initialLoading } = useAppContext();
-  const segments = useSegments();
-  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (initialLoading) return;
 
-    const inAuthGroup = segments[0] === 'login';
+    const inAuthGroup = pathname.startsWith('/login');
 
     if (!user && !inAuthGroup) {
       router.replace('/login');
     } else if (user && inAuthGroup) {
       router.replace('/(tabs)/dashboard');
     }
-  }, [user, segments, initialLoading]);
+  }, [user, pathname, initialLoading]);
 
-  if (initialLoading) {
-    return <Loading />;
-  }
+  return null;
+}
+
+function InitialLayout() {
+  const { initialLoading } = useAppContext();
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="profile"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="user-sales"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="notifications"
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="new-product"
-        options={{ animation: 'slide_from_bottom' }}
-      />
-      <Stack.Screen
-        name="edit-product/[id]"
-        options={{ animation: 'slide_from_right' }}
-      />
-    </Stack>
+    <>
+      <AuthGuard />
+      <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="profile"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="user-sales"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="notifications"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="new-product"
+          options={{ animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="edit-product/[id]"
+          options={{ animation: 'slide_from_right' }}
+        />
+      </Stack>
+      {initialLoading && <Loading />}
+    </>
   );
 }
 
@@ -76,23 +81,21 @@ function MainContent() {
   const { colorScheme } = useColorScheme();
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
         translucent
       />
-      <SafeAreaProvider>
-        <SafeAreaView
-          edges={[]}
-          style={{ flex: 1 }}
-          className="bg-background dark:bg-zinc-950"
-        >
-          <InitialLayout />
-          <CustomAlertModal />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </>
+      <SafeAreaView
+        edges={[]}
+        style={{ flex: 1 }}
+        className="bg-background dark:bg-zinc-950"
+      >
+        <InitialLayout />
+        <CustomAlertModal />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
