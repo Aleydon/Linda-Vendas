@@ -1,159 +1,233 @@
-# Linda Vendas - ODS 8 (Cruzeiro do Sul)</div>
+# Linda Vendas - ODS 8 (Cruzeiro do Sul)
 
 <p align="center">
-  <img src="./assets/images/icon.png" width="100" alt="Linda Vendas Logo" style="border-radius: 50%;"/>
+  <img src="./assets/images/icon.png" width="120" alt="Linda Vendas Logo" style="border-radius: 20px;"/>
 </p>
 
-## 📌 About the Project
+<p align="center">
+  <strong>The Ultimate Sales & Inventory Powerhouse for Small Entrepreneurs</strong>
+</p>
 
-**Linda Vendas** is a mobile application developed as part of the **ODS 8 (Sustainable Development Goal 8)** initiative at **Cruzeiro do Sul**. The project aims to empower micro and small entrepreneurs by providing a simple, efficient, and accessible tool for sales management and inventory control.
-
-The application allows users to track their products, manage stock levels in real-time, and record sales transactions, helping them gain better control over their business operations and financial health.
-
----
-
-## 🌍 ODS 8 Alignment: Decent Work and Economic Growth
-
-The United Nations Sustainable Development Goal 8 aims to "promote sustained, inclusive and sustainable economic growth, full and productive employment and decent work for all."
-
-**Linda Vendas** contributes directly to several ODS 8 targets:
-
-- **Target 8.3 (Support MSMEs and Entrepreneurship):** By providing a free or low-cost digital management tool, the app supports the formalization and growth of micro, small, and medium-sized enterprises (MSMEs). It helps entrepreneurs organize their business, which is a crucial step toward sustainability and economic expansion.
-- **Target 8.2 (Economic Productivity through Innovation):** The project promotes technological upgrading by introducing digital tools to traditional or manual sales processes, increasing the productivity of small business owners.
-- **Economic Empowerment:** Proper inventory and sales management reduce waste and financial loss, directly impacting the income stability and growth potential of independent workers and small teams.
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-53-000020?style=for-the-badge&logo=expo&logoColor=white" />
+  <img src="https://img.shields.io/badge/React_Native-0.79-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/Supabase-2.105-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Jest-50_Tests-C21325?style=for-the-badge&logo=jest&logoColor=white" />
+</p>
 
 ---
 
-## ✨ Key Features
+## 📌 Comprehensive Overview
 
-- **Inventory Management:** Add, edit, and delete products with category support.
-- **Real-time Stock Tracking:** Automatic stock updates after sales and manual stock adjustments.
-- **Sales Recording:** Quick sale process with automated total calculation.
-- **Sales History:** Access historical data to analyze business performance.
-- **Dashboard:** At-a-glance view of business metrics (Current Stock, Recent Sales).
-- **Search & Filtering:** Easily find products by name or category.
-- **Offline-First Ready:** Built with local state management for a smooth user experience.
+**Linda Vendas** is a state-of-the-art mobile solution built to revolutionize how micro-entrepreneurs manage their business. Developed under the **ODS 8 initiative** at **Cruzeiro do Sul University**, it combines enterprise-grade features with an incredibly simple user interface.
 
----
+### 🌍 ODS 8: Decent Work and Economic Growth
 
-## 📱 Screenshots & Features
+This app is more than a tool; it's an economic catalyst:
 
-Discover how **Linda Vendas** empowers entrepreneurs through its intuitive and secure interface:
-
-### 🔐 Auth & Dashboard
-
-|                                          **Secure Google Sign-In**                                           |                                          **Business Dashboard**                                          |
-| :----------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
-|             <img src="./assets/read-images/google-signin.jpg" width="350" alt="Google Sign-In"/>             |               <img src="./assets/read-images/dashboard.jpg" width="350" alt="Dashboard"/>                |
-| _Seamless login via Google Authentication, ensuring business data protection and role-based access control._ | _Real-time metrics on revenue and inventory status, providing the insights needed for strategic growth._ |
-
-### 📊 Inventory & Control
-
-|                                                     **Stock Management**                                                     |                                             **Admin Stock Entry**                                             |
-| :--------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
-|                        <img src="./assets/read-images/stock.jpg" width="350" alt="Stock Management"/>                        |       <img src="./assets/read-images/add-new-product-in-stock.jpg" width="350" alt="Add New Product"/>        |
-| _Monitor every item in your catalog. **Note:** Only administrators can modify stock levels to maintain financial integrity._ | _Streamlined process for adding new inventory, categories, and descriptions to keep your business organized._ |
-
-### 💸 Pricing & Sales
-
-|                                          **Product Price List**                                          |                                     **Dynamic Sales & Pricing**                                     |
-| :------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: |
-|      <img src="./assets/read-images/products-price-list.jpg" width="350" alt="Product Price List"/>      |      <img src="./assets/read-images/sales-dynamic-price.jpg" width="350" alt="Dynamic Sales"/>      |
-| _Quick access to the full product catalog and current pricing, facilitating fast customer interactions._ | _Agile sales recording with the flexibility to apply manual discounts or adjust prices on the fly._ |
-
-### 📜 Payments & History
-
-|                                       **Instant Pix QR Code**                                        |                                        **Sales History & Analytics**                                        |
-| :--------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------: |
-|     <img src="./assets/read-images/sale-dynamic-qrcode.jpg" width="350" alt="QR Code Payment"/>      |             <img src="./assets/read-images/sales-history.jpg" width="350" alt="Sales History"/>             |
-| _Secure and fast payments via dynamic QR codes, generating a unique Pix code for every transaction._ | _Detailed audit trail of all transactions, allowing you to analyze peak periods and manage accountability._ |
+- **Financial Empowerment:** Accurate profit tracking and loss prevention.
+- **Innovation:** Bringing high-end tech to local street markets and small shops.
+- **Formalization:** Helping businesses organize data for future growth and credit access.
 
 ---
 
-## 🛠 Tech Stack
+## 🏗️ System Architecture & Logic
 
-- **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
-- **Navigation:** [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
-- **Styling:** [NativeWind](https://www.nativewind.dev/) (Tailwind CSS for React Native)
-- **Backend/Database:** [Supabase](https://supabase.com/) (PostgreSQL + Auth + Storage)
-- **State Management:** React Context API
-- **Icons:** Expo Vector Icons (Material Community Icons)
-- **Linting & Formatting:** ESLint, Prettier, CommitLint
+### 📊 Database Schema (ERD)
 
----
+The following diagram illustrates how the data is structured within Supabase:
 
-## 🚀 Getting Started
+```mermaid
+erDiagram
+    profiles ||--o{ sales : "manages"
+    categories ||--o{ products : "contains"
+    products ||--o{ product_variations : "has"
+    products ||--o{ sale_items : "sold_in"
+    product_variations ||--o{ sale_items : "sold_in"
+    sales ||--|{ sale_items : "includes"
 
-### Prerequisites
+    profiles {
+        uuid id PK
+        string email
+        string role "admin | user"
+        boolean allow_fiado
+        string expo_push_token
+    }
+    products {
+        uuid id PK
+        string name
+        decimal price
+        int stock
+        uuid category_id FK
+    }
+    product_variations {
+        uuid id PK
+        uuid product_id FK
+        string name
+        decimal price
+        int stock
+    }
+    sales {
+        uuid id PK
+        decimal total
+        string status "paid | pending"
+        uuid user_id FK "Seller"
+        string customer_name
+    }
+```
 
-- [Node.js](https://nodejs.org/) (v18 or newer)
-- [npm](https://www.npmjs.com/) or [bun](https://bun.sh/)
-- [Expo Go](https://expo.dev/expo-go) app on your physical device or an Android/iOS emulator.
+### 🔐 Role-Based Access Control (RBAC) Flow
 
-### Installation
+How the application decides what the user can see and do:
 
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/Aleydon/ODS-8.git
-   cd Linda-Sales-Cruzeiro-do-Sul-ODS
-   ```
-
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   # or
-   bun install
-   ```
-
-3. **Environment Variables:**
-   Create a `.env` file in the root directory (using `.env.example` as a template) and add your Supabase credentials:
-
-   ```env
-   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. **Start the application:**
-   ```bash
-   npm start
-   ```
-
----
-
-## 📁 Project Structure
-
-```text
-src/
-├── app/               # Expo Router routes (tabs and screens)
-├── assets/            # Static assets (images, fonts)
-├── components/        # Reusable UI components
-├── context/           # Global state management (AppContext)
-├── lib/               # Third-party configurations (Supabase client)
-├── services/          # API services and data fetching logic
-├── utils/             # Helper functions and formatters
-└── __tests__/         # Unit and integration tests
+```mermaid
+graph TD
+    A[User Logged In] --> B{Is Admin?}
+    B -- Yes --> C[Full Inventory Access]
+    B -- Yes --> D[Confirm Pending Payments]
+    B -- Yes --> E[Authorize Sellers for 'Fiado']
+    B -- No --> F[Standard POS Access]
+    F --> G{Can Sell Fiado?}
+    G -- Yes --> H[Show QR Code + Fiado Buttons]
+    G -- No --> I[Show QR Code Only]
 ```
 
 ---
 
-## 🤝 Contributing
+## 🛡️ Business Rules & Access Control
 
-This is an academic project for **Cruzeiro do Sul**. Contributions that align with the ODS 8 mission are welcome.
+### 👤 Seller Role (Standard)
 
-1. Fork the project.
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes using Conventional Commits (`npm run commit`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+- **Dynamic POS Operations:** Create sales and select products.
+- **Conditional "Fiado" Sales:** The "Fiado" (Pending Payment) option only appears if the **Admin explicitly authorizes** it for that specific seller. Otherwise, only the QR Code (Instant Payment) option is available.
+- **Personal History:** View their own sales performance and history.
+- **Read-Only Inventory:** Browse products without modification rights.
+
+### 👑 Admin Role (Manager)
+
+- **Total Inventory Control:** Full rights to manage products, variations, and categories.
+- **Seller Authorization:** Grant or revoke "Fiado" sales permission for each seller individually.
+- **Financial Validation:** Review and **manually confirm** pending "Fiado" payments.
+- **Global Analytics:** Access consolidated data and seller-specific metrics.
 
 ---
 
-## 📝 License
+## ✨ Specialized Technical Features
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### 🌓 Intelligent Dark Mode
+
+The app features a seamless theme transition using **NativeWind**. Every component is optimized for high contrast and readability in both Light and Dark modes.
+
+### 🔔 Smart Notification System (Expo Notifications)
+
+Integrated with **Expo Push Notifications**, the app keeps the business owner informed in real-time about sales and inventory levels.
+
+### 💸 Professional Payment & Credit Flows
+
+- **Instant Pix (BRCode):** Automated QR Code generation with CRC16 checksum for error-free transactions.
+- **Permission-Based Credit (Fiado):** A trust-based system where the Admin controls credit sales.
 
 ---
 
-<p align="center">Developed for ODS 8 - Cruzeiro do Sul University</p>
+## 📱 Visual Experience (Full Gallery)
+
+### 🌓 Theme & Onboarding
+
+|                     **Google Secure Login**                     |                 **Dashboard (Light Mode)**                  |                      **Dashboard (Dark Mode)**                       |
+| :-------------------------------------------------------------: | :---------------------------------------------------------: | :------------------------------------------------------------------: |
+| <img src="./assets/read-images/google-signin.jpg" width="220"/> | <img src="./assets/read-images/dashboard.jpg" width="220"/> | <img src="./assets/read-images/dashboard-darkmode.jpg" width="220"/> |
+|            _OAuth integration for business safety._             |             _Clean interface for daytime use._              |                      _Eye-friendly dark theme._                      |
+
+### 🛒 Point of Sale (POS) & Dynamic Rules
+
+|                   **Dynamic Payment Options**                   |                          **Smart Checkout**                           |                        **Instant Pix Payment**                        |
+| :-------------------------------------------------------------: | :-------------------------------------------------------------------: | :-------------------------------------------------------------------: |
+| <img src="./assets/read-images/type-of-sales.jpg" width="220"/> | <img src="./assets/read-images/sales-dynamic-price.jpg" width="220"/> | <img src="./assets/read-images/sale-dynamic-qrcode.jpg" width="220"/> |
+|         _"Fiado" only appears for authorized sellers._          |              _On-the-fly discounts & stock validation._               |                      _Static BRCode generation._                      |
+
+### 📦 Inventory & Catalog Management
+
+|                        **Product Price List**                         |                       **Product Variations**                       |                  **Inventory Control**                  |
+| :-------------------------------------------------------------------: | :----------------------------------------------------------------: | :-----------------------------------------------------: |
+| <img src="./assets/read-images/products-price-list.jpg" width="220"/> | <img src="./assets/read-images/product-variants.jpg" width="220"/> | <img src="./assets/read-images/stock.jpg" width="220"/> |
+|                 _Quick price reference for sellers._                  |                _Sizes, colors, and types support._                 |             _Admin-only stock adjustments._             |
+
+### 🛠️ Advanced Admin Operations
+
+|                          **Single Product Entry**                          |                             **Bulk Stock Addition**                              |                            **Payment Confirmation**                             |
+| :------------------------------------------------------------------------: | :------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: |
+| <img src="./assets/read-images/add-new-product-in-stock.jpg" width="220"/> | <img src="./assets/read-images/multiples-product-add-in-stock.jpg" width="220"/> | <img src="./assets/read-images/admin-confirm-pendent-payment.jpg" width="220"/> |
+|                        _Detailed product creation._                        |                      _Efficient multiple-item restocking._                       |                      _Admin validation for "Fiado" sales._                      |
+
+### 📊 Reports & User Preferences
+
+|                    **Consolidated History**                     |                    **Profile & Sync Settings**                     |
+| :-------------------------------------------------------------: | :----------------------------------------------------------------: |
+| <img src="./assets/read-images/sales-history.jpg" width="350"/> | <img src="./assets/read-images/profile-settings.jpg" width="350"/> |
+|          _Full audit trail for business transparency._          |             _Manage push tokens and app preferences._              |
+
+---
+
+## 🏗️ Production Deployment Guide
+
+Follow these steps to deploy **Linda Vendas** for a new client or production environment.
+
+### 1. Resetting EAS (Expo Application Services)
+
+If you are cloning this repo for a new store, you must reset the project identity:
+
+1. **Delete the `eas.json` file** and the `extra.eas.projectId` from `app.json`.
+2. Run the configuration command: `npx eas build:configure`
+3. Log in to your Expo account and follow the prompts.
+4. **CRITICAL:** Update the new **Project ID** in `src/hooks/useNotifications.ts`.
+
+### 2. Supabase Edge Functions (Real-time Alerts)
+
+1. **Install Supabase CLI:** `npm install supabase --save-dev`
+2. **Login & Link:** `npx supabase login` then `npx supabase link --project-ref your-project-id`
+3. **Deploy the Function:** `npx supabase functions deploy vendas-estoque-push`
+4. **Set Webhook:** In Supabase Dashboard, create a Webhook for the `sales` table (Insert/Update) pointing to your function URL.
+
+### 3. Google OAuth & Firebase Console
+
+1. **Firebase Configuration:**
+   - Create a project and enable **Cloud Messaging**.
+   - Download `google-services.json` and place it in the project **root**.
+   - **CRITICAL (Secret Key):** Generate a **Service Account Key** (JSON) in Firebase Settings > Service Accounts.
+   - **DO NOT** keep this secret key in the project root or commit it to Git. Keep it in a safe place on your machine.
+2. **Google Cloud:** Create **Client IDs** for Web (Supabase) and Android/iOS (Expo).
+3. **EAS CLI Build Process:** When running `eas build`, the terminal will ask for:
+   - The `google-services.json` (it will find it automatically in the root).
+   - **The FCM Server Key/Service Account Key:** When prompted, provide the path to that **secret JSON file** you saved safely. Choose **"Yes"** to upload it to Expo's secure servers. This is required for Push Notifications to work on Android.
+
+---
+
+## 🧪 Industrial-Strength Testing
+
+This project maintains a high standard of quality through an extensive test suite:
+
+- **Business Logic:** Hooks (`useCart`, `useDashboardMetrics`) are fully unit-tested.
+- **API Integrity:** Mocked Supabase & Services layer.
+- **User Interface:** Components (`ProductForm`, `SaleProductItem`) tested for interaction.
+
+```bash
+# Run all 50+ tests
+npm test
+```
+
+---
+
+## 🛠️ Tech Stack Details
+
+- **Mobile Framework:** React Native 0.79 with Expo 53.
+- **Backend-as-a-Service:** Supabase (Auth, DB, Realtime, Edge Functions).
+- **Styling:** NativeWind (Tailwind CSS).
+- **Navigation:** Expo Router (File-based routing).
+
+---
+
+<p align="center">
+  <b>Developed for ODS 8 - Cruzeiro do Sul University</b><br/>
+  <i>Empowering local commerce through technology.</i>
+</p>
