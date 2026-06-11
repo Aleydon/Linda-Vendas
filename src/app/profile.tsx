@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import {
   Image,
@@ -41,13 +42,9 @@ export default function Profile() {
   // App Info
   const appVersion =
     Constants.expoConfig?.version ?? Constants.nativeAppVersion;
-  const buildDate = new Date().toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+
+  const updateId = Updates.updateId ? Updates.updateId.slice(0, 8) : 'Base';
+  const runtimeVersion = Updates.runtimeVersion ?? 'N/A';
 
   useEffect(() => {
     if (isAdminPanelExpanded && isAdmin) {
@@ -306,7 +303,7 @@ export default function Profile() {
             iconBgColor="bg-zinc-100 dark:bg-zinc-800"
             iconColor={colorScheme === 'dark' ? '#cbd5e1' : '#475569'}
             title="Versão do Aplicativo"
-            description={`Versão ${appVersion} • Atualizado em ${buildDate}`}
+            description={`v${appVersion} (${updateId}) • RT: ${runtimeVersion}`}
           />
         </View>
 

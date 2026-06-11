@@ -170,26 +170,44 @@ export function PaymentModal({
             exiting={FadeOut.duration(120)}
           >
             {paymentMethod === 'pix' ? (
-              <View className="mb-4 items-center justify-center rounded-xl bg-secondary p-3 dark:bg-white">
-                {pixString ? (
-                  <QRCode
-                    value={pixString}
-                    size={160}
-                    color="#09090b"
-                    backgroundColor="white"
-                  />
-                ) : (
-                  <View className="h-[160px] w-[160px] items-center justify-center">
-                    <MaterialCommunityIcons
-                      name="qrcode-remove"
-                      size={40}
-                      color={colorScheme === 'dark' ? '#09090b' : '#BDB2B2'}
+              <View className="mb-4 items-center">
+                <View className="items-center justify-center rounded-xl bg-secondary p-3 dark:bg-white mb-4">
+                  {pixString ? (
+                    <QRCode
+                      value={pixString}
+                      size={220}
+                      color="#09090b"
+                      backgroundColor="white"
                     />
-                    <Text className="text-text-secondary dark:text-zinc-950 mt-2 text-center text-xs">
-                      PIX não configurado
-                    </Text>
+                  ) : (
+                    <View className="h-[220px] w-[220px] items-center justify-center">
+                      <MaterialCommunityIcons
+                        name="qrcode-remove"
+                        size={60}
+                        color={colorScheme === 'dark' ? '#09090b' : '#BDB2B2'}
+                      />
+                      <Text className="text-text-secondary dark:text-zinc-950 mt-2 text-center text-xs">
+                        PIX não configurado
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <View className="w-full">
+                  <Text className="text-text-primary dark:text-zinc-100 mb-2 ml-1 font-bold">
+                    Nome do Cliente (Opcional)
+                  </Text>
+                  <View className="rounded-xl border border-zinc-200 bg-secondary px-4 py-2.5 dark:border-zinc-700 dark:bg-zinc-800">
+                    <TextInput
+                      placeholder="Ex: João Silva"
+                      placeholderTextColor="#71717a"
+                      className="text-text-primary dark:text-zinc-100 text-base"
+                      value={customerName}
+                      onChangeText={setCustomerName}
+                      returnKeyType="done"
+                    />
                   </View>
-                )}
+                </View>
               </View>
             ) : fiadoEnabled && paymentMethod === 'fiado' ? (
               <View className="mb-4">

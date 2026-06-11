@@ -9,7 +9,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { FormField } from '@/components/FormField';
-import { useAppContext, Variation } from '@/context/AppContext';
+import { Variation } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import { formatCurrencyValue } from '@/utils/formatters';
 
 interface VariationSectionProps {
@@ -80,6 +81,25 @@ export function VariationSection({
                 layout={LinearTransition}
                 className="border-secondary dark:border-zinc-800 mb-4 rounded-2xl border bg-white dark:bg-zinc-900 p-4 shadow-sm"
               >
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-text-secondary dark:text-zinc-500 font-bold text-xs uppercase">
+                    Variação #{index + 1}
+                  </Text>
+                  <TouchableOpacity
+                    className="flex-row items-center bg-red-50 dark:bg-red-900/10 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/20"
+                    onPress={() => onRemoveVariation(variation.id)}
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={16}
+                      color="#ef4444"
+                    />
+                    <Text className="text-red-500 dark:text-red-400 font-bold text-xs ml-1.5">
+                      Remover
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <View className="mb-4">
                   <FormField
                     label="Nome da Variação"
@@ -123,18 +143,6 @@ export function VariationSection({
                       />
                     </View>
                   </View>
-                </View>
-                <View key={index}>
-                  <TouchableOpacity
-                    className="flex-row items-center justify-center w-full"
-                    onPress={() => onRemoveVariation(variation.id)}
-                  >
-                    <View className="bg-red-500 dark:bg-red-900/40 w-full py-3 items-center justify-center rounded-2xl border border-red-600 dark:border-red-900/60">
-                      <Text className="text-white dark:text-red-200 font-bold">
-                        Excluir Variação
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
                 </View>
               </Animated.View>
             ))}

@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -20,10 +21,18 @@ import {
 
 export function History() {
   const { sales, loading, colorScheme } = useAppContext();
+  const params = useLocalSearchParams<{ filter?: string }>();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending'>(
     'all'
   );
+
+  useEffect(() => {
+    if (params.filter === 'pending') {
+      setStatusFilter('pending');
+    }
+  }, [params.filter]);
+
   const focusAnimatedStyle = useFocusAnimation();
 
   const filteredSales = useMemo(() => {
@@ -64,6 +73,46 @@ export function History() {
       .filter(s => s.status === 'pending')
       .reduce((acc, sale) => acc + Number(sale.total || 0), 0);
   }, [sales]);
+
+  const searchSummary = useMemo(() => {
+    if (!search) return null;
+
+    const summary = {
+      paid: 0,
+      pending: 0,
+      products: new Map<string, { quantity: number; total: number }>()
+    };
+
+    filteredSales.forEach(sale => {
+      const isPaid = sale.status === 'paid';
+      const saleTotal = Number(sale.total || 0);
+
+      if (isPaid) {
+        summary.paid += saleTotal;
+      } else {
+        summary.pending += saleTotal;
+      }
+
+      sale.sale_items?.forEach(item => {
+        const name = item.product?.name || 'Produto';
+        const variation = item.variation?.name;
+        const key = variation ? `${name} (${variation})` : name;
+        const current = summary.products.get(key) || { quantity: 0, total: 0 };
+        summary.products.set(key, {
+          quantity: current.quantity + item.quantity,
+          total: current.total + item.quantity * Number(item.unit_price)
+        });
+      });
+    });
+
+    return {
+      ...summary,
+      total: summary.paid + summary.pending,
+      productList: Array.from(summary.products.entries())
+        .map(([name, data]) => ({ name, ...data }))
+        .sort((a, b) => b.total - a.total)
+    };
+  }, [filteredSales, search]);
 
   const groupedSales = useMemo(() => {
     const groups: { [key: string]: { sales: Sale[]; total: number } } = {};
@@ -120,7 +169,7 @@ export function History() {
               className={`px-4 py-2 rounded-full border ${
                 statusFilter === status
                   ? 'bg-primary border-primary dark:bg-orange-600 dark:border-orange-600'
-                  : 'bg-secondary border-secondary dark:bg-zinc-800 dark:border-zinc-800'
+                  : 'bg-secondary border-secondary dark:bg-zinc-800 dark:bg-zinc-800'
               }`}
             >
               <Text
@@ -145,7 +194,88 @@ export function History() {
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           <View className="px-6">
-            {totalPending > 0 && statusFilter !== 'paid' && (
+            {/* Search Summary Card */}
+            {searchSummary && (
+              <Animated.View
+                entering={FadeInDown.duration(400)}
+                className="bg-white dark:bg-zinc-900 rounded-[32px] p-6 mb-6 border border-primary/20 dark:border-orange-500/20 shadow-sm"
+              >
+                <View className="flex-row items-center mb-4">
+                  <View className="bg-primary/10 dark:bg-orange-500/20 p-2 rounded-xl mr-3">
+                    <MaterialCommunityIcons
+                      name="finance"
+                      size={20}
+                      color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+                    />
+                  </View>
+                  <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg">
+                    Resumo da Busca
+                  </Text>
+                </View>
+
+                <View className="flex-row gap-4 mb-4">
+                  <View className="flex-1 bg-green-50 dark:bg-emerald-950/20 p-3 rounded-2xl border border-green-100 dark:border-emerald-900/30">
+                    <Text className="text-green-800 dark:text-emerald-400 text-[10px] font-bold uppercase">
+                      Total Pago
+                    </Text>
+                    <Text className="text-green-600 dark:text-emerald-500 font-bold text-base">
+                      {formatCurrency(searchSummary.paid)}
+                    </Text>
+                  </View>
+                  <View className="flex-1 bg-orange-50 dark:bg-orange-950/20 p-3 rounded-2xl border border-orange-100 dark:border-orange-900/30">
+                    <Text className="text-orange-800 dark:text-orange-400 text-[10px] font-bold uppercase">
+                      Pendente
+                    </Text>
+                    <Text className="text-orange-600 dark:text-orange-500 font-bold text-base">
+                      {formatCurrency(searchSummary.pending)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="bg-secondary/50 dark:bg-zinc-800/50 p-4 rounded-2xl mb-4 flex-row justify-between items-center">
+                  <Text className="text-text-secondary dark:text-zinc-400 font-bold text-xs uppercase">
+                    Total Geral
+                  </Text>
+                  <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
+                    {formatCurrency(searchSummary.total)}
+                  </Text>
+                </View>
+
+                {searchSummary.productList.length > 0 && (
+                  <View>
+                    <Text className="text-text-secondary dark:text-zinc-500 text-[10px] font-bold uppercase mb-2 ml-1">
+                      Produtos no Filtro
+                    </Text>
+                    <View className="gap-y-2">
+                      {searchSummary.productList.slice(0, 5).map(item => (
+                        <View
+                          key={item.name}
+                          className="flex-row justify-between items-center"
+                        >
+                          <Text
+                            className="text-text-primary dark:text-zinc-300 text-xs flex-1 mr-2"
+                            numberOfLines={1}
+                          >
+                            {item.quantity}x {item.name}
+                          </Text>
+                          <Text className="text-text-primary dark:text-zinc-300 text-xs font-bold">
+                            {formatCurrency(item.total)}
+                          </Text>
+                        </View>
+                      ))}
+                      {searchSummary.productList.length > 5 && (
+                        <Text className="text-text-muted dark:text-zinc-500 text-[10px] italic text-center mt-1">
+                          + {searchSummary.productList.length - 5} outros
+                          produtos
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                )}
+              </Animated.View>
+            )}
+
+            {!search && totalPending > 0 && statusFilter !== 'paid' && (
               <View className="bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 mb-6 flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <View className="bg-orange-100 dark:bg-orange-900/40 p-2 rounded-xl mr-3">

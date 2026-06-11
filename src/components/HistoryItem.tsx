@@ -141,17 +141,29 @@ export function HistoryItem({
         >
           <View className="h-[1px] bg-secondary/10 dark:bg-zinc-800 w-full mb-2" />
 
-          {/* Customer Name for Pending Sales */}
-          {isPending && sale.customer_name && (
-            <View className="bg-orange-50 dark:bg-orange-900/10 p-3 rounded-2xl mb-4 border border-orange-100 dark:border-orange-900/20">
+          {/* Customer Name */}
+          {sale.customer_name && (
+            <View
+              className={`${
+                isPending
+                  ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-900/20'
+                  : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800'
+              } p-3 rounded-2xl mb-4 border`}
+            >
               <View className="flex-row items-center">
                 <MaterialCommunityIcons
-                  name="account-clock"
+                  name={isPending ? 'account-clock' : 'account-outline'}
                   size={18}
-                  color="#f97316"
+                  color={isPending ? '#f97316' : '#71717a'}
                 />
-                <Text className="ml-2 text-orange-700 dark:text-orange-400 font-bold text-xs uppercase tracking-wider">
-                  Cliente (Pagar Depois)
+                <Text
+                  className={`ml-2 font-bold text-xs uppercase tracking-wider ${
+                    isPending
+                      ? 'text-orange-700 dark:text-orange-400'
+                      : 'text-text-secondary dark:text-zinc-400'
+                  }`}
+                >
+                  {isPending ? 'Cliente (Pagar Depois)' : 'Cliente'}
                 </Text>
               </View>
               <Text className="text-text-primary dark:text-zinc-100 font-bold text-lg mt-1">

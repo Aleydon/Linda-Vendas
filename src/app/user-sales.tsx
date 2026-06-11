@@ -183,7 +183,9 @@ export default function UserSales() {
           <View className="flex-row gap-4 mb-8">
             <View className="flex-1 bg-white dark:bg-zinc-900 rounded-[32px] p-5 border border-secondary/20 dark:border-zinc-800 shadow-sm">
               <Text className="text-primary dark:text-orange-400 text-[10px] uppercase font-bold tracking-widest mb-1">
-                {isAdmin ? 'Faturamento' : 'Total Pago'}
+                {isAdmin
+                  ? 'Faturamento Total Acumulado'
+                  : 'Total Pago Acumulado'}
               </Text>
               <Text className="text-[#22c55e] dark:text-emerald-400 font-bold text-xl">
                 {formatCurrency(totalAmount)}
@@ -193,7 +195,7 @@ export default function UserSales() {
             {totalPending > 0 && (
               <View className="flex-1 bg-white dark:bg-zinc-900 rounded-[32px] p-5 border border-orange-100 dark:border-orange-900/20 shadow-sm">
                 <Text className="text-orange-500 text-[10px] uppercase font-bold tracking-widest mb-1">
-                  Pendente
+                  Pendente (Fiado)
                 </Text>
                 <Text className="text-orange-600 dark:text-orange-400 font-bold text-xl">
                   {formatCurrency(totalPending)}

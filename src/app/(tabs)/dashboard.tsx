@@ -27,21 +27,31 @@ export function Dashboard() {
 
   const debtsByCustomer = useMemo(() => {
     const debts: {
-      [key: string]: { name: string; total: number; count: number };
+      [key: string]: {
+        name: string;
+        total: number;
+        count: number;
+        lastDate: string;
+      };
     } = {};
 
     sales.forEach(sale => {
       if (sale.status === 'pending' && sale.customer_name) {
         const name = sale.customer_name;
         if (!debts[name]) {
-          debts[name] = { name, total: 0, count: 0 };
+          debts[name] = { name, total: 0, count: 0, lastDate: sale.created_at };
         }
         debts[name].total += Number(sale.total || 0);
         debts[name].count += 1;
+        if (new Date(sale.created_at) > new Date(debts[name].lastDate)) {
+          debts[name].lastDate = sale.created_at;
+        }
       }
     });
 
-    return Object.values(debts).sort((a, b) => b.total - a.total);
+    return Object.values(debts).sort(
+      (a, b) => new Date(b.lastDate).getTime() - new Date(a.lastDate).getTime()
+    );
   }, [sales]);
 
   const hasSales = metrics.topProducts.length > 0;
@@ -83,7 +93,9 @@ export function Dashboard() {
                   <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl">
                     Clientes Devedores
                   </Text>
-                  <TouchableOpacity onPress={() => router.push('/history')}>
+                  <TouchableOpacity
+                    onPress={() => router.push('/history?filter=pending')}
+                  >
                     <Text className="text-primary dark:text-orange-400 font-bold text-sm">
                       Ver Tudo
                     </Text>
@@ -124,7 +136,7 @@ export function Dashboard() {
                   ))}
                   {debtsByCustomer.length > 3 && (
                     <TouchableOpacity
-                      onPress={() => router.push('/history')}
+                      onPress={() => router.push('/history?filter=pending')}
                       className="py-3 items-center"
                     >
                       <Text className="text-text-secondary dark:text-zinc-500 text-xs font-bold">
@@ -276,21 +288,11 @@ export function Dashboard() {
                       key={item.id}
                       className={`flex-row items-center p-4 ${index !== metrics.lowStockItems.length - 1 ? 'border-b border-secondary/5 dark:border-zinc-800/50' : ''}`}
                     >
-                      <View
-                        className={`h-10 w-10 items-center justify-center rounded-2xl mr-4 ${
-                          item.stock <= 5
-                            ? 'bg-red-50 dark:bg-red-900/20'
-                            : 'bg-teal-50 dark:bg-teal-900/20'
-                        }`}
-                      >
+                      <View className="h-10 w-10 items-center justify-center rounded-2xl mr-4 bg-red-50 dark:bg-red-900/20">
                         <MaterialCommunityIcons
-                          name={
-                            item.stock <= 5
-                              ? 'alert-outline'
-                              : 'package-variant'
-                          }
+                          name="alert-outline"
                           size={20}
-                          color={item.stock <= 5 ? '#ef4444' : '#0d9488'}
+                          color="#ef4444"
                         />
                       </View>
                       <View className="flex-1">
@@ -304,16 +306,8 @@ export function Dashboard() {
                           {item.category || 'Sem Categoria'}
                         </Text>
                       </View>
-                      <View
-                        className={`px-3 py-1 rounded-full ${
-                          item.stock <= 5
-                            ? 'bg-red-50 dark:bg-red-900/30'
-                            : 'bg-teal-50 dark:bg-teal-900/30'
-                        }`}
-                      >
-                        <Text
-                          className={`font-bold text-xs ${item.stock <= 5 ? 'text-red-600 dark:text-red-400' : 'text-teal-600 dark:text-teal-400'}`}
-                        >
+                      <View className="px-3 py-1 rounded-full bg-red-50 dark:bg-red-900/30">
+                        <Text className="font-bold text-xs text-red-600 dark:text-red-400">
                           {item.stock} un
                         </Text>
                       </View>
