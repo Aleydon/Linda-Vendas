@@ -65,7 +65,8 @@ export function useCart(products: Product[]) {
         return newCart;
       } else if (delta > 0) {
         if (maxStock <= 0) return prev;
-        return [...prev, { productId, variationId, quantity: 1 }];
+        const initialQuantity = Math.min(delta, maxStock);
+        return [...prev, { productId, variationId, quantity: initialQuantity }];
       }
       return prev;
     });

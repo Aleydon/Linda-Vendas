@@ -36,8 +36,15 @@ export default defineConfig([
     files: [
       'src/**/__tests__/**/*.{ts,tsx}',
       'src/**/*.spec.{ts,tsx}',
-      'src/**/*.test.{ts,tsx}'
+      'src/**/*.test.{ts,tsx}',
+      '.jest/**/*.js'
     ],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        ...globals.node
+      }
+    },
     plugins: {
       'testing-library': testingLibrary
     },

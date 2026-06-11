@@ -102,6 +102,7 @@ export function SaleProductItem({
           <View className="flex-row items-center rounded-xl bg-secondary dark:bg-zinc-800 px-2 py-1">
             <TouchableOpacity
               onPress={() => onUpdateQuantity(item.id, -1)}
+              testID="minus-button"
               className="p-1"
             >
               <MaterialCommunityIcons
@@ -115,6 +116,7 @@ export function SaleProductItem({
             </Text>
             <TouchableOpacity
               onPress={() => onUpdateQuantity(item.id, 1)}
+              testID="plus-button"
               className="p-1"
             >
               <MaterialCommunityIcons
@@ -154,6 +156,7 @@ export function SaleProductItem({
                 <TouchableOpacity
                   onPress={() => onUpdateQuantity(item.id, -1, v.id)}
                   disabled={v.stock <= 0}
+                  testID={`minus-button-${v.id}`}
                   className="p-1"
                 >
                   <MaterialCommunityIcons
@@ -168,6 +171,7 @@ export function SaleProductItem({
                 <TouchableOpacity
                   onPress={() => onUpdateQuantity(item.id, 1, v.id)}
                   disabled={v.stock <= 0 || getQuantity(v.id) >= v.stock}
+                  testID={`plus-button-${v.id}`}
                   className="p-1"
                 >
                   <MaterialCommunityIcons

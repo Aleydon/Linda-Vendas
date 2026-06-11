@@ -2,6 +2,7 @@ export default {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/.jest/jest.setup.js'],
   moduleNameMapper: {
-    '^src/(.*)$': '<rootDir>/src/$1'
+    '^src/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1'
   }
 };
