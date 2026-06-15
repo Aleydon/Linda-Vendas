@@ -115,7 +115,9 @@ export function useMultipleProductsForm({
               mediaTypes: ['images'],
               allowsEditing: true,
               aspect: [4, 3],
-              quality: 0.7
+              quality: 0.5,
+              width: 800,
+              height: 600
             });
             if (!result.canceled && result.assets[0].uri) {
               await uploadImage(productId, result.assets[0].uri);
@@ -138,7 +140,9 @@ export function useMultipleProductsForm({
             const result = await ImagePicker.launchCameraAsync({
               allowsEditing: true,
               aspect: [4, 3],
-              quality: 0.7
+              quality: 0.5,
+              width: 800,
+              height: 600
             });
             if (!result.canceled && result.assets[0].uri) {
               await uploadImage(productId, result.assets[0].uri);

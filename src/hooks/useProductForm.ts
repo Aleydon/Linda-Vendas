@@ -65,7 +65,9 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
               mediaTypes: ['images'],
               allowsEditing: true,
               aspect: [4, 3],
-              quality: 0.7
+              quality: 0.5,
+              width: 800,
+              height: 600
             });
             if (!result.canceled && result.assets[0].uri) {
               await uploadImage(result.assets[0].uri);
@@ -88,8 +90,11 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
             const result = await ImagePicker.launchCameraAsync({
               allowsEditing: true,
               aspect: [4, 3],
-              quality: 0.7
+              quality: 0.5,
+              width: 800,
+              height: 600
             });
+
             if (!result.canceled && result.assets[0].uri) {
               await uploadImage(result.assets[0].uri);
             }
