@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AdminPanel } from '@/components/profile/AdminPanel';
+import { DataManagementPanel } from '@/components/profile/DataManagementPanel';
 import { PixConfigPanel } from '@/components/profile/PixConfigPanel';
 import { ProfileMenuItem } from '@/components/ProfileMenuItem';
 import { useAlert } from '@/context/AlertContext';
@@ -30,7 +31,8 @@ export default function Profile() {
     toggleColorScheme,
     fetchAllProfiles,
     updateUserRole,
-    updateUserFiado
+    updateUserFiado,
+    refreshData
   } = useAppContext();
   const { showAlert } = useAlert();
 
@@ -232,7 +234,7 @@ export default function Profile() {
             onPress={() => router.push('/user-sales')}
           />
 
-          {/* Admin Management Panel */}
+          {/* Admin Panels */}
           {isAdmin && (
             <>
               <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">
@@ -250,6 +252,12 @@ export default function Profile() {
                 onToggleExpand={() =>
                   setIsAdminPanelExpanded(!isAdminPanelExpanded)
                 }
+              />
+
+              <DataManagementPanel
+                isAdmin={isAdmin}
+                colorScheme={colorScheme}
+                refreshData={refreshData}
               />
             </>
           )}

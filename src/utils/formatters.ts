@@ -73,6 +73,11 @@ export const formatDateLong = (date: string | Date): string => {
   return dateStr;
 };
 
+export const formatDate = (date: string | Date): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('pt-BR');
+};
+
 export const formatRelativeTime = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   const diff = Date.now() - d.getTime();
