@@ -80,6 +80,7 @@ export const api = {
       return {
         id: p.id,
         name: p.name,
+        description: p.description ?? undefined,
         price: Number(p.price),
         stock: totalStock,
         imageUrl: p.image_url,
@@ -171,6 +172,7 @@ export const api = {
       .insert([
         {
           name: product.name,
+          description: product.description,
           price: product.price,
           stock: product.stock,
           image_url: product.imageUrl,
@@ -211,6 +213,7 @@ export const api = {
     return {
       id: p.id,
       name: p.name,
+      description: p.description ?? undefined,
       price: Number(p.price),
       stock: totalStock,
       imageUrl: p.image_url,
@@ -230,6 +233,8 @@ export const api = {
     > = {};
 
     if (updates.name !== undefined) payload.name = updates.name;
+    if (updates.description !== undefined)
+      payload.description = updates.description;
     if (updates.price !== undefined) payload.price = updates.price;
     if (updates.stock !== undefined) payload.stock = updates.stock;
     if (updates.imageUrl !== undefined) payload.image_url = updates.imageUrl;

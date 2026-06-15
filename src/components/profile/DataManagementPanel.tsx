@@ -23,6 +23,7 @@ interface DataManagementPanelProps {
 interface ProductCsvRow {
   'ID Produto'?: string;
   Produto: string;
+  Descrição?: string;
   'Preço Base': number;
   Categoria: string;
   'Possui Variações': 'Sim' | 'Não';
@@ -64,6 +65,7 @@ export function DataManagementPanel({
           return p.variations.map(v => ({
             'ID Produto': p.id,
             Produto: p.name,
+            Descrição: p.description || '',
             'Preço Base': p.price,
             Categoria: p.category,
             'Possui Variações': 'Sim',
@@ -77,6 +79,7 @@ export function DataManagementPanel({
           {
             'ID Produto': p.id,
             Produto: p.name,
+            Descrição: p.description || '',
             'Preço Base': p.price,
             Categoria: p.category,
             'Possui Variações': 'Não',
@@ -179,6 +182,7 @@ export function DataManagementPanel({
           productsMap.set(productName, {
             id: existing?.id, // If exists, we'll update
             name: productName,
+            description: item['Descrição'] || '',
             price: Number(item['Preço Base']) || 0,
             category_id: categoryId,
             imageUrl: item['Imagem URL'] || '',
@@ -215,6 +219,7 @@ export function DataManagementPanel({
           // Update existing
           await api.updateProduct(productData.id, {
             name: productData.name,
+            description: productData.description,
             price: productData.price,
             stock: productData.stock,
             imageUrl: productData.imageUrl,

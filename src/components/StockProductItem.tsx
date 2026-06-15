@@ -40,6 +40,14 @@ export function StockProductItem({
           <Text className="text-text-secondary dark:text-zinc-400 text-sm">
             {product.category || 'Sem Categoria'}
           </Text>
+          {product.description && (
+            <Text
+              className="text-text-secondary dark:text-zinc-500 text-xs mt-1"
+              numberOfLines={1}
+            >
+              {product.description}
+            </Text>
+          )}
           {product.has_variations && (
             <View className="flex-row items-center mt-1">
               <Text className="text-primary dark:text-orange-400 text-[10px] font-bold uppercase mr-1">

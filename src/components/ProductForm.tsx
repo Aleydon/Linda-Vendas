@@ -15,7 +15,8 @@ import { FormField } from '@/components/FormField';
 import { CategoryPicker } from '@/components/product/CategoryPicker';
 import { ProductImagePicker } from '@/components/product/ProductImagePicker';
 import { VariationSection } from '@/components/product/VariationSection';
-import { Product, useAppContext } from '@/context/AppContext';
+import { Product } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import { useProductForm } from '@/hooks/useProductForm';
 
 interface ProductFormProps {
@@ -36,6 +37,8 @@ export function ProductForm({
   const {
     name,
     setName,
+    description,
+    setDescription,
     categoryId,
     setCategoryId,
     showCategoryDropdown,
@@ -105,6 +108,17 @@ export function ProductForm({
                   label="Nome do Produto"
                   value={name}
                   onChangeText={setName}
+                />
+              </View>
+
+              <View className="mb-4">
+                <FormField
+                  label="Descrição (Opcional)"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                  placeholder="Ex: Ingredientes, tamanho, detalhes..."
                 />
               </View>
 

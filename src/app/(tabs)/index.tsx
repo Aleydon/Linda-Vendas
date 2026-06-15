@@ -109,6 +109,7 @@ export function Home(): React.JSX.Element {
                       >
                         <ProductCard
                           name={product.name}
+                          description={product.description}
                           price={formatCurrencyValue(product.price)}
                           stock={product.stock}
                           imageUrl={product.imageUrl}

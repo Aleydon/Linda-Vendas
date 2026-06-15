@@ -24,6 +24,9 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
   const { showAlert } = useAlert();
 
   const [name, setName] = useState(initialData?.name ?? '');
+  const [description, setDescription] = useState(
+    initialData?.description ?? ''
+  );
   const [categoryId, setCategoryId] = useState(initialData?.category_id ?? '');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [price, setPrice] = useState(
@@ -94,7 +97,6 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
               width: 800,
               height: 600
             });
-
             if (!result.canceled && result.assets[0].uri) {
               await uploadImage(result.assets[0].uri);
             }
@@ -221,6 +223,7 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
 
       await onSubmit({
         name,
+        description: description || undefined,
         category_id: categoryId || undefined,
         price: numericPrice,
         stock: numericStock,
@@ -245,6 +248,8 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
   return {
     name,
     setName,
+    description,
+    setDescription,
     categoryId,
     setCategoryId,
     showCategoryDropdown,

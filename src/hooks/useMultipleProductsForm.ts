@@ -15,6 +15,7 @@ import {
 export interface ProductFormState {
   id: string;
   name: string;
+  description: string;
   category_id: string;
   price: string;
   stock: string;
@@ -39,6 +40,7 @@ export function useMultipleProductsForm({
   const createEmptyProduct = (): ProductFormState => ({
     id: Math.random().toString(36).substring(2, 9),
     name: '',
+    description: '',
     category_id: '',
     price: '',
     stock: '',
@@ -300,6 +302,7 @@ export function useMultipleProductsForm({
 
         return {
           name: p.name,
+          description: p.description || undefined,
           category_id: p.category_id || undefined,
           price: numericPrice,
           stock: numericStock,

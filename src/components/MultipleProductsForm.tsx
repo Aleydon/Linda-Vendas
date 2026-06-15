@@ -153,9 +153,26 @@ export function MultipleProductsForm({
                           <FormField
                             label="Nome do Produto"
                             value={product.name}
-                            onChangeText={val =>
-                              updateProductField(product.id, 'name', val)
+                            onChangeText={text =>
+                              updateProductField(product.id, 'name', text)
                             }
+                          />
+                        </View>
+
+                        <View className="mb-4">
+                          <FormField
+                            label="Descrição (Opcional)"
+                            value={product.description}
+                            onChangeText={text =>
+                              updateProductField(
+                                product.id,
+                                'description',
+                                text
+                              )
+                            }
+                            multiline
+                            numberOfLines={2}
+                            placeholder="Detalhes do produto..."
                           />
                         </View>
 

@@ -8,6 +8,7 @@ import { formatCurrency } from '@/utils/formatters';
 
 interface ProductCardProps {
   name: string;
+  description?: string;
   price: string;
   stock: number;
   imageUrl?: string;
@@ -18,6 +19,7 @@ interface ProductCardProps {
 
 export function ProductCard({
   name,
+  description,
   price,
   stock,
   imageUrl,
@@ -71,6 +73,15 @@ export function ProductCard({
           <Text className="text-text-primary dark:text-zinc-100 font-semibold text-base">
             {name}
           </Text>
+
+          {description && (
+            <Text
+              className="text-text-secondary dark:text-zinc-400 text-xs mt-0.5"
+              numberOfLines={2}
+            >
+              {description}
+            </Text>
+          )}
 
           <View className="mt-1 flex-row items-center justify-between">
             <View>

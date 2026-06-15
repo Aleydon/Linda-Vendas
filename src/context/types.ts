@@ -34,6 +34,7 @@ export interface Product {
   category_id?: string;
   category?: string; // For display/legacy compatibility
   name: string;
+  description?: string;
   price: number;
   stock: number;
   imageUrl: string;
