@@ -43,25 +43,61 @@ export function useProductForm({ initialData, onSubmit }: UseProductFormProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const pickImage = async (): Promise<void> => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.7
-      });
-
-      if (!result.canceled && result.assets[0].uri) {
-        await uploadImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      showAlert({
-        title: 'Erro',
-        description: 'Não foi possível selecionar a imagem.',
-        type: 'error'
-      });
-    }
+    showAlert({
+      title: 'Selecionar Imagem',
+      description: 'Escolha como deseja adicionar a foto do produto:',
+      type: 'confirm',
+      buttons: [
+        {
+          text: 'Galeria',
+          onPress: async () => {
+            const { status } =
+              await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              showAlert({
+                title: 'Permissão Negada',
+                description: 'Precisamos de acesso à sua galeria.',
+                type: 'error'
+              });
+              return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 0.7
+            });
+            if (!result.canceled && result.assets[0].uri) {
+              await uploadImage(result.assets[0].uri);
+            }
+          }
+        },
+        {
+          text: 'Câmera',
+          onPress: async () => {
+            const { status } =
+              await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              showAlert({
+                title: 'Permissão Negada',
+                description: 'Precisamos de acesso à sua câmera.',
+                type: 'error'
+              });
+              return;
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 0.7
+            });
+            if (!result.canceled && result.assets[0].uri) {
+              await uploadImage(result.assets[0].uri);
+            }
+          }
+        },
+        { text: 'Cancelar', style: 'cancel' }
+      ]
+    });
   };
 
   const uploadImage = async (uri: string): Promise<void> => {
