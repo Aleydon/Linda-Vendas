@@ -57,7 +57,7 @@ export function Home(): React.JSX.Element {
       <Animated.View style={focusAnimatedStyle} className="flex-1">
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
         >
           {/* Search Bar */}
           <SearchBar value={searchQuery} onChangeText={setSearchQuery} />

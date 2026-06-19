@@ -11,6 +11,7 @@ import Animated, {
   FadeInDown,
   LinearTransition
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryItem } from '@/components/CategoryItem';
 import { Header } from '@/components/Header';
@@ -28,6 +29,11 @@ export default function NewSale() {
   const { products, addSale, loading, categories, profile, user, colorScheme } =
     useAppContext();
   const [search, setSearch] = useState('');
+  const insets = useSafeAreaInsets();
+
+  // Dynamically calculate spacing to position the checkout summary card above the floating tab bar
+  const bottomInset = insets.bottom > 0 ? insets.bottom + 8 : 24;
+  const cardBottom = bottomInset + 80 + 12; // 80 (tab bar height) + 12 (margin offset)
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -132,7 +138,7 @@ export default function NewSale() {
       <View className="flex-1">
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 180 }}
+          contentContainerStyle={{ paddingBottom: 24 }}
         >
           <View className="px-6 pt-2">
             <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
@@ -222,7 +228,10 @@ export default function NewSale() {
         </ScrollView>
 
         {/* Bottom Summary */}
-        <View className="border-secondary dark:border-zinc-800 absolute bottom-0 left-0 right-0 border-t bg-white dark:bg-zinc-900 px-6 pb-2 pt-2 shadow-lg">
+        <View
+          className="border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-5 pb-5 pt-4 rounded-3xl shadow-xl shadow-black/10 mx-4"
+          style={{ marginBottom: cardBottom }}
+        >
           <View className="mb-4 flex-row items-center justify-between">
             <View>
               <Text className="text-text-secondary dark:text-zinc-400 text-sm">

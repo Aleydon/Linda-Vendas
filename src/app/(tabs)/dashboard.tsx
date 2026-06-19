@@ -72,7 +72,7 @@ export function Dashboard() {
       <Animated.View style={focusAnimatedStyle} className="flex-1">
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
         >
           <View className="px-6 py-4">
             {/* Main Integrated Sales Card & Chart */}

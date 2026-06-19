@@ -191,7 +191,7 @@ export function History() {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
         >
           <View className="px-6">
             {/* Search Summary Card */}

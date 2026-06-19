@@ -143,7 +143,7 @@ export function Stock(): React.JSX.Element {
       <Animated.View style={focusAnimatedStyle} className="flex-1">
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
         >
           <View className="px-6 py-6">
             <View className="mb-6">
