@@ -63,7 +63,8 @@ export function useNotifications() {
             notifications_enabled: true,
             expo_push_token: token,
             // Default sub-settings to true if enabling for the first time
-            sales_notifications: profile?.sales_notifications ?? true
+            sales_notifications: profile?.sales_notifications ?? true,
+            products_notifications: profile?.products_notifications ?? true
           });
         }
       } else {

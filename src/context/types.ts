@@ -19,6 +19,7 @@ export interface Profile {
   notifications_enabled?: boolean;
   low_stock_notifications?: boolean;
   sales_notifications?: boolean;
+  products_notifications?: boolean;
   allow_fiado?: boolean;
 }
 

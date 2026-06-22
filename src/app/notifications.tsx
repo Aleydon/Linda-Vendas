@@ -40,7 +40,10 @@ export default function NotificationsScreen() {
   };
 
   const handleToggleSubSetting = async (
-    key: 'low_stock_notifications' | 'sales_notifications',
+    key:
+      | 'low_stock_notifications'
+      | 'sales_notifications'
+      | 'products_notifications',
     value: boolean
   ) => {
     try {
@@ -132,6 +135,32 @@ export default function NotificationsScreen() {
                   </View>
                 </View>
               )}
+
+              {isAdmin && (
+                <View className="mb-4 rounded-2xl bg-zinc-50 p-6 dark:bg-zinc-900/50">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1 pr-4">
+                      <Text className="text-base font-medium text-zinc-900 dark:text-zinc-100">
+                        Produtos
+                      </Text>
+                      <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                        Receba notificações quando produtos forem adicionados,
+                        editados ou excluídos.
+                      </Text>
+                    </View>
+                    <Switch
+                      value={profile?.products_notifications}
+                      onValueChange={v =>
+                        handleToggleSubSetting('products_notifications', v)
+                      }
+                      trackColor={{ false: '#d4d4d8', true: '#fdba74' }}
+                      thumbColor={
+                        profile?.products_notifications ? '#fb923c' : '#f4f4f5'
+                      }
+                    />
+                  </View>
+                </View>
+              )}
             </Animated.View>
           )}
 
@@ -143,7 +172,7 @@ export default function NotificationsScreen() {
                 color="#A34211"
               />
               <Text className="ml-2 flex-1 text-sm text-orange-800 dark:text-orange-200">
-                O administrador receberá notificações de vendas realizadas em
+                O administrador receberá notificações de vendas e produtos em
                 tempo real.
               </Text>
             </View>

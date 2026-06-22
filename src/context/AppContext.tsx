@@ -171,7 +171,11 @@ export function AppProvider({
             table: 'sales'
           },
           payload => {
-            const newSale = payload.new;
+            const newSale = payload.new as {
+              id: string;
+              total: number;
+              user_id: string;
+            };
             // Notify admin if it's not their sale
             if (
               profile?.role === 'admin' &&
@@ -207,6 +211,81 @@ export function AppProvider({
     profile?.role,
     profile?.notifications_enabled,
     profile?.sales_notifications
+  ]);
+
+  // 6. Products realtime subscription and notifications
+  useEffect(() => {
+    if (!user) return;
+
+    let productsSubscription: RealtimeChannel | null = null;
+
+    const setupProductsSubscription = () => {
+      if (productsSubscription) {
+        supabase.removeChannel(productsSubscription);
+      }
+
+      productsSubscription = supabase
+        .channel('public:products')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'products'
+          },
+          payload => {
+            const shouldNotify =
+              profile?.role === 'admin' &&
+              profile?.notifications_enabled &&
+              profile?.products_notifications;
+
+            if (!shouldNotify) {
+              void fetchData();
+              return;
+            }
+
+            const productName =
+              ((payload.new as Record<string, unknown>)?.name as string) ||
+              ((payload.old as Record<string, unknown>)?.name as string) ||
+              'Produto';
+
+            let title = '';
+            let body = '';
+
+            if (payload.eventType === 'INSERT') {
+              title = '🆕 Novo Produto Adicionado!';
+              body = `${productName} foi adicionado ao estoque.`;
+            } else if (payload.eventType === 'UPDATE') {
+              title = '✏️ Produto Editado!';
+              body = `${productName} foi atualizado.`;
+            } else if (payload.eventType === 'DELETE') {
+              title = '🗑️ Produto Excluído!';
+              body = `${productName} foi removido do estoque.`;
+            }
+
+            void Notifications.scheduleNotificationAsync({
+              content: { title, body, data: { table: 'products' } },
+              trigger: null
+            });
+
+            void fetchData();
+          }
+        )
+        .subscribe();
+    };
+
+    setupProductsSubscription();
+
+    return () => {
+      if (productsSubscription) {
+        supabase.removeChannel(productsSubscription);
+      }
+    };
+  }, [
+    user?.id,
+    profile?.role,
+    profile?.notifications_enabled,
+    profile?.products_notifications
   ]);
 
   const contextValue: AppContextType = {
