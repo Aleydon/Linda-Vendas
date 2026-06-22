@@ -98,6 +98,7 @@ export interface AppContextType {
     updates: Partial<Omit<Product, 'id' | 'outOfStock'>>
   ) => Promise<void>;
   deleteProduct: (productId: string) => Promise<void>;
+  clearSalesHistory: () => Promise<void>;
   addSale: (
     items: {
       product_id: string;

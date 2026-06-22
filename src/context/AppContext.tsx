@@ -129,7 +129,8 @@ export function AppProvider({
     fetchSalesByUser,
     fetchAllProfiles,
     updateUserRole,
-    updateUserFiado
+    updateUserFiado,
+    clearSalesHistory
   } = useAppSales({
     isAdmin,
     user,
@@ -225,6 +226,7 @@ export function AppProvider({
     updateProduct,
     addProduct,
     deleteProduct,
+    clearSalesHistory,
     addSale,
     confirmPayment,
     addCategory,

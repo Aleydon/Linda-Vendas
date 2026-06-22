@@ -114,6 +114,20 @@ export function useAppSales({
     }
   };
 
+  const clearSalesHistory = async (): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      setLoading(true);
+      await api.clearSalesHistory();
+      await refreshData();
+    } catch (error) {
+      console.error('Error clearing sales history:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     sales,
     setSales,
@@ -123,6 +137,7 @@ export function useAppSales({
     fetchSalesByUser,
     fetchAllProfiles,
     updateUserRole,
-    updateUserFiado
+    updateUserFiado,
+    clearSalesHistory
   };
 }

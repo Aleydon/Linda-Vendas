@@ -289,6 +289,20 @@ export const api = {
     if (error) throw error;
   },
 
+  async clearSalesHistory(): Promise<void> {
+    const { error: itemsError } = await supabase
+      .from('sale_items')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (itemsError) throw itemsError;
+
+    const { error: salesError } = await supabase
+      .from('sales')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (salesError) throw salesError;
+  },
+
   async addSale(
     items: {
       product_id: string;

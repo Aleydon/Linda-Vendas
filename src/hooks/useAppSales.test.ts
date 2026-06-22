@@ -14,7 +14,8 @@ jest.mock('@/services/api', () => ({
     fetchSalesByUser: jest.fn(),
     fetchAllProfiles: jest.fn(),
     updateUserRole: jest.fn(),
-    updateUserFiado: jest.fn()
+    updateUserFiado: jest.fn(),
+    clearSalesHistory: jest.fn()
   }
 }));
 
@@ -138,5 +139,38 @@ describe('useAppSales', () => {
     await expect(
       result.current.updateUserRole('seller-1', 'user')
     ).rejects.toThrow('Você não pode alterar sua própria role.');
+  });
+
+  it('should clear sales history if admin', async () => {
+    const { result } = renderHook(() =>
+      useAppSales({
+        isAdmin: true,
+        user: mockUser as unknown as User,
+        refreshData: mockRefreshData,
+        setLoading: mockSetLoading
+      })
+    );
+
+    await act(async () => {
+      await result.current.clearSalesHistory();
+    });
+
+    expect(api.clearSalesHistory).toHaveBeenCalled();
+    expect(mockRefreshData).toHaveBeenCalled();
+  });
+
+  it('should throw error if non-admin tries to clear sales history', async () => {
+    const { result } = renderHook(() =>
+      useAppSales({
+        isAdmin: false,
+        user: mockUser as unknown as User,
+        refreshData: mockRefreshData,
+        setLoading: mockSetLoading
+      })
+    );
+
+    await expect(result.current.clearSalesHistory()).rejects.toThrow(
+      'Unauthorized'
+    );
   });
 });

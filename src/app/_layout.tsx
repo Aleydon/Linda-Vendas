@@ -43,8 +43,6 @@ function AuthGuard() {
 }
 
 function InitialLayout() {
-  const { initialLoading } = useAppContext();
-
   return (
     <>
       <AuthGuard />
@@ -72,7 +70,6 @@ function InitialLayout() {
           options={{ animation: 'slide_from_right' }}
         />
       </Stack>
-      {initialLoading && <Loading />}
     </>
   );
 }

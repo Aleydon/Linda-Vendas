@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
+import { useAlert } from '@/context/AlertContext';
+import { useAppContext } from '@/context/AppContext';
 import { Product, Variation } from '@/context/types';
 import { api } from '@/services/api';
 import { csvUtils } from '@/utils/csv';
@@ -48,6 +50,9 @@ export function DataManagementPanel({
 }: DataManagementPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { clearSalesHistory } = useAppContext();
+  const { showAlert } = useAlert();
 
   // Somente Admins podem ver este painel inteiro
   if (!isAdmin) return null;
@@ -251,6 +256,42 @@ export function DataManagementPanel({
     }
   };
 
+  const handleClearHistory = () => {
+    showAlert({
+      title: 'Limpar Histórico',
+      description:
+        'Tem certeza de que deseja apagar permanentemente todas as vendas do histórico? Esta ação NÃO pode ser desfeita e deve ser usada apenas após exportar o backup em CSV.',
+      type: 'confirm',
+      buttons: [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await clearSalesHistory();
+              showAlert({
+                title: 'Sucesso',
+                description: 'Histórico de vendas limpo com sucesso.',
+                type: 'success'
+              });
+            } catch (error) {
+              console.error('Error clearing sales history:', error);
+              showAlert({
+                title: 'Erro',
+                description: 'Não foi possível limpar o histórico de vendas.',
+                type: 'error'
+              });
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    });
+  };
+
   return (
     <View className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-secondary dark:border-zinc-800 overflow-hidden mb-4">
       <TouchableOpacity
@@ -351,6 +392,26 @@ export function DataManagementPanel({
                 Nota: Se o nome do produto já existir, ele será atualizado em
                 vez de duplicado.
               </Text>
+
+              <View className="h-[1px] bg-secondary dark:bg-zinc-800 my-2" />
+
+              <Text className="text-red-500/80 dark:text-red-400/80 text-[10px] uppercase font-bold mb-1">
+                Zona de Perigo
+              </Text>
+
+              <TouchableOpacity
+                onPress={handleClearHistory}
+                className="bg-red-50 dark:bg-red-950/20 p-3 rounded-xl flex-row items-center justify-center border border-red-200 dark:border-red-900/30"
+              >
+                <MaterialCommunityIcons
+                  name="trash-can-outline"
+                  size={20}
+                  color="#ef4444"
+                />
+                <Text className="ml-2 text-red-600 dark:text-red-400 font-bold text-xs">
+                  Limpar Histórico de Vendas
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </Animated.View>
