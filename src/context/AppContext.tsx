@@ -19,6 +19,7 @@ import {
   Profile,
   Sale,
   SaleItem,
+  SaleStatus,
   UserRole,
   Variation
 } from './types';
@@ -108,12 +109,12 @@ export function AppProvider({
     products,
     setProducts,
     fetchProducts,
-    addProduct,
-    updateProduct,
+    addProduct: hookAddProduct,
+    updateProduct: hookUpdateProduct,
     updateStock,
     resetStock,
     addStock,
-    deleteProduct
+    deleteProduct: hookDeleteProduct
   } = useAppProducts({
     isAdmin,
     refreshData: () => fetchData()
@@ -124,7 +125,7 @@ export function AppProvider({
     sales,
     setSales,
     fetchSales,
-    addSale,
+    addSale: hookAddSale,
     confirmPayment,
     fetchSalesByUser,
     fetchAllProfiles,
@@ -147,6 +148,84 @@ export function AppProvider({
     } finally {
       setLoading(false);
       setInitialLoading(false);
+    }
+  };
+
+  const showProductNotification = (
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE',
+    productName: string
+  ) => {
+    if (profile?.role !== 'admin' || !profile?.notifications_enabled) return;
+    if (!(profile?.products_notifications ?? true)) return;
+
+    let title = '';
+    let body = '';
+    if (eventType === 'INSERT') {
+      title = '🆕 Novo Produto Adicionado!';
+      body = `${productName} foi adicionado ao estoque.`;
+    } else if (eventType === 'UPDATE') {
+      title = '✏️ Produto Editado!';
+      body = `${productName} foi atualizado.`;
+    } else if (eventType === 'DELETE') {
+      title = '🗑️ Produto Excluído!';
+      body = `${productName} foi removido do estoque.`;
+    }
+
+    Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { table: 'products' } },
+      trigger: null
+    }).catch(err => console.error('Falha ao agendar notificação:', err));
+  };
+
+  const addProduct = async (
+    productData: Omit<Product, 'id' | 'outOfStock' | 'category'>
+  ) => {
+    await hookAddProduct(productData);
+    showProductNotification('INSERT', productData.name || 'Produto');
+  };
+
+  const updateProduct = async (
+    productId: string,
+    updates: Partial<Omit<Product, 'id' | 'outOfStock'>>
+  ) => {
+    const oldProduct = products.find(p => p.id === productId);
+    await hookUpdateProduct(productId, updates);
+    showProductNotification('UPDATE', oldProduct?.name || 'Produto');
+  };
+
+  const deleteProduct = async (productId: string) => {
+    const oldProduct = products.find(p => p.id === productId);
+    await hookDeleteProduct(productId);
+    showProductNotification('DELETE', oldProduct?.name || 'Produto');
+  };
+
+  const addSale = async (
+    items: {
+      product_id: string;
+      variation_id?: string;
+      quantity: number;
+      unit_price: number;
+    }[],
+    total: number,
+    userId?: string,
+    status: SaleStatus = 'paid',
+    customerName?: string
+  ) => {
+    await hookAddSale(items, total, userId, status, customerName);
+
+    if (
+      profile?.role === 'admin' &&
+      profile?.notifications_enabled &&
+      (profile?.sales_notifications ?? true)
+    ) {
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Nova Venda Realizada!',
+          body: `Uma nova venda de R$ ${Number(total).toFixed(2)} foi registrada.`,
+          data: {}
+        },
+        trigger: null
+      }).catch(err => console.error('Falha ao agendar notificação:', err));
     }
   };
 
@@ -180,23 +259,27 @@ export function AppProvider({
             if (
               profile?.role === 'admin' &&
               profile?.notifications_enabled &&
-              profile?.sales_notifications &&
+              (profile?.sales_notifications ?? true) &&
               newSale.user_id !== user.id
             ) {
-              void Notifications.scheduleNotificationAsync({
+              Notifications.scheduleNotificationAsync({
                 content: {
                   title: 'Nova Venda Realizada!',
                   body: `Uma nova venda de R$ ${Number(newSale.total).toFixed(2)} foi registrada por outro vendedor.`,
                   data: { saleId: newSale.id }
                 },
                 trigger: null
-              });
+              }).catch(err =>
+                console.error('Falha ao agendar notificação:', err)
+              );
             }
             // Refresh data to show new sale in history
             void fetchData();
           }
         )
-        .subscribe();
+        .subscribe(status => {
+          console.log('Realtime status (sales):', status);
+        });
     };
 
     setupSalesSubscription();
@@ -234,44 +317,44 @@ export function AppProvider({
             table: 'products'
           },
           payload => {
-            const shouldNotify =
+            if (
               profile?.role === 'admin' &&
               profile?.notifications_enabled &&
-              profile?.products_notifications;
+              (profile?.products_notifications ?? true)
+            ) {
+              const productName =
+                ((payload.new as Record<string, unknown>)?.name as string) ||
+                ((payload.old as Record<string, unknown>)?.name as string) ||
+                'Produto';
 
-            if (!shouldNotify) {
-              void fetchData();
-              return;
+              let title = '';
+              let body = '';
+
+              if (payload.eventType === 'INSERT') {
+                title = '🆕 Novo Produto Adicionado!';
+                body = `${productName} foi adicionado ao estoque.`;
+              } else if (payload.eventType === 'UPDATE') {
+                title = '✏️ Produto Editado!';
+                body = `${productName} foi atualizado.`;
+              } else if (payload.eventType === 'DELETE') {
+                title = '🗑️ Produto Excluído!';
+                body = `${productName} foi removido do estoque.`;
+              }
+
+              Notifications.scheduleNotificationAsync({
+                content: { title, body, data: { table: 'products' } },
+                trigger: null
+              }).catch(err =>
+                console.error('Falha ao agendar notificação:', err)
+              );
             }
-
-            const productName =
-              ((payload.new as Record<string, unknown>)?.name as string) ||
-              ((payload.old as Record<string, unknown>)?.name as string) ||
-              'Produto';
-
-            let title = '';
-            let body = '';
-
-            if (payload.eventType === 'INSERT') {
-              title = '🆕 Novo Produto Adicionado!';
-              body = `${productName} foi adicionado ao estoque.`;
-            } else if (payload.eventType === 'UPDATE') {
-              title = '✏️ Produto Editado!';
-              body = `${productName} foi atualizado.`;
-            } else if (payload.eventType === 'DELETE') {
-              title = '🗑️ Produto Excluído!';
-              body = `${productName} foi removido do estoque.`;
-            }
-
-            void Notifications.scheduleNotificationAsync({
-              content: { title, body, data: { table: 'products' } },
-              trigger: null
-            });
 
             void fetchData();
           }
         )
-        .subscribe();
+        .subscribe(status => {
+          console.log('Realtime status (products):', status);
+        });
     };
 
     setupProductsSubscription();

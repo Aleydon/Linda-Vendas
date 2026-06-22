@@ -42,10 +42,9 @@ async function sendPushNotifications(
 ): Promise<Response> {
   const query = supabase
     .from('profiles')
-    .select('expo_push_token')
+    .select(`expo_push_token, ${filters.notificationField}`)
     .eq('role', 'admin')
     .eq('notifications_enabled', true)
-    .eq(filters.notificationField, true)
     .not('expo_push_token', 'is', null);
 
   if (filters.excludeUserId) {
@@ -65,7 +64,12 @@ async function sendPushNotifications(
     );
   }
 
-  const expoTokens: string[] = admins
+  // Filtra apenas admins que não desabilitaram explicitamente (null/undefined = ativado)
+  const eligibleAdmins = admins.filter(
+    (a: Record<string, unknown>) => a[filters.notificationField] !== false
+  );
+
+  const expoTokens: string[] = eligibleAdmins
     .map((u: Partial<Profile>) => u.expo_push_token)
     .filter((t): t is string => !!t);
 

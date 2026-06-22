@@ -207,7 +207,7 @@ export function Stock(): React.JSX.Element {
         {/* Floating Action Button */}
         {isAdmin && (
           <TouchableOpacity
-            className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
+            className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-28 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg z-50"
             activeOpacity={0.8}
             onPress={() => {
               Haptics.selectionAsync();
