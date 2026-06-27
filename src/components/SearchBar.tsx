@@ -22,7 +22,7 @@ export function SearchBar({
   const { colorScheme } = useAppContext();
 
   return (
-    <View className={customClass || 'px-6 py-6'}>
+    <View className={customClass || 'p-card'}>
       <View className="border-secondary dark:border-zinc-800 flex-row items-center rounded-2xl border bg-white dark:bg-zinc-900 px-4 py-3 shadow-sm">
         <MaterialCommunityIcons
           name="magnify"
