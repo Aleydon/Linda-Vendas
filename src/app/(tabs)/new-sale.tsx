@@ -33,7 +33,7 @@ export default function NewSale() {
 
   // Dynamically calculate spacing to position the checkout summary card above the floating tab bar
   const bottomInset = insets.bottom > 0 ? insets.bottom + 8 : 24;
-  const cardBottom = bottomInset + 80 + 12; // 80 (tab bar height) + 12 (margin offset)
+  const cardBottom = bottomInset + 80 + 2; // 80 (tab bar height) + 12 (margin offset)
   const [activeCategoryId, setActiveCategoryId] = useState('Todos');
   const [showConfirmation, setShowConfirmation] = useState(false);
 
