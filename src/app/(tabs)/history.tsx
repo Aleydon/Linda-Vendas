@@ -169,7 +169,7 @@ export function History() {
               className={`px-4 py-2 rounded-full border ${
                 statusFilter === status
                   ? 'bg-primary border-primary dark:bg-orange-600 dark:border-orange-600'
-                  : 'bg-secondary border-secondary dark:bg-zinc-800 dark:bg-zinc-800'
+                  : 'bg-secondary border-secondary dark:bg-zinc-800'
               }`}
             >
               <Text
@@ -193,7 +193,7 @@ export function History() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="px-6">
+          <View className="p-card">
             {/* Search Summary Card */}
             {searchSummary && (
               <Animated.View
