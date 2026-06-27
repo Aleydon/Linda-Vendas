@@ -84,8 +84,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           const label = ROUTE_LABELS[route.name] || route.name;
 
           // Custom styling based on focus and theme
-          const activeBgColor = isDark ? '#182a3c' : '#fdf4e9';
-          const activeTextColor = isDark ? '#38bdf8' : '#A34211';
+          const activeBgColor = isDark ? '#c06030' : '#fdf4e9';
+          const activeTextColor = isDark ? '#fdf4e9' : '#A34211';
           const inactiveTextColor = isDark ? '#ffffff' : '#8C7E7E';
 
           const showBadge = route.name === 'history' && pendingSalesCount > 0;
@@ -106,7 +106,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 style={{
                   minWidth: 64,
                   alignSelf: 'center',
-                  borderRadius: 16, // "Meio arredondado" (retângulo de cantos suaves elegante)
+                  borderRadius: 50,
                   backgroundColor: isFocused ? activeBgColor : 'transparent',
                   overflow: 'hidden'
                 }}
