@@ -179,7 +179,7 @@ export default function UserSales() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="px-6">
+        <View className="p-card">
           <View className="flex-row gap-4 mb-8">
             <View className="flex-1 bg-white dark:bg-zinc-900 rounded-[32px] p-5 border border-secondary/20 dark:border-zinc-800 shadow-sm">
               <Text className="text-primary dark:text-orange-400 text-[10px] uppercase font-bold tracking-widest mb-1">
