@@ -74,7 +74,7 @@ export function Dashboard() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="px-6 py-4">
+          <View className="p-card">
             {/* Main Integrated Sales Card & Chart */}
             <Animated.View entering={FadeInDown.duration(600)}>
               <SalesChart
