@@ -215,8 +215,8 @@ export default function Profile() {
         </View>
 
         {/* Panel Section */}
-        <View className="m-card p-card mt-10">
-          <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4">
+        <View className="mt-8 p-card">
+          <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 ml-card">
             Painel do Vendedor
           </Text>
 
