@@ -229,10 +229,10 @@ export default function NewSale() {
 
         {/* Bottom Summary */}
         <View
-          className="border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-5 pb-5 pt-4 rounded-3xl shadow-xl shadow-black/10 mx-4"
+          className="border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-card pb-5 pt-4 rounded-3xl shadow-xl shadow-black/10 mx-2"
           style={{ marginBottom: cardBottom }}
         >
-          <View className="mb-4 flex-row items-center justify-between">
+          <View className="mb-4 flex-row items-center justify-between px-card">
             <View>
               <Text className="text-text-secondary dark:text-zinc-400 text-sm">
                 Total da Venda
