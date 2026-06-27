@@ -36,6 +36,13 @@ module.exports = {
         bold: ['Inter_700Bold', 'sans-serif'],
         extrabold: ['Inter_800ExtraBold', 'sans-serif'],
         black: ['Inter_900Black', 'sans-serif']
+      },
+      padding: {
+        card: '5px',
+        cardSm: '10px',
+        cardMd: '15px',
+        cardLg: '20px',
+        cardXl: '25px'
       }
     }
   },

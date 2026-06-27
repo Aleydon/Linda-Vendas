@@ -145,7 +145,7 @@ export function Stock(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 160 }}
         >
-          <View className="px-6 py-6">
+          <View className="p-card">
             <View className="mb-6">
               <Text className="text-text-primary dark:text-zinc-100 font-bold text-2xl">
                 Gestão de Estoque
@@ -207,7 +207,7 @@ export function Stock(): React.JSX.Element {
         {/* Floating Action Button */}
         {isAdmin && (
           <TouchableOpacity
-            className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-28 right-6 h-16 w-16 items-center justify-center rounded-2xl shadow-lg z-50"
+            className="bg-primary  dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-28 right-6 h-16 w-16 items-center justify-center rounded-full shadow-lg z-50"
             activeOpacity={0.8}
             onPress={() => {
               Haptics.selectionAsync();
