@@ -215,7 +215,7 @@ export default function Profile() {
         </View>
 
         {/* Panel Section */}
-        <View className="mt-12 p-card">
+        <View className="m-card p-card mt-10">
           <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4">
             Painel do Vendedor
           </Text>
@@ -237,7 +237,7 @@ export default function Profile() {
           {/* Admin Panels */}
           {isAdmin && (
             <>
-              <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">
+              <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold ml-card mb-cardLg">
                 Administração
               </Text>
               <AdminPanel
