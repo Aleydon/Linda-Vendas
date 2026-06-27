@@ -43,6 +43,13 @@ module.exports = {
         cardMd: '15px',
         cardLg: '20px',
         cardXl: '25px'
+      },
+      spacing: {
+        card: '8px',
+        cardSm: '10px',
+        cardMd: '15px',
+        cardLg: '20px',
+        cardXl: '25px'
       }
     }
   },
