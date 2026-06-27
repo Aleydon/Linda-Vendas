@@ -176,7 +176,7 @@ export default function NewSale() {
             ))}
           </ScrollView>
 
-          <View className="px-6">
+          <View className="p-card">
             {displayedSections.map(section => {
               const sectionProducts = filteredProducts.filter(
                 p => p.category_id === section.id
@@ -186,7 +186,7 @@ export default function NewSale() {
 
               return (
                 <View key={section.id} className="mb-6">
-                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
+                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest ml-2">
                     {section.name}
                   </Text>
 
