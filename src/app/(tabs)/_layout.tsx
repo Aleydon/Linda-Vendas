@@ -50,7 +50,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         style={{ height: bottomInset + 10 }} // Covers bottom safe area plus a little offset
       />
       <View
-        className={`absolute left-4 right-4 h-20 rounded-full flex-row items-center justify-around px-2 shadow-lg m-cardXl ${
+        className={`absolute left-2 right-2 h-20 rounded-full flex-row items-center justify-around px-cardSm shadow-lg  ${
           isDark
             ? 'bg-[#091118] border border-[#16232e] shadow-black/60'
             : 'bg-white border border-zinc-200 shadow-zinc-300/40'
