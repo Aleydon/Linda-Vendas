@@ -144,4 +144,5 @@ export interface DBProduct {
   category_id: string | null;
   categories?: { name: string } | null;
   product_variations?: DBVariation[];
+  description?: string | null;
 }

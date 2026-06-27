@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { act, renderHook } from '@testing-library/react-native';
 
@@ -29,7 +30,9 @@ describe('useAppSales', () => {
   });
 
   it('should fetch sales', async () => {
-    const mockSales = [{ id: 'sale-1', total: 100 }];
+    const mockSales = [
+      { id: 'sale-1', total: 100, created_at: '2026-06-27T00:00:00.000Z' }
+    ];
     (api.fetchSales as jest.Mock).mockResolvedValue(mockSales);
 
     const { result } = renderHook(() =>
@@ -47,6 +50,48 @@ describe('useAppSales', () => {
 
     expect(api.fetchSales).toHaveBeenCalled();
     expect(result.current.sales).toEqual(mockSales);
+  });
+
+  it('should fetch and merge local and remote sales ordered by date', async () => {
+    const mockRemoteSales = [
+      {
+        id: 'sale-remote-1',
+        total: 100,
+        created_at: '2026-06-27T00:00:00.000Z'
+      }
+    ];
+    const mockLocalSales = [
+      { id: 'sale-local-1', total: 50, created_at: '2026-06-26T00:00:00.000Z' }
+    ];
+
+    (api.fetchSales as jest.Mock).mockResolvedValue(mockRemoteSales);
+    await AsyncStorage.setItem(
+      '@imported_sales',
+      JSON.stringify(mockLocalSales)
+    );
+
+    const { result } = renderHook(() =>
+      useAppSales({
+        isAdmin: true,
+        user: mockUser as unknown as User,
+        refreshData: mockRefreshData,
+        setLoading: mockSetLoading
+      })
+    );
+
+    await act(async () => {
+      await result.current.fetchSales();
+    });
+
+    expect(api.fetchSales).toHaveBeenCalled();
+    expect(result.current.sales).toEqual([
+      {
+        id: 'sale-remote-1',
+        total: 100,
+        created_at: '2026-06-27T00:00:00.000Z'
+      },
+      { id: 'sale-local-1', total: 50, created_at: '2026-06-26T00:00:00.000Z' }
+    ]);
   });
 
   it('should add a sale', async () => {
@@ -141,7 +186,13 @@ describe('useAppSales', () => {
     ).rejects.toThrow('Você não pode alterar sua própria role.');
   });
 
-  it('should clear sales history if admin', async () => {
+  it('should clear sales history and remove local sales if admin', async () => {
+    // Definir venda local antes
+    await AsyncStorage.setItem(
+      '@imported_sales',
+      JSON.stringify([{ id: 'local-1' }])
+    );
+
     const { result } = renderHook(() =>
       useAppSales({
         isAdmin: true,
@@ -157,6 +208,10 @@ describe('useAppSales', () => {
 
     expect(api.clearSalesHistory).toHaveBeenCalled();
     expect(mockRefreshData).toHaveBeenCalled();
+
+    // Verificar que a venda local foi limpa do AsyncStorage
+    const stored = await AsyncStorage.getItem('@imported_sales');
+    expect(stored).toBeNull();
   });
 
   it('should throw error if non-admin tries to clear sales history', async () => {

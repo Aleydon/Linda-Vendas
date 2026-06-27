@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@supabase/supabase-js';
 import { useState } from 'react';
 
@@ -21,8 +22,30 @@ export function useAppSales({
 
   const fetchSales = async (): Promise<void> => {
     try {
-      const data = await api.fetchSales();
-      setSales(data);
+      const remoteData = await api.fetchSales();
+
+      let localSales: Sale[] = [];
+      try {
+        const stored = await AsyncStorage.getItem('@imported_sales');
+        if (stored) {
+          localSales = JSON.parse(stored);
+        }
+      } catch (err) {
+        console.error('Error reading local sales:', err);
+      }
+
+      // Merge local and remote sales, prioritizing remote ones in case of ID collision
+      const salesMap = new Map<string, Sale>();
+
+      localSales.forEach(s => salesMap.set(s.id, s));
+      remoteData.forEach(s => salesMap.set(s.id, s));
+
+      const mergedSales = Array.from(salesMap.values()).sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setSales(mergedSales);
     } catch (error) {
       console.error('Error fetching sales:', error);
     }
@@ -119,6 +142,11 @@ export function useAppSales({
     try {
       setLoading(true);
       await api.clearSalesHistory();
+      try {
+        await AsyncStorage.removeItem('@imported_sales');
+      } catch (err) {
+        console.error('Error removing local sales:', err);
+      }
       await refreshData();
     } catch (error) {
       console.error('Error clearing sales history:', error);

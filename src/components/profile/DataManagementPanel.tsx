@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +12,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { useAlert } from '@/context/AlertContext';
 import { useAppContext } from '@/context/AppContext';
-import { Product, Variation } from '@/context/types';
+import { Product, Sale, Variation } from '@/context/types';
 import { api } from '@/services/api';
 import { csvUtils } from '@/utils/csv';
 import { formatDate } from '@/utils/formatters';
@@ -41,6 +42,22 @@ interface ProductImportData extends Omit<
 > {
   id?: string;
   variations: Omit<Variation, 'id'>[];
+}
+
+interface SaleCsvRow {
+  'ID Venda': string;
+  Data: string;
+  'ID Vendedor'?: string;
+  Vendedor: string;
+  Cliente: string;
+  'Total Venda': number;
+  Status: string;
+  'ID Produto'?: string;
+  Produto: string;
+  'ID Variação'?: string;
+  Variação?: string;
+  Quantidade: number;
+  'Preço Unitário': number;
 }
 
 export function DataManagementPanel({
@@ -119,20 +136,41 @@ export function DataManagementPanel({
       const exportData: Record<
         string,
         string | number | boolean | null | undefined
-      >[] = sales.map(s => ({
-        'ID Venda': s.id.substring(0, 8),
-        Data: formatDate(s.created_at),
-        Vendedor: s.seller?.email || 'N/A',
-        Cliente: s.customer_name || 'N/A',
-        Total: s.total,
-        Status: s.status === 'paid' ? 'Pago' : 'Pendente',
-        Itens: s.sale_items
-          ?.map(
-            item =>
-              `${item.quantity}x ${item.product?.name}${item.variation ? ` (${item.variation.name})` : ''}`
-          )
-          .join('; ')
-      }));
+      >[] = sales.flatMap(s => {
+        const baseSaleInfo = {
+          'ID Venda': s.id,
+          Data: s.created_at,
+          'ID Vendedor': s.user_id || '',
+          Vendedor: s.seller?.email || 'N/A',
+          Cliente: s.customer_name || 'N/A',
+          'Total Venda': s.total,
+          Status: s.status === 'paid' ? 'Pago' : 'Pendente'
+        };
+
+        if (s.sale_items && s.sale_items.length > 0) {
+          return s.sale_items.map(item => ({
+            ...baseSaleInfo,
+            'ID Produto': item.product_id,
+            Produto: item.product?.name || 'Produto Removido',
+            'ID Variação': item.variation_id || '',
+            Variação: item.variation?.name || '',
+            Quantidade: item.quantity,
+            'Preço Unitário': item.unit_price
+          }));
+        }
+
+        return [
+          {
+            ...baseSaleInfo,
+            'ID Produto': '',
+            Produto: '',
+            'ID Variação': '',
+            Variação: '',
+            Quantidade: 0,
+            'Preço Unitário': 0
+          }
+        ];
+      });
 
       await csvUtils.exportToCsv(
         exportData,
@@ -143,6 +181,96 @@ export function DataManagementPanel({
       Alert.alert(
         'Erro',
         `Não foi possível exportar as vendas: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImportSales = async (): Promise<void> => {
+    try {
+      const data = await csvUtils.importFromCsv<SaleCsvRow>();
+      if (!data || data.length === 0) return;
+
+      setLoading(true);
+
+      const salesMap = new Map<string, Sale>();
+
+      for (const row of data) {
+        const saleId = row['ID Venda'];
+        if (!saleId) continue;
+
+        if (!salesMap.has(saleId)) {
+          salesMap.set(saleId, {
+            id: saleId,
+            total: Number(row['Total Venda']) || 0,
+            created_at: row['Data'] || new Date().toISOString(),
+            user_id: row['ID Vendedor'] || undefined,
+            status:
+              row['Status'] === 'Pago' || row['Status'] === 'paid'
+                ? 'paid'
+                : 'pending',
+            customer_name:
+              row['Cliente'] && row['Cliente'] !== 'N/A'
+                ? row['Cliente']
+                : undefined,
+            seller:
+              row['Vendedor'] && row['Vendedor'] !== 'N/A'
+                ? { email: row['Vendedor'] }
+                : null,
+            sale_items: []
+          });
+        }
+
+        const sale = salesMap.get(saleId);
+        if (sale && sale.sale_items) {
+          const qty = Number(row['Quantidade']) || 0;
+          const price = Number(row['Preço Unitário']) || 0;
+
+          sale.sale_items.push({
+            id: Math.random().toString(36).substring(2, 9),
+            product_id: row['ID Produto'] || '',
+            variation_id: row['ID Variação'] || undefined,
+            quantity: qty,
+            unit_price: price,
+            product: {
+              name: row['Produto'] || 'Produto Removido'
+            },
+            variation: row['Variação'] ? { name: row['Variação'] } : null
+          });
+        }
+      }
+
+      const importedSales = Array.from(salesMap.values());
+
+      let existingLocalSales: Sale[] = [];
+      const stored = await AsyncStorage.getItem('@imported_sales');
+      if (stored) {
+        existingLocalSales = JSON.parse(stored);
+      }
+
+      const finalSalesMap = new Map<string, Sale>();
+      existingLocalSales.forEach(s => finalSalesMap.set(s.id, s));
+      importedSales.forEach(s => finalSalesMap.set(s.id, s));
+
+      const mergedLocalSales = Array.from(finalSalesMap.values());
+
+      await AsyncStorage.setItem(
+        '@imported_sales',
+        JSON.stringify(mergedLocalSales)
+      );
+
+      await refreshData();
+
+      Alert.alert(
+        'Sucesso',
+        `${importedSales.length} vendas importadas e armazenadas localmente.`
+      );
+    } catch (error) {
+      console.error('Import Sales Error:', error);
+      Alert.alert(
+        'Erro',
+        'Falha ao importar vendas. Verifique o formato do arquivo CSV.'
       );
     } finally {
       setLoading(false);
@@ -374,23 +502,39 @@ export function DataManagementPanel({
                 Importar Dados
               </Text>
 
-              <TouchableOpacity
-                onPress={handleImportProducts}
-                className="bg-primary/10 dark:bg-primary/20 p-3 rounded-xl flex-row items-center justify-center border border-primary/20"
-              >
-                <MaterialCommunityIcons
-                  name="file-import-outline"
-                  size={20}
-                  color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
-                />
-                <Text className="ml-2 text-primary dark:text-orange-400 font-bold text-xs">
-                  Importar Produtos do CSV
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  onPress={handleImportProducts}
+                  className="flex-1 bg-primary/10 dark:bg-primary/20 p-3 rounded-xl flex-row items-center justify-center border border-primary/20"
+                >
+                  <MaterialCommunityIcons
+                    name="file-import-outline"
+                    size={20}
+                    color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+                  />
+                  <Text className="ml-2 text-primary dark:text-orange-400 font-bold text-xs">
+                    Produtos
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleImportSales}
+                  className="flex-1 bg-primary/10 dark:bg-primary/20 p-3 rounded-xl flex-row items-center justify-center border border-primary/20"
+                >
+                  <MaterialCommunityIcons
+                    name="file-import-outline"
+                    size={20}
+                    color={colorScheme === 'dark' ? '#fb923c' : '#A34211'}
+                  />
+                  <Text className="ml-2 text-primary dark:text-orange-400 font-bold text-xs">
+                    Vendas
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               <Text className="text-text-secondary dark:text-zinc-500 text-[9px] text-center mt-1">
-                Nota: Se o nome do produto já existir, ele será atualizado em
-                vez de duplicado.
+                Nota: Produtos existentes serão atualizados. Vendas importadas
+                são salvas localmente para visualização.
               </Text>
 
               <View className="h-[1px] bg-secondary dark:bg-zinc-800 my-2" />
