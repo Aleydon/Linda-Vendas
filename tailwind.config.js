@@ -38,7 +38,7 @@ module.exports = {
         black: ['Inter_900Black', 'sans-serif']
       },
       padding: {
-        card: '5px',
+        card: '8px',
         cardSm: '10px',
         cardMd: '15px',
         cardLg: '20px',

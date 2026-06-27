@@ -83,7 +83,7 @@ export function Home(): React.JSX.Element {
             ))}
           </ScrollView>
 
-          <View className="px-6">
+          <View className="p-card">
             {displayedSections.map(section => {
               const sectionProducts = filteredProducts.filter(
                 p => p.category_id === section.id
@@ -96,11 +96,11 @@ export function Home(): React.JSX.Element {
 
               return (
                 <View key={section.id} className="mb-6">
-                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest">
+                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 mx-2 font-bold text-xs uppercase tracking-widest">
                     {section.name}
                   </Text>
 
-                  <Animated.View layout={LinearTransition} className="gap-y-2">
+                  <Animated.View layout={LinearTransition} className="gap-y-2 ">
                     {sectionProducts.map((product, index) => (
                       <Animated.View
                         key={product.id}
