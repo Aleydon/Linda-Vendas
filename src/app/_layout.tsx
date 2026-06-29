@@ -19,7 +19,7 @@ import { StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomAlertModal } from '@/components/CustomAlertModal';
-import { Loading } from '@/components/Loading';
+import Skeleton from '@/components/Skeleton';
 import { AlertProvider } from '@/context/AlertContext';
 import { AppProvider, useAppContext } from '@/context/AppContext';
 
@@ -110,7 +110,7 @@ export function RootLayout() {
   });
 
   if (!fontsIsLoaded) {
-    return <Loading />;
+    return <Skeleton />;
   }
 
   return (

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Loading } from '@/components/Loading';
+import Skeleton from '@/components/Skeleton';
 import { useAppContext } from '@/context/AppContext';
 
 export default function Login() {
@@ -22,7 +22,7 @@ export default function Login() {
   };
 
   if (isLoggingIn) {
-    return <Loading />;
+    return <Skeleton />;
   }
 
   return (
