@@ -18,6 +18,7 @@ import Animated, {
   ZoomIn,
   ZoomOut
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryManagerModal } from '@/components/CategoryManagerModal';
 import { Header } from '@/components/Header';
@@ -46,6 +47,10 @@ export function Stock(): React.JSX.Element {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
   const focusAnimatedStyle = useFocusAnimation();
+  const insets = useSafeAreaInsets();
+
+  const bottomInset = insets.bottom > 0 ? insets.bottom + 8 : 24;
+  const fabBottom = bottomInset + 80 + 32; // 80 (tab bar height) + 32 (margin offset)
 
   const toggleExpand = (productId: string) => {
     setExpandedProducts(prev =>
@@ -207,7 +212,8 @@ export function Stock(): React.JSX.Element {
         {/* Floating Action Button */}
         {isAdmin && (
           <TouchableOpacity
-            className="bg-primary  dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute bottom-28 right-6 h-16 w-16 items-center justify-center rounded-full shadow-lg z-50"
+            className="bg-primary dark:bg-orange-600 shadow-primary/40 dark:shadow-orange-950/40 absolute right-6 h-[72px] w-[72px] items-center justify-center rounded-full shadow-lg z-50"
+            style={{ bottom: fabBottom }}
             activeOpacity={0.8}
             onPress={() => {
               Haptics.selectionAsync();
@@ -216,7 +222,7 @@ export function Stock(): React.JSX.Element {
           >
             <MaterialCommunityIcons
               name="plus-box-outline"
-              size={32}
+              size={36}
               color="white"
             />
           </TouchableOpacity>
