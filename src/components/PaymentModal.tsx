@@ -29,6 +29,7 @@ interface PaymentModalProps {
   pixString: string;
   allowFiado?: boolean;
   colorScheme: 'light' | 'dark';
+  hasOwnPix?: boolean;
 }
 
 export function PaymentModal({
@@ -39,7 +40,8 @@ export function PaymentModal({
   loading,
   pixString,
   allowFiado = false,
-  colorScheme
+  colorScheme,
+  hasOwnPix = false
 }: PaymentModalProps) {
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'fiado' | null>(
     allowFiado ? null : 'pix'
@@ -63,6 +65,9 @@ export function PaymentModal({
     if (paymentMethod === 'fiado' && !customerName.trim()) {
       return;
     }
+    if (paymentMethod === 'pix' && !pixString) {
+      return;
+    }
     onConfirm(paymentMethod === 'pix' ? 'paid' : 'pending', customerName);
   };
 
@@ -75,7 +80,8 @@ export function PaymentModal({
   const isConfirmDisabled =
     loading ||
     !paymentMethod ||
-    (paymentMethod === 'fiado' && !customerName.trim());
+    (paymentMethod === 'fiado' && !customerName.trim()) ||
+    (paymentMethod === 'pix' && !pixString);
 
   return (
     <Modal
@@ -191,6 +197,15 @@ export function PaymentModal({
                     </View>
                   )}
                 </View>
+
+                {pixString && !hasOwnPix && (
+                  <View className="mb-3 rounded-xl border border-orange-200 dark:border-orange-900/30 bg-orange-50 dark:bg-orange-950/20 px-3 py-2">
+                    <Text className="text-orange-600 dark:text-orange-400 text-[11px] text-center">
+                      Chave PIX padrão do administrador. Configure sua própria
+                      chave em Meu Perfil.
+                    </Text>
+                  </View>
+                )}
 
                 <View className="w-full">
                   <Text className="text-text-primary dark:text-zinc-100 mb-2 ml-1 font-bold">

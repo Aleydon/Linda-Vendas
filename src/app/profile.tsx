@@ -228,18 +228,32 @@ export default function Profile() {
 
         {/* User Card */}
         <View className="items-center mt-8 px-6">
-          <View className="w-32 h-32 rounded-full border-4 border-secondary dark:border-zinc-800 overflow-hidden bg-secondary dark:bg-zinc-800 items-center justify-center mb-4">
-            {user?.user_metadata?.avatar_url ? (
-              <Image
-                source={{ uri: user.user_metadata.avatar_url }}
-                className="w-full h-full"
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="account"
-                size={64}
-                color={colorScheme === 'dark' ? '#F5EBE0' : '#A34211'}
-              />
+          <View className="relative mb-4">
+            <View className="w-32 h-32 rounded-full border-4 border-secondary dark:border-zinc-800 overflow-hidden bg-secondary dark:bg-zinc-800 items-center justify-center">
+              {user?.user_metadata?.avatar_url ? (
+                <Image
+                  source={{ uri: user.user_metadata.avatar_url }}
+                  className="w-full h-full"
+                />
+              ) : (
+                <MaterialCommunityIcons
+                  name="account"
+                  size={64}
+                  color={colorScheme === 'dark' ? '#F5EBE0' : '#A34211'}
+                />
+              )}
+            </View>
+            {!profile?.pix_key && (
+              <View className="absolute -bottom-1 -right-1 bg-red-500 rounded-full px-2 py-0.5 shadow-md flex-row items-center">
+                <MaterialCommunityIcons
+                  name="alert-circle"
+                  size={12}
+                  color="white"
+                />
+                <Text className="text-white text-[9px] font-bold ml-0.5">
+                  PIX
+                </Text>
+              </View>
             )}
           </View>
 
@@ -250,10 +264,19 @@ export default function Profile() {
             {user?.email}
           </Text>
 
-          <View className="bg-category-chip dark:bg-zinc-800 rounded-full mt-4 px-chip-x py-chip-y">
-            <Text className="text-primary dark:text-orange-400 font-semibold text-chip capitalize">
-              {profile?.role === 'admin' ? 'Administrador' : 'Vendedor'}
-            </Text>
+          <View className="flex-row items-center gap-2 mt-4">
+            <View className="bg-category-chip dark:bg-zinc-800 rounded-full px-chip-x py-chip-y">
+              <Text className="text-primary dark:text-orange-400 font-semibold text-chip capitalize">
+                {profile?.role === 'admin' ? 'Administrador' : 'Vendedor'}
+              </Text>
+            </View>
+            {!profile?.pix_key && (
+              <View className="bg-red-100 dark:bg-red-900/30 rounded-full px-chip-x py-chip-y">
+                <Text className="text-red-500 dark:text-red-400 font-semibold text-chip">
+                  Sem PIX
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 

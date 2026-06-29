@@ -75,20 +75,24 @@ export default function NewSale() {
   }, [categories, filteredProducts, activeCategoryId]);
 
   const pixString = useMemo(() => {
-    const key = profile?.pix_key || process.env.EXPO_PUBLIC_PIX_KEY;
-    const name = profile?.pix_name || process.env.EXPO_PUBLIC_PIX_NAME;
-    const city = profile?.pix_city || process.env.EXPO_PUBLIC_PIX_CITY;
-
-    if (!key || !name || !city || total <= 0) return '';
+    if (
+      !profile?.pix_key ||
+      !profile?.pix_name ||
+      !profile?.pix_city ||
+      total <= 0
+    )
+      return '';
 
     return generatePixPayload({
-      key,
-      name,
-      city,
+      key: profile.pix_key,
+      name: profile.pix_name,
+      city: profile.pix_city,
       amount: total,
       description: 'Venda Linda Sales'
     });
   }, [total, profile]);
+
+  const hasOwnPix = !!profile?.pix_key;
 
   const handleFinalize = () => {
     if (cart.length === 0) {
@@ -316,6 +320,7 @@ export default function NewSale() {
           pixString={pixString}
           allowFiado={profile?.allow_fiado}
           colorScheme={colorScheme}
+          hasOwnPix={hasOwnPix}
         />
       )}
     </View>
