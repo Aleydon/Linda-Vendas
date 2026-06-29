@@ -15,6 +15,7 @@
     "update:apk": "eas update --channel preview",
     "test": "jest",
     "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage",
     "lint": "eslint . --fix --ext .tsx,.ts,.jsx,.js",
     "prepare": "husky",
     "commit": "eslint . --fix --ext .tsx,.ts && prettier --write .  && git add . && cz"
