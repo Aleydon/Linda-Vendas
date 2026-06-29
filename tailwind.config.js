@@ -33,7 +33,7 @@ module.exports = {
         }
       },
       fontSize: {
-        chip: ['14px', { lineHeight: '20px' }],
+        chip: ['12px', { lineHeight: '20px' }],
         'category-section': ['12px', { lineHeight: '16px' }]
       },
       fontFamily: {
