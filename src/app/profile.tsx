@@ -27,11 +27,14 @@ export default function Profile() {
     isAdmin,
     signOut,
     updateProfile,
+    isApproved,
     colorScheme,
     toggleColorScheme,
     fetchAllProfiles,
     updateUserRole,
     updateUserFiado,
+    updateUserApproval,
+    pendingApprovalsCount,
     refreshData
   } = useAppContext();
   const { showAlert } = useAlert();
@@ -147,6 +150,46 @@ export default function Profile() {
     });
   };
 
+  const handleToggleApproval = async (targetUser: UserProfile) => {
+    if (targetUser.id === user?.id) return;
+    if (targetUser.role === 'admin') return;
+
+    const newValue = !(targetUser.approved ?? false);
+    const actionStr = newValue ? 'aprovar' : 'desaprovar';
+
+    showAlert({
+      title: 'Aprovação de Vendedor',
+      description: `Deseja ${actionStr} o vendedor ${targetUser.email}?`,
+      type: 'confirm',
+      buttons: [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              await updateUserApproval(targetUser.id, newValue);
+              void loadProfiles();
+              showAlert({
+                title: 'Sucesso',
+                description: newValue
+                  ? 'Vendedor aprovado com sucesso.'
+                  : 'Aprovação removida.',
+                type: 'success'
+              });
+            } catch {
+              showAlert({
+                title: 'Erro',
+                description:
+                  'Não foi possível atualizar a aprovação. Verifique as políticas de segurança do banco de dados.',
+                type: 'error'
+              });
+            }
+          }
+        }
+      ]
+    });
+  };
+
   const handleSignOut = () => {
     showAlert({
       title: 'Sair',
@@ -247,11 +290,13 @@ export default function Profile() {
                 onRefresh={loadProfiles}
                 onToggleAdmin={handleToggleAdmin}
                 onToggleFiado={handleToggleFiado}
+                onToggleApproval={handleToggleApproval}
                 colorScheme={colorScheme}
                 isExpanded={isAdminPanelExpanded}
                 onToggleExpand={() =>
                   setIsAdminPanelExpanded(!isAdminPanelExpanded)
                 }
+                pendingApprovalsCount={pendingApprovalsCount}
               />
 
               <DataManagementPanel
@@ -300,6 +345,7 @@ export default function Profile() {
             colorScheme={colorScheme}
             isExpanded={isPixExpanded}
             onToggleExpand={() => setIsPixExpanded(!isPixExpanded)}
+            isApproved={isApproved}
           />
 
           <Text className="text-text-primary dark:text-zinc-100 text-lg font-bold mb-4 mt-4">

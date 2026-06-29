@@ -19,6 +19,7 @@ interface PixConfigPanelProps {
   colorScheme: 'light' | 'dark';
   isExpanded: boolean;
   onToggleExpand: () => void;
+  isApproved: boolean;
 }
 
 export function PixConfigPanel({
@@ -26,7 +27,8 @@ export function PixConfigPanel({
   updateProfile,
   colorScheme,
   isExpanded,
-  onToggleExpand
+  onToggleExpand,
+  isApproved
 }: PixConfigPanelProps) {
   const { showAlert } = useAlert();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -124,70 +126,90 @@ export function PixConfigPanel({
           exiting={FadeOut}
           className="px-4 pb-6 border-t border-secondary dark:border-zinc-800 pt-4"
         >
-          <View className="mb-4">
-            <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
-              Chave PIX
-            </Text>
-            <TextInput
-              value={pixKey}
-              onChangeText={setPixKey}
-              placeholder="CPF, E-mail, Celular ou Chave Aleatória"
-              placeholderTextColor={
-                colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
-              }
-              keyboardType={getKeyboardType()}
-              autoCapitalize="none"
-              className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
-            />
-          </View>
-
-          <View className="mb-4">
-            <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
-              Nome do Beneficiário
-            </Text>
-            <TextInput
-              value={pixName}
-              onChangeText={setPixName}
-              placeholder="Seu nome completo"
-              placeholderTextColor={
-                colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
-              }
-              className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
-            />
-          </View>
-
-          <View className="mb-6">
-            <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
-              Cidade
-            </Text>
-            <TextInput
-              value={pixCity}
-              onChangeText={setPixCity}
-              placeholder="Sua cidade"
-              placeholderTextColor={
-                colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
-              }
-              autoCapitalize="words"
-              className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
-            />
-          </View>
-
-          <TouchableOpacity
-            onPress={handleUpdatePix}
-            disabled={isUpdating}
-            className="bg-primary dark:bg-orange-600 flex-row items-center justify-center py-4 rounded-xl shadow-sm shadow-orange-500/20"
-          >
-            {isUpdating ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="check" size={20} color="white" />
-                <Text className="text-white font-bold ml-2">
-                  Salvar Configurações
+          {!isApproved ? (
+            <View className="items-center py-6">
+              <MaterialCommunityIcons
+                name="lock-outline"
+                size={40}
+                color={colorScheme === 'dark' ? '#52525b' : '#BDB2B2'}
+              />
+              <Text className="text-text-secondary dark:text-zinc-400 text-sm text-center mt-3 px-4">
+                Seu cadastro está aguardando aprovação do administrador para
+                liberar a configuração do PIX e as vendas.
+              </Text>
+            </View>
+          ) : (
+            <View>
+              <View className="mb-4">
+                <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
+                  Chave PIX
                 </Text>
-              </>
-            )}
-          </TouchableOpacity>
+                <TextInput
+                  value={pixKey}
+                  onChangeText={setPixKey}
+                  placeholder="CPF, E-mail, Celular ou Chave Aleatória"
+                  placeholderTextColor={
+                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
+                  }
+                  keyboardType={getKeyboardType()}
+                  autoCapitalize="none"
+                  className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
+                />
+              </View>
+
+              <View className="mb-4">
+                <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
+                  Nome do Beneficiário
+                </Text>
+                <TextInput
+                  value={pixName}
+                  onChangeText={setPixName}
+                  placeholder="Seu nome completo"
+                  placeholderTextColor={
+                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
+                  }
+                  className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
+                />
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-text-secondary dark:text-zinc-400 text-sm font-medium mb-2">
+                  Cidade
+                </Text>
+                <TextInput
+                  value={pixCity}
+                  onChangeText={setPixCity}
+                  placeholder="Sua cidade"
+                  placeholderTextColor={
+                    colorScheme === 'dark' ? '#71717a' : '#8C7E7E'
+                  }
+                  autoCapitalize="words"
+                  className="bg-background dark:bg-zinc-950 border border-secondary dark:border-zinc-800 rounded-xl px-4 py-3 text-text-primary dark:text-zinc-100"
+                />
+              </View>
+
+              <TouchableOpacity
+                onPress={handleUpdatePix}
+                disabled={isUpdating}
+                className="bg-primary dark:bg-orange-600 flex-row items-center justify-center py-4 rounded-xl shadow-sm shadow-orange-500/20"
+              >
+                {isUpdating ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <>
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={20}
+                      color="white"
+                    />
+                    <Text className="text-white font-bold ml-2">
+                      Salvar Configurações
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
         </Animated.View>
       )}
     </View>

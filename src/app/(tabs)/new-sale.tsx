@@ -26,8 +26,16 @@ import { formatCurrency } from '@/utils/formatters';
 import { generatePixPayload } from '@/utils/pix';
 
 export default function NewSale() {
-  const { products, addSale, loading, categories, profile, user, colorScheme } =
-    useAppContext();
+  const {
+    products,
+    addSale,
+    loading,
+    categories,
+    profile,
+    user,
+    colorScheme,
+    isApproved
+  } = useAppContext();
   const [search, setSearch] = useState('');
   const insets = useSafeAreaInsets();
 
@@ -121,6 +129,28 @@ export default function NewSale() {
       console.error('Error finalizing sale:', error);
     }
   };
+
+  if (!isApproved) {
+    return (
+      <View className="bg-background dark:bg-zinc-950 flex-1">
+        <Header />
+        <View className="flex-1 items-center justify-center px-10">
+          <MaterialCommunityIcons
+            name="account-lock-outline"
+            size={64}
+            color={colorScheme === 'dark' ? '#52525b' : '#BDB2B2'}
+          />
+          <Text className="text-text-primary dark:text-zinc-100 font-bold text-xl text-center mt-6">
+            Aguardando Aprovação
+          </Text>
+          <Text className="text-text-secondary dark:text-zinc-400 text-base text-center mt-2">
+            Seu cadastro ainda não foi aprovado pelo administrador. Assim que
+            for liberado, você poderá realizar vendas.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (loading && products.length === 0) {
     return (

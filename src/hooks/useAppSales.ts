@@ -124,6 +124,19 @@ export function useAppSales({
     }
   };
 
+  const updateUserApproval = async (
+    userId: string,
+    approved: boolean
+  ): Promise<void> => {
+    if (!isAdmin) throw new Error('Unauthorized');
+    try {
+      await api.updateUserApproval(userId, approved);
+    } catch (error) {
+      console.error('Error updating user approval:', error);
+      throw error;
+    }
+  };
+
   const updateUserFiado = async (
     userId: string,
     allowFiado: boolean
@@ -166,6 +179,7 @@ export function useAppSales({
     fetchAllProfiles,
     updateUserRole,
     updateUserFiado,
+    updateUserApproval,
     clearSalesHistory
   };
 }

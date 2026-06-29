@@ -56,6 +56,14 @@ export const api = {
     if (error) throw error;
   },
 
+  async updateUserApproval(userId: string, approved: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ approved })
+      .eq('id', userId);
+    if (error) throw error;
+  },
+
   async confirmSalePayment(saleId: string): Promise<void> {
     const { error } = await supabase
       .from('sales')

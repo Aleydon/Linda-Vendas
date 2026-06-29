@@ -12,6 +12,7 @@ export interface Profile {
   id: string;
   email: string;
   role: UserRole;
+  approved?: boolean;
   pix_key?: string;
   pix_name?: string;
   pix_city?: string;
@@ -86,6 +87,8 @@ export interface AppContextType {
   user: User | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isApproved: boolean;
+  pendingApprovalsCount: number;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   addProduct: (
@@ -121,6 +124,7 @@ export interface AppContextType {
   fetchAllProfiles: () => Promise<Profile[]>;
   updateUserRole: (userId: string, role: UserRole) => Promise<void>;
   updateUserFiado: (userId: string, allowFiado: boolean) => Promise<void>;
+  updateUserApproval: (userId: string, approved: boolean) => Promise<void>;
   refreshData: () => Promise<void>;
   colorScheme: 'light' | 'dark';
   toggleColorScheme: () => void;

@@ -18,9 +18,11 @@ interface AdminPanelProps {
   onRefresh: () => void;
   onToggleAdmin: (profile: Profile) => void;
   onToggleFiado: (profile: Profile) => void;
+  onToggleApproval: (profile: Profile) => void;
   colorScheme: 'light' | 'dark';
   isExpanded: boolean;
   onToggleExpand: () => void;
+  pendingApprovalsCount?: number;
 }
 
 export function AdminPanel({
@@ -30,9 +32,11 @@ export function AdminPanel({
   onRefresh,
   onToggleAdmin,
   onToggleFiado,
+  onToggleApproval,
   colorScheme,
   isExpanded,
-  onToggleExpand
+  onToggleExpand,
+  pendingApprovalsCount = 0
 }: AdminPanelProps) {
   return (
     <View className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-secondary dark:border-zinc-800 overflow-hidden mb-4">
@@ -50,9 +54,19 @@ export function AdminPanel({
             />
           </View>
           <View className="ml-3">
-            <Text className="text-text-primary dark:text-zinc-100 font-bold">
-              Gestão de Usuários
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-text-primary dark:text-zinc-100 font-bold">
+                Gestão de Usuários
+              </Text>
+              {pendingApprovalsCount > 0 && (
+                <View className="ml-2 bg-blue-500 rounded-full px-2 py-0.5">
+                  <Text className="text-white text-[10px] font-bold">
+                    {pendingApprovalsCount} pendente
+                    {pendingApprovalsCount > 1 ? 's' : ''}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text className="text-text-secondary dark:text-zinc-400 text-xs">
               Configurar acesso e permissões
             </Text>
@@ -101,6 +115,20 @@ export function AdminPanel({
                 </View>
 
                 <View className="flex-row items-center gap-3">
+                  <View className="items-center">
+                    <Text className="text-[9px] text-text-secondary dark:text-zinc-500 mb-1 uppercase font-bold">
+                      Aprov.
+                    </Text>
+                    <Switch
+                      value={p.role === 'admin' || p.approved === true}
+                      onValueChange={() => onToggleApproval(p)}
+                      disabled={p.id === user?.id || p.role === 'admin'}
+                      trackColor={{ false: '#D1D5DB', true: '#3b82f6' }}
+                      thumbColor={
+                        p.approved || p.role === 'admin' ? '#FFFFFF' : '#F3F4F6'
+                      }
+                    />
+                  </View>
                   <View className="items-center">
                     <Text className="text-[9px] text-text-secondary dark:text-zinc-500 mb-1 uppercase font-bold">
                       Admin

@@ -9,6 +9,7 @@ import { useAppCategories } from '@/hooks/useAppCategories';
 import { useAppProducts } from '@/hooks/useAppProducts';
 import { useAppSales } from '@/hooks/useAppSales';
 import { supabase } from '@/lib/supabase';
+import { api } from '@/services/api';
 
 import {
   AppContextType,
@@ -45,6 +46,7 @@ export function AppProvider({
   children: React.ReactNode;
 }): React.JSX.Element {
   const { colorScheme, setColorScheme } = useColorScheme();
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -131,6 +133,7 @@ export function AppProvider({
     fetchAllProfiles,
     updateUserRole,
     updateUserFiado,
+    updateUserApproval,
     clearSalesHistory
   } = useAppSales({
     isAdmin,
@@ -371,6 +374,93 @@ export function AppProvider({
     profile?.products_notifications
   ]);
 
+  // 7. Profiles realtime subscription - notify admin of new pending users
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+
+    let profilesSubscription: RealtimeChannel | null = null;
+
+    const setupProfilesSubscription = () => {
+      if (profilesSubscription) {
+        supabase.removeChannel(profilesSubscription);
+      }
+
+      profilesSubscription = supabase
+        .channel('public:profiles')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'profiles'
+          },
+          payload => {
+            const newProfile = payload.new as Profile;
+            const isPending =
+              !newProfile.approved && newProfile.role !== 'admin';
+
+            if (isPending) {
+              setPendingApprovalsCount(prev => prev + 1);
+              if (
+                profile?.notifications_enabled &&
+                (profile?.sales_notifications ?? true)
+              ) {
+                Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: 'Novo Vendedor Pendente',
+                    body: `${newProfile.email} aguarda aprovação para vender.`,
+                    data: { profileId: newProfile.id }
+                  },
+                  trigger: null
+                }).catch(err =>
+                  console.error('Falha ao agendar notificação:', err)
+                );
+              }
+            }
+          }
+        )
+        .subscribe(status => {
+          console.log('Realtime status (profiles):', status);
+        });
+    };
+
+    setupProfilesSubscription();
+
+    return () => {
+      if (profilesSubscription) {
+        supabase.removeChannel(profilesSubscription);
+      }
+    };
+  }, [
+    user?.id,
+    isAdmin,
+    profile?.notifications_enabled,
+    profile?.sales_notifications
+  ]);
+
+  const computePendingApprovals = async () => {
+    if (!isAdmin) return;
+    try {
+      const allProfiles = await api.fetchAllProfiles();
+      const count = allProfiles.filter(
+        p => p.role !== 'admin' && !p.approved
+      ).length;
+      setPendingApprovalsCount(count);
+    } catch {
+      setPendingApprovalsCount(0);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin && user) {
+      void computePendingApprovals();
+    } else {
+      setPendingApprovalsCount(0);
+    }
+  }, [isAdmin, user?.id]);
+
+  const isApproved = isAdmin || profile?.approved === true;
+
   const contextValue: AppContextType = {
     products,
     sales,
@@ -380,6 +470,8 @@ export function AppProvider({
     user,
     profile,
     isAdmin,
+    isApproved,
+    pendingApprovalsCount,
     signInWithGoogle,
     signOut,
     updateStock,
@@ -399,6 +491,7 @@ export function AppProvider({
     fetchAllProfiles,
     updateUserRole,
     updateUserFiado,
+    updateUserApproval,
     refreshData: fetchData,
     colorScheme: colorScheme ?? 'light',
     toggleColorScheme
