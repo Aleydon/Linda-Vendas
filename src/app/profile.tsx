@@ -207,8 +207,8 @@ export default function Profile() {
             {user?.email}
           </Text>
 
-          <View className="bg-secondary dark:bg-zinc-800 px-4 py-1 rounded-full mt-4">
-            <Text className="text-primary dark:text-orange-400 font-medium text-sm capitalize">
+          <View className="bg-category-chip dark:bg-zinc-800 rounded-full mt-4 px-chip-x py-chip-y">
+            <Text className="text-primary dark:text-orange-400 font-semibold text-chip capitalize">
               {profile?.role === 'admin' ? 'Administrador' : 'Vendedor'}
             </Text>
           </View>

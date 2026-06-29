@@ -16,14 +16,14 @@ export function CategoryItem({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className={`mr-3 rounded-full border px-6 py-2 ${
+      className={`mr-3 rounded-full border px-chip-x py-chip-y ${
         isActive
-          ? 'border-primary bg-primary dark:bg-orange-600 dark:border-orange-600'
-          : 'border-secondary bg-secondary dark:bg-zinc-800 dark:border-zinc-800'
+          ? 'border-category-chip-active bg-category-chip-active dark:border-orange-600 dark:bg-orange-600'
+          : 'border-secondary bg-category-chip dark:bg-zinc-800 dark:border-zinc-800'
       }`}
     >
       <Text
-        className={`font-semibold text-sm ${
+        className={`font-semibold text-chip ${
           isActive ? 'text-white' : 'text-text-primary dark:text-zinc-300'
         }`}
       >

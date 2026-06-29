@@ -186,7 +186,7 @@ export default function NewSale() {
 
               return (
                 <View key={section.id} className="mb-6">
-                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 font-bold text-xs uppercase tracking-widest ml-2">
+                  <Text className="text-text-secondary dark:text-zinc-500 mb-4 ml-2 font-bold text-category-section uppercase tracking-widest">
                     {section.name}
                   </Text>
 

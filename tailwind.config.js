@@ -24,7 +24,17 @@ module.exports = {
         badge: {
           success: '#FEF2E2',
           error: '#FEE2E2'
+        },
+        category: {
+          chip: {
+            active: '#A34211',
+            DEFAULT: '#F5EBE0'
+          }
         }
+      },
+      fontSize: {
+        chip: ['14px', { lineHeight: '20px' }],
+        'category-section': ['12px', { lineHeight: '16px' }]
       },
       fontFamily: {
         thin: ['Inter_100Thin', 'sans-serif'],
@@ -42,7 +52,9 @@ module.exports = {
         cardSm: '10px',
         cardMd: '15px',
         cardLg: '20px',
-        cardXl: '25px'
+        cardXl: '25px',
+        'chip-x': '24px',
+        'chip-y': '8px'
       },
       spacing: {
         card: '8px',

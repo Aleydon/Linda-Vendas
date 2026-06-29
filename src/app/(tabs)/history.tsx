@@ -166,14 +166,14 @@ export function History() {
             <TouchableOpacity
               key={status}
               onPress={() => setStatusFilter(status)}
-              className={`px-4 py-2 rounded-full border ${
+              className={`rounded-full border px-chip-x py-chip-y ${
                 statusFilter === status
-                  ? 'bg-primary border-primary dark:bg-orange-600 dark:border-orange-600'
-                  : 'bg-secondary border-secondary dark:bg-zinc-800'
+                  ? 'bg-category-chip-active border-category-chip-active dark:bg-orange-600 dark:border-orange-600'
+                  : 'bg-category-chip border-secondary dark:bg-zinc-800 dark:border-zinc-800'
               }`}
             >
               <Text
-                className={`text-xs font-bold ${
+                className={`text-chip font-bold ${
                   statusFilter === status
                     ? 'text-white'
                     : 'text-text-secondary dark:text-zinc-400'
