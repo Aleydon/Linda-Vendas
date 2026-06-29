@@ -10,6 +10,7 @@ interface FormFieldProps {
   keyboardType?: 'default' | 'numeric' | 'email-address' | 'decimal-pad';
   placeholder?: string;
   multiline?: boolean;
+  numberOfLines?: number;
 }
 
 export function FormField({
@@ -18,7 +19,8 @@ export function FormField({
   onChangeText,
   keyboardType = 'default',
   placeholder,
-  multiline = false
+  multiline = false,
+  numberOfLines
 }: FormFieldProps): React.JSX.Element {
   const { colorScheme } = useAppContext();
 
@@ -32,6 +34,7 @@ export function FormField({
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         multiline={multiline}
+        numberOfLines={numberOfLines}
         className="rounded-2xl border border-secondary dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-4 text-text-primary dark:text-zinc-100 w-full"
         placeholder={placeholder || `Insira o ${label.toLowerCase()}`}
         placeholderTextColor={colorScheme === 'dark' ? '#71717a' : '#9CA3AF'}

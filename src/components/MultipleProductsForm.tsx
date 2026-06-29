@@ -4,7 +4,6 @@ import React from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -52,10 +51,7 @@ export function MultipleProductsForm({
   } = useMultipleProductsForm({ onSubmit });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-    >
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <View className="bg-background dark:bg-zinc-950 flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 pb-4 pt-12">
